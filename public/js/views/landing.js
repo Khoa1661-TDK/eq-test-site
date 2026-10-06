@@ -1,6 +1,7 @@
-/* landing.js — trang chủ của website đánh giá & luyện Trí tuệ Cảm xúc cho học sinh.
-   Sáu khối: mở đầu · xem trước một tình huống · năm kỹ năng · cách tính điểm · hai chế độ · giới hạn.
-   Không còn mô hình phân loại con người: chỉ có 5 kỹ năng cảm xúc và 28 tình huống. */
+/* landing.js — trang chủ của website LUYỆN Trí tuệ Cảm xúc (EQ) cho học sinh.
+   Bảy khối: mở đầu · xem trước một tình huống · vòng luyện · sáu kỹ năng · cách tính điểm · ba chế độ · giới hạn.
+   Sản phẩm là một trainer theo vòng: đánh giá → hiểu → luyện → đánh giá lại → tiến bộ.
+   Không phải bài kiểm tra dán nhãn con người: chỉ có 6 kỹ năng luyện được và những tình huống thực tế. */
 
 import { el, frame } from "../core/dom.js"
 import { EQ_DIMENSIONS } from "../data/eqDimensions.js"
@@ -53,7 +54,7 @@ function ledgerItem(key, value) {
 export function renderLanding(mount, { navigate }) {
   const skillNames = EQ_DIMENSIONS.map((dim) => dim.name.toLowerCase()).join(" · ")
 
-  const assessButton = primaryButton("Bắt đầu đánh giá EQ", "/assessment", navigate)
+  const assessButton = primaryButton("Bắt đầu đánh giá", "/assessment", navigate)
   const practiceGhost = ghostLink("Luyện EQ", "/practice", navigate)
 
   // 1 — MỞ ĐẦU ------------------------------------------------------------
@@ -65,7 +66,7 @@ export function renderLanding(mount, { navigate }) {
       el(
         "div",
         {},
-        frame(el("span", { text: "ĐÁNH GIÁ EQ CHO HỌC SINH" }), {
+        frame(el("span", { text: "LUYỆN EQ CHO HỌC SINH" }), {
           size: "sm",
           cls: "chip chip--olive hero__eyebrow",
         }),
@@ -78,17 +79,17 @@ export function renderLanding(mount, { navigate }) {
         el(
           "p",
           { class: "hero__tag" },
-          el("b", { text: "Cảm xúc không quyết định bạn — cách bạn phản ứng mới là thứ luyện được." }),
+          el("b", { text: "Đánh giá để thấy mình đang ở đâu — luyện để lần sau phản ứng tốt hơn." }),
         ),
         el("p", {
           class: "prose hero__desc",
           text:
-            "Khám phá cách bạn nhận biết, hiểu và xử lý cảm xúc qua những tình huống thực tế của đời sống học sinh.",
+            "Trả lời 20 tình huống của đời sống học sinh, hiểu kỹ năng nào còn yếu, luyện đúng chỗ đó, rồi đánh giá lại bằng đề khác để xem tiến bộ.",
         }),
         el("div", { class: "hero__cta" }, assessButton, practiceGhost),
         el("p", {
           class: "hero__meta",
-          text: `${TOTAL_SCENARIOS} tình huống · ${EQ_DIMENSIONS.length} kỹ năng · 8–12 phút · không có một đáp án đúng duy nhất cho mỗi tình huống`,
+          text: `${TOTAL_SCENARIOS} tình huống mỗi lần · 6 kỹ năng · 10–15 phút · có cảnh động`,
         }),
       ),
       el(
@@ -96,11 +97,11 @@ export function renderLanding(mount, { navigate }) {
         { class: "facts", attrs: { "aria-label": "Thông số của bài đánh giá EQ" } },
         factCard(
           TOTAL_SCENARIOS,
-          "tình huống thật: bài nhóm, điểm kiểm tra, bạn bè, gia đình, áp lực thi cử",
+          "tình huống mỗi lần đánh giá: bài nhóm, điểm kiểm tra, bạn bè, gia đình, áp lực thi cử",
         ),
         factCard(EQ_DIMENSIONS.length, `kỹ năng cảm xúc: ${skillNames}`),
-        factCard(TOTAL_SCENARIOS * 4, `cách phản ứng để chọn (${TOTAL_SCENARIOS} tình huống × 4)`),
-        factCard(0, "đáp án đúng duy nhất — nhiều cách đều có lý, chỉ khác nhau ở hệ quả", {
+        factCard(2, "đề song song: đề A và đề B, lần đánh giá lại dùng đề còn lại"),
+        factCard(0, "nhãn dán lên con người: chỉ có kỹ năng và tình huống", {
           on: 0,
           max: TOTAL_SCENARIOS,
         }),
@@ -123,7 +124,7 @@ export function renderLanding(mount, { navigate }) {
       el("p", {
         class: "band__lead",
         text:
-          "Không có danh sách câu phát biểu để chấm điểm 1–5. Bạn bước vào một cảnh ngắn của đời sống học sinh, đọc lời thoại, rồi trả lời ngay trong khung hội thoại đó.",
+          "Không có danh sách câu phát biểu để chấm điểm 1–5. Bạn bước vào một tình huống ngắn của đời sống học sinh, đọc lời thoại, rồi trả lời ngay trong khung hội thoại. Một số tình huống là cảnh động pixel: nhân vật tự dựng chuyện lên cho bạn xem.",
       }),
       scenarioPeek(SCENARIO_BY_ID.ER_01),
       el("p", {
@@ -135,7 +136,46 @@ export function renderLanding(mount, { navigate }) {
     ),
   )
 
-  // 3 — NĂM KỸ NĂNG -------------------------------------------------------
+  // 3 — VÒNG LUYỆN ---------------------------------------------------------
+  const loop = el("section", { class: "band" })
+  loop.append(
+    el(
+      "div",
+      { class: "shell" },
+      el("h2", { class: "band__title", text: "Vòng luyện" }),
+      el("p", {
+        class: "band__lead",
+        text:
+          "Cả trang web xoay quanh một vòng năm bước. Không bước nào là một lần duy nhất: vòng này chạy lại nhiều lần trong thời gian bạn muốn.",
+      }),
+      el(
+        "div",
+        { class: "ledger" },
+        ledgerItem(
+          "Đánh giá",
+          `Trả lời ${TOTAL_SCENARIOS} tình huống — chữ và cảnh động — theo cách bạn thật sự làm. Điểm không hiện trong lúc làm, nên bạn không “chấm” mình theo đáp án.`,
+        ),
+        ledgerItem(
+          "Hiểu",
+          "Kết quả chỉ ra kỹ năng mạnh và kỹ năng cần luyện, mỗi cái kèm đúng tình huống và lựa chọn của bạn. Chiến lược lặp lại được gọi tên, kèm một cách đổi cụ thể và hai bài tập.",
+        ),
+        ledgerItem(
+          "Luyện",
+          "Làm tình huống luyện tập theo từng kỹ năng, có cả cảnh động. Không tính điểm — mỗi lựa chọn là một lượt luyện, được đếm cho lần so sánh sau.",
+        ),
+        ledgerItem(
+          "Đánh giá lại",
+          "Làm đề còn lại: lần trước đề A thì lần này đề B, để đo kỹ năng chứ không đo trí nhớ. Kết quả hiện trước → sau từng kỹ năng.",
+        ),
+        ledgerItem(
+          "Tiến bộ",
+          "Chỉ gắn “Tiến bộ”, “Ổn định” hay “Giảm” khi thay đổi từ 10 điểm trở lên. Mọi số liệu lưu trong trình duyệt này để lần sau mở vào là so sánh được.",
+        ),
+      ),
+    ),
+  )
+
+  // 4 — SÁU KỸ NĂNG --------------------------------------------------------
   const skills = el("div", { class: "skills" })
   for (const dim of EQ_DIMENSIONS) {
     skills.append(
@@ -156,23 +196,23 @@ export function renderLanding(mount, { navigate }) {
       ),
     )
   }
-  const skillsBand = el("section", { class: "band" })
+  const skillsBand = el("section", { class: "band band--soft" })
   skillsBand.append(
     el(
       "div",
       { class: "shell" },
-      el("h2", { class: "band__title", text: "Năm kỹ năng" }),
+      el("h2", { class: "band__title", text: "Sáu kỹ năng" }),
       el("p", {
         class: "band__lead",
         text:
-          "Mỗi tình huống đo từ một đến ba kỹ năng. Không kỹ năng nào là “điểm mạnh bẩm sinh”: cả năm đều luyện được, và cả năm đều đang ở mức nào đó trong mỗi người.",
+          "Mỗi tình huống đo một kỹ năng chính và một đến hai kỹ năng phụ. Không kỹ năng nào là trời sinh: cả sáu đều luyện được, và cả sáu đều đang ở một mức nào đó trong bạn.",
       }),
       skills,
     ),
   )
 
-  // 4 — CÁCH TÍNH ĐIỂM ----------------------------------------------------
-  const method = el("section", { class: "band band--soft" })
+  // 5 — CÁCH TÍNH ĐIỂM ----------------------------------------------------
+  const method = el("section", { class: "band" })
   method.append(
     el(
       "div",
@@ -181,45 +221,45 @@ export function renderLanding(mount, { navigate }) {
       el("p", {
         class: "band__lead",
         text:
-          "Điểm được tính từ những lựa chọn bạn thật sự làm, không từ việc bạn có biết đáp án “đúng” hay không.",
+          "Điểm tính từ những lựa chọn bạn thật sự làm trong từng tình huống, không từ một đáp án “đúng” duy nhất.",
       }),
       el(
         "div",
         { class: "ledger" },
         ledgerItem(
-          "Mỗi phương án",
-          "Mỗi phương án mang điểm hiệu quả 0–3 cho từng kỹ năng mà tình huống đo. Một tình huống đo 1–3 kỹ năng, và điểm tối đa luôn tính theo chính kỹ năng đó — nên chọn cách nào cũng được tính công bằng.",
+          "Mỗi tình huống đo gì",
+          "Một tình huống đo một kỹ năng chính với trọng số 1 và một đến hai kỹ năng phụ với trọng số 0,5. Mỗi phương án mang 0–3 điểm cho từng kỹ năng được đo.",
         ),
         ledgerItem(
-          "Điểm tổng",
-          "Điểm tổng = tổng điểm đạt / tổng điểm tối đa, quy về thang 100. Không có điểm tuyệt đối, vì phần lớn tình huống không có một đáp án đúng duy nhất.",
+          "Trần điểm",
+          "Điểm của một kỹ năng = điểm bạn đạt ÷ điểm của phương án mạnh nhất trong cùng các tình huống đó, nhân 100. Trần không phải con số cố định — chọn phương án mạnh nhất ở mọi chỗ cho đúng 100.",
         ),
         ledgerItem(
-          "Căn cứ chấm",
-          "Điểm dựa trên những chiến lược được xem là hữu ích trong tài liệu về điều chỉnh cảm xúc, đồng cảm và xử lý xung đột — không phải trên một thang đo đã kiểm định.",
+          "Ngưỡng bằng chứng",
+          "Một kỹ năng cần ít nhất 3 tình huống chính đã trả lời mới có điểm, thiếu thì hiện “chưa đủ dữ liệu”. Con số tổng chỉ là trung bình của sáu kỹ năng, không gắn nhãn riêng.",
         ),
       ),
       el(
         "div",
         { class: "formula" },
-        `Ví dụ: Nhận biết 72 · Hiểu 64 · Điều chỉnh 51 · Đồng cảm 78 · Quan hệ 59 → điểm tổng 65/100`,
+        "Ví dụ: Tự nhận thức 72 · Điều chỉnh 66 · Đồng cảm 58 · Nhận biết xã hội 70 · Giao tiếp 56 · Quản lý quan hệ 62 → trung bình 64/100",
         el("br"),
-        "Kỹ năng thấp nhất không bị dán nhãn, mà nhận bài tập cụ thể: bốn bước khi cơn tới, chờ 90 giây, tách cảm giác khỏi hành động.",
+        "Kỹ năng thấp nhất không nhận nhãn — nhận bài tập và tình huống luyện, rồi đánh giá lại để xem nó có nhích lên.",
       ),
     ),
   )
 
-  // 5 — HAI CHẾ ĐỘ --------------------------------------------------------
-  const modes = el("section", { class: "band" })
+  // 6 — BA CHẾ ĐỘ ----------------------------------------------------------
+  const modes = el("section", { class: "band band--soft" })
   modes.append(
     el(
       "div",
       { class: "shell" },
-      el("h2", { class: "band__title", text: "Hai chế độ" }),
+      el("h2", { class: "band__title", text: "Ba chế độ" }),
       el("p", {
         class: "band__lead",
         text:
-          "Cùng một kho tình huống, hai cách dùng: một để nhìn lại mình, một để thử cách khác đi.",
+          "Cùng một kho tình huống, ba cách dùng: nhìn lại mình, luyện thêm, và kiểm tra lại sau.",
       }),
       el(
         "div",
@@ -231,12 +271,12 @@ export function renderLanding(mount, { navigate }) {
           el("div", {
             class: "ledger__v",
             text:
-              "Không hiện điểm trong lúc làm — bạn chỉ thấy kết quả ở cuối. Nhờ vậy bạn trả lời theo cách mình thật sự làm, không phải theo cách mình nghĩ là nên làm.",
+              `Trả lời ${TOTAL_SCENARIOS} tình huống, điểm không hiện trong lúc làm. Kết quả cuối chỉ ra kỹ năng mạnh, kỹ năng cần luyện, kèm bằng chứng và bài tập.`,
           }),
           el(
             "p",
             { class: "hero__cta", style: { marginTop: "var(--gap-4)", marginBottom: "0" } },
-            primaryButton("Bắt đầu đánh giá EQ", "/assessment", navigate),
+            primaryButton("Bắt đầu đánh giá", "/assessment", navigate),
           ),
         ),
         el(
@@ -246,7 +286,7 @@ export function renderLanding(mount, { navigate }) {
           el("div", {
             class: "ledger__v",
             text:
-              "Chơi thêm tình huống, không có điểm và không có xếp hạng. Sau mỗi lựa chọn, bạn được giải thích chiến lược mình vừa dùng, hệ quả thường thấy, một cách mạnh hơn và một nguyên tắc để nhớ.",
+              "Tình huống theo từng kỹ năng, không tính điểm, chỉ đếm lượt luyện. Sau mỗi lựa chọn bạn thấy chiến lược mình vừa dùng, hệ quả thường thấy và một cách mạnh hơn.",
           }),
           el(
             "p",
@@ -254,12 +294,27 @@ export function renderLanding(mount, { navigate }) {
             ghostLink("Luyện EQ", "/practice", navigate),
           ),
         ),
+        el(
+          "div",
+          { class: "ledger__item" },
+          el("div", { class: "ledger__k", text: "Đánh giá lại" }),
+          el("div", {
+            class: "ledger__v",
+            text:
+              "Làm đề còn lại — lần trước đề A thì lần này đề B — để đo kỹ năng, không đo trí nhớ. Kết quả so trước → sau từng kỹ năng, kèm lượt luyện bạn đã làm ở giữa.",
+          }),
+          el(
+            "p",
+            { class: "hero__cta", style: { marginTop: "var(--gap-4)", marginBottom: "0" } },
+            ghostLink("Luyện bằng cảnh động", "/scenes", navigate),
+          ),
+        ),
       ),
     ),
   )
 
-  // 6 — GIỚI HẠN CỦA CÔNG CỤ ---------------------------------------------
-  const honesty = el("section", { class: "band band--soft" })
+  // 7 — GIỚI HẠN CỦA CÔNG CỤ ---------------------------------------------
+  const honesty = el("section", { class: "band" })
   honesty.append(
     el(
       "div",
@@ -273,12 +328,12 @@ export function renderLanding(mount, { navigate }) {
       el("p", {
         class: "prose",
         text:
-          "Câu trả lời của bạn chỉ nằm trong phiên làm việc này của trình duyệt: không có tài khoản, không lưu nội dung câu trả lời ở đâu khác. Máy chủ chỉ nhận một số đếm hoàn thành ẩn danh, không kèm tình huống hay phương án bạn đã chọn.",
+          "Tiến bộ của bạn chỉ lưu trong trình duyệt này, để lần sau mở vào là so sánh trước → sau được. Không có tài khoản; máy chủ chỉ nhận một số đếm hoàn thành ẩn danh, không kèm tình huống hay phương án bạn chọn. Trên trang kết quả có nút xóa sạch dữ liệu lưu ở đây.",
       }),
     ),
   )
 
-  mount.append(hero, preview, skillsBand, method, modes, honesty)
+  mount.append(hero, preview, loop, skillsBand, method, modes, honesty)
 
   return { destroy: () => mount.replaceChildren() }
 }
