@@ -1,0 +1,14 @@
+{
+  "name": "eq-hoc-duong",
+  "private": true,
+  "type": "module",
+  "description": "EQ HỌC ĐƯỜNG — trò chơi pixel luyện trí tuệ cảm xúc cho học sinh: đánh giá, hiểu, luyện, đánh giá lại.",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node test/eq-data.test.mjs && node test/scoring.test.mjs && node test/wording.test.mjs",
+    "e2e": "node test/playwright/run.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.62.1"
+  }
+}

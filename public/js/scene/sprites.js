@@ -816,11 +816,28 @@ const TEAMMATE = {
   ],
 }
 
+/* Bối cảnh trường học dùng lại dáng người ở trên, chỉ đổi màu áo quần sang đồng phục:
+   áo sơ mi trắng kem, quần/váy xanh than. Cô giáo giữ áo xanh thép. */
+const UNIFORM = { T: "#2e3f63", t: "#222f4b" }
+const SHIRT = "#efece3"
+const SHIRT_SHADE = "#cfc9b8"
+
 export const CHARACTERS = {
   player: PLAYER,
   coworker: COWORKER,
   manager: MANAGER,
   teammate: TEAMMATE,
+  // trường học
+  classmate: COWORKER,
+  friend: TEAMMATE,
+  teacher: MANAGER,
+}
+
+/** Bảng màu riêng theo nhân vật (mặc định dùng P). */
+export const CHARACTER_PALETTES = {
+  classmate: { ...P, ...UNIFORM, R: SHIRT, r: SHIRT_SHADE },
+  friend: { ...P, ...UNIFORM, Y: SHIRT, y: SHIRT_SHADE },
+  teacher: { ...P, B: "#3b6e8a", b: "#2c5469" },
 }
 
 /**
@@ -854,11 +871,11 @@ export function svgFor(rows, palette = P) {
  * Tạo một sprite container chứa MỌI biến thể của một nhân vật (ẩn/show theo class).
  * @returns {{setFrame(name:string):void, frames:Map<string,Element>}}
  */
-export function createSpriteSet(container, frames) {
+export function createSpriteSet(container, frames, palette = P) {
   const set = new Map()
   for (const [name, rows] of Object.entries(frames)) {
     const node = el("div", { class: "scn-sprite__frame", attrs: { "data-frame": name } })
-    node.innerHTML = svgFor(rows)
+    node.innerHTML = svgFor(rows, palette ?? P)
     container.append(node)
     set.set(name, node)
   }

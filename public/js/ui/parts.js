@@ -19,15 +19,15 @@ export function dimRow(dim, { open = false, practiceHref = null } = {}) {
     { class: "dim__head" },
     el("span", { class: "dim__code", text: dim.code, attrs: { "aria-hidden": "true" } }),
     el("span", { class: "dim__name", text: dim.name }),
-    el("span", { class: "dim__val", text: `${dim.score}%` }),
-    el("span", { class: "dim__meter" }, meterCells(dim.score, 100, { cells: 16, cls: "meter__cells" })),
+    el("span", { class: "dim__val", text: dim.score === null ? "—" : `${dim.score}` }),
+    el("span", { class: "dim__meter" }, meterCells(dim.score ?? 0, 100, { cells: 16, cls: "meter__cells" })),
     el("span", { class: "dim__sign", text: "＋", attrs: { "aria-hidden": "true" } }),
   )
 
   const body = el(
     "div",
     { class: "dim__body" },
-    el("p", { class: "dim__band", text: dim.band?.label ?? "" }),
+    el("p", { class: "dim__band", text: dim.score === null ? "Chưa đủ dữ liệu" : dim.band?.label ?? "" }),
     el("p", { class: "dim__meaning", text: dim.band?.meaning ?? "" }),
     el(
       "ul",
@@ -36,7 +36,10 @@ export function dimRow(dim, { open = false, practiceHref = null } = {}) {
     ),
     el("p", {
       class: "dim__exact",
-      text: `Điểm tình huống: ${dim.earned}/${dim.possible} — đo qua ${Math.round(dim.possible / 3)} tình huống có chạm tới kỹ năng này.`,
+      text:
+        dim.score === null
+          ? `Mới có ${dim.primaryAnswered} tình huống chính về kỹ năng này — cần ít nhất 3 để cho điểm.`
+          : `Đo qua ${dim.measured} tình huống (${dim.primaryAnswered} tình huống chính) — đạt ${dim.earned}/${dim.possible} điểm có trọng số.`,
     }),
     practiceHref ? el("a", { class: "dim__link", href: practiceHref, text: `Luyện ${dim.name.toLowerCase()} →` }) : null,
   )

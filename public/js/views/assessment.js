@@ -1,33 +1,67 @@
 /* assessment.js — màn ĐÁNH GIÁ: HUD + sân khấu tình huống + điều phối việc lưu câu trả lời.
-   Không hiển thị điểm trong lúc làm; toàn bộ việc chấm nằm ở core/eqScoring.js. */
+   Mỗi lượt làm một đề (A hoặc B, luân phiên); đề gồm tình huống chữ và cảnh động.
+   Không hiển thị điểm trong lúc làm; toàn bộ việc chấm và lưu nằm ở core/eqScoring.js.
+   Bài dở được lưu trên máy (localStorage) nên đóng tab vẫn làm tiếp được. */
 
 import { el, frame } from "../core/dom.js"
 import { sound, soundToggle } from "../core/sound.js"
 import { createQuestionScene } from "../scene/questionScene.js"
-import { SCENARIO_BY_ID } from "../data/scenarios.js"
+import { createSceneRuntime } from "../scene/sceneRuntime.js"
 import {
-  TOTAL_SCENARIOS,
+  ITEM_BY_ID,
+  RETAKE_PRACTICE_REPS,
+  RETAKE_WAIT_DAYS,
+  finishAttempt,
+  formIds,
+  latestAttempt,
   loadAssessment,
+  practiceSince,
   saveAssessment,
-  scoreAnswers,
+  scoreAttempt,
   shuffleScenarios,
 } from "../core/eqScoring.js"
 
+const CODES = "ABCDEF"
+const DAY = 24 * 60 * 60 * 1000
+
+/** Thứ tự phương án được xáo cố định theo lượt làm, để vị trí không gắn với điểm. */
+function seeded(seedText) {
+  let h = 2166136261
+  for (const ch of seedText) h = Math.imul(h ^ ch.charCodeAt(0), 16777619)
+  return () => {
+    h = Math.imul(h ^ (h >>> 15), 2246822507)
+    h = Math.imul(h ^ (h >>> 13), 3266489909)
+    h ^= h >>> 16
+    return (h >>> 0) / 4294967296
+  }
+}
+
+function displayItem(item, seed) {
+  const rand = seeded(`${seed}:${item.id}`)
+  const choices = [...item.choices]
+  for (let i = choices.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(rand() * (i + 1))
+    ;[choices[i], choices[j]] = [choices[j], choices[i]]
+  }
+  return { ...item, choices: choices.map((c, i) => ({ ...c, code: CODES[i] })) }
+}
+
 export function renderAssessment(mount, { navigate }) {
+  let form = "A"
   let answers = {}
   let order = []
   let index = 0
   let startedAt = 0
   let finished = false
-  let statsSent = false
   let started = false
-  let resumable = 0
+  let runtime = null
 
-  const list = () => order.map((id) => SCENARIO_BY_ID[id]).filter(Boolean)
+  const list = () => order.map((id) => ITEM_BY_ID[id]).filter(Boolean)
   const current = () => list()[index]
-  const answeredCount = () => list().filter((scenario) => answers[scenario.id]).length
-  const choiceFor = (scenario) =>
-    scenario ? scenario.choices.find((choice) => choice.id === answers[scenario.id]) ?? null : null
+  const answeredCount = () => list().filter((item) => answers[item.id]).length
+  const view = (item) => (item ? displayItem(item, startedAt) : item)
+  const choiceFor = (item) => (item ? view(item).choices.find((c) => c.id === answers[item.id]) ?? null : null)
+  const persist = () => saveAssessment({ form, order, answers, index, startedAt })
 
   /* ---------------------------------------------------------------- khung */
   const countEl = el("span", { class: "hud__count", text: "" })
@@ -56,13 +90,20 @@ export function renderAssessment(mount, { navigate }) {
   hud.style.display = "none"
 
   const stage = el("div", { class: "stage" })
+  const sceneHost = el("div", { class: "scene-stage-host assess-scene" })
   mount.append(el("div", { class: "quiz-wrap" }, hud, stage))
 
   const scene = createQuestionScene({ onAnswer: handleAnswer, onAdvance: handleAdvance })
 
   /* ------------------------------------------------------------ màn mở đầu */
+  const saved = loadAssessment()
+  const last = latestAttempt()
+  const isRetake = Boolean(last)
+  const total = formIds(saved.form).length
+  const resumable = Object.keys(saved.answers || {}).length
+
   const startBtn = el("button", { class: "btn btn--accent btn--lg", attrs: { type: "button" } })
-  startBtn.append(el("span", { class: "pxf-in", text: "Bắt đầu đánh giá" }))
+  startBtn.append(el("span", { class: "pxf-in", text: isRetake ? "Bắt đầu đánh giá lại" : "Bắt đầu đánh giá" }))
   startBtn.addEventListener("click", () => start({ fresh: true }))
 
   const resumeBtn = el("button", { class: "btn btn--accent btn--lg", attrs: { type: "button" } })
@@ -70,97 +111,162 @@ export function renderAssessment(mount, { navigate }) {
   resumeBtn.style.display = "none"
   resumeBtn.addEventListener("click", () => start({ fresh: false }))
 
+  const notes = [
+    el("p", {
+      class: "prose",
+      text: `${total} tình huống thật của đời sống học sinh — có cả những cảnh động, nơi nhân vật diễn lại điều xảy ra sau lựa chọn của bạn.`,
+    }),
+    el("p", { class: "prose", text: "Cách nào cũng có lý. Chọn cách gần với điều bạn thật sự sẽ làm — không phải cách bạn nghĩ là đúng." }),
+    el("p", { class: "prose", text: "Trong lúc làm, bạn sẽ không thấy điểm. Cuối bài là sáu kỹ năng, kèm những tình huống cho thấy vì sao, và cách luyện kỹ năng cần luyện nhất." }),
+  ]
+  if (isRetake) {
+    const days = Math.floor((Date.now() - (last.finishedAt || 0)) / DAY)
+    const reps = Object.values(practiceSince(last.finishedAt || 0)).reduce((sum, r) => sum + r.practised, 0)
+    notes.push(
+      el("p", {
+        class: "prose",
+        text: `Lần này dùng bộ tình huống khác (đề ${saved.form}) để đo kỹ năng chứ không đo trí nhớ. Cuối bài bạn sẽ thấy từng kỹ năng thay đổi thế nào so với lần trước.`,
+      }),
+    )
+    if (days < RETAKE_WAIT_DAYS || reps < RETAKE_PRACTICE_REPS) {
+      notes.push(
+        el("p", {
+          class: "prose muted",
+          text: `Gợi ý: kết quả rõ hơn khi bạn đợi khoảng ${RETAKE_WAIT_DAYS} ngày và luyện ít nhất ${RETAKE_PRACTICE_REPS} tình huống. Hiện tại: ${days} ngày, ${reps} lượt luyện. Bạn vẫn có thể làm ngay.`,
+        }),
+      )
+    }
+  }
+  notes.push(
+    el("p", { class: "prose muted", text: "Mất khoảng 10–15 phút. Đây là công cụ học tập và tự phát triển, không phải một thang đo đã được kiểm định tâm lý và không dùng để chẩn đoán." }),
+  )
+
   const intro = frame(
     el(
       "div",
       { class: "quiz-intro__in" },
-      el("h2", { class: "px-head", text: "Trước khi bắt đầu" }),
-      el(
-        "div",
-        { class: "quiz-intro__note" },
-        el("p", { class: "prose", text: `${TOTAL_SCENARIOS} tình huống thật của đời sống học sinh: bài nhóm, điểm kiểm tra, bạn bè, gia đình, áp lực thi cử.` }),
-        el("p", { class: "prose", text: "Mỗi tình huống có bốn cách phản ứng, cách nào cũng có lý. Chọn cách gần với bạn nhất — không phải cách bạn nghĩ là đúng." }),
-        el("p", { class: "prose", text: "Trong lúc làm, bạn sẽ không thấy điểm. Kết quả hiện ra ở cuối, kèm gợi ý luyện tập cho kỹ năng cần luyện nhất." }),
-        el("p", { class: "prose muted", text: "Mất khoảng 8–12 phút. Đây là công cụ học tập và tự phát triển, không phải một thang đo đã được kiểm định tâm lý và không dùng để chẩn đoán." }),
-      ),
+      el("h2", { class: "px-head", text: isRetake ? "Đánh giá lại" : "Trước khi bắt đầu" }),
+      el("div", { class: "quiz-intro__note" }, ...notes),
       el("div", { class: "quiz-intro__actions" }, resumeBtn, startBtn, soundToggle()),
     ),
     { size: "lg", cls: "quiz-intro" },
   )
-
   stage.append(intro)
+
+  if (resumable > 0) {
+    resumeBtn.style.display = ""
+    startBtn.replaceChildren(el("span", { class: "pxf-in", text: "Làm lại từ đầu" }))
+    startBtn.classList.remove("btn--accent")
+    startBtn.classList.add("btn--ghost")
+    intro.querySelector(".quiz-intro__note")?.append(
+      el("p", { class: "prose", text: `Bạn đang làm dở: đã trả lời ${resumable}/${total} tình huống.` }),
+    )
+  }
 
   /* ------------------------------------------------------------- điều phối */
   function start({ fresh }) {
-    const saved = fresh ? { answers: {}, index: 0, order: null } : loadAssessment()
-    answers = { ...(saved.answers || {}) }
-    order = saved.order ?? shuffleScenarios()
-    index = fresh ? 0 : Math.min(Math.max(saved.index, 0), TOTAL_SCENARIOS - 1)
+    const state = loadAssessment()
+    form = state.form
+    answers = fresh ? {} : { ...(state.answers || {}) }
+    order = fresh || !state.order ? shuffleScenarios(form) : state.order
+    startedAt = fresh || !state.startedAt ? Date.now() : state.startedAt
+    index = fresh ? 0 : Math.min(Math.max(state.index, 0), order.length - 1)
     if (fresh || !answers[current()?.id]) {
-      const firstOpen = list().findIndex((scenario) => !answers[scenario.id])
+      const firstOpen = list().findIndex((item) => !answers[item.id])
       if (firstOpen >= 0) index = firstOpen
     }
     started = true
     finished = false
-    statsSent = false
-    startedAt = Date.now()
-    saveAssessment(answers, index, order)
+    persist()
 
     intro.remove()
-    stage.append(scene.el)
     hud.style.display = ""
     sound.open()
     updateHud()
-    scene.show(current(), { dir: "next", answer: choiceFor(current()) })
+    showItem("next")
     window.scrollTo({ top: 0, behavior: "auto" })
   }
 
+  function stopRuntime() {
+    runtime?.destroy()
+    runtime = null
+    sceneHost.replaceChildren()
+  }
+
+  function showItem(dir) {
+    const item = current()
+    if (!item) return
+    if (item.kind === "scene") {
+      scene.el.remove()
+      stopRuntime()
+      stage.append(sceneHost)
+      runtime = createSceneRuntime(sceneHost, view(item), {
+        onAnswer(choiceId) {
+          const choice = item.choices.find((c) => c.id === choiceId)
+          if (choice) handleAnswer(item, choice)
+        },
+        onDone() {
+          advance()
+        },
+      })
+      runtime.start()
+      return
+    }
+    stopRuntime()
+    sceneHost.remove()
+    if (!scene.el.isConnected) stage.append(scene.el)
+    scene.show(view(item), { dir, answer: choiceFor(item) })
+  }
+
   /** Lưu ngay khi người dùng xác nhận — trước mọi hoạt ảnh chuyển câu. */
-  function handleAnswer(scenario, choice) {
-    answers[scenario.id] = choice.id
-    saveAssessment(answers, index, order)
+  function handleAnswer(item, choice) {
+    answers[item.id] = choice.id
+    persist()
     updateHud()
   }
 
   function updateHud() {
-    const scenarios = list()
-    const scenario = scenarios[index]
+    const items = list()
+    const item = items[index]
     const done = answeredCount()
-    countEl.textContent = scenario ? `Tình huống ${index + 1}` : ""
-    progressEl.textContent = `${done}/${scenarios.length} hoàn thành`
+    countEl.textContent = item ? `${item.kind === "scene" ? "Cảnh" : "Tình huống"} ${index + 1}` : ""
+    progressEl.textContent = `${done}/${items.length} hoàn thành`
     backBtn.disabled = index <= 0
-    submitBtn.style.display = done === scenarios.length ? "" : "none"
-    const pct = scenarios.length ? done / scenarios.length : 0
+    submitBtn.style.display = done === items.length ? "" : "none"
+    const pct = items.length ? done / items.length : 0
     const width = `${(pct * 100).toFixed(2)}%`
     barFill.style.width = width
     barEdge.style.left = `calc(${width} - 5px)`
   }
 
-  function goBack() {
+  async function goBack() {
     if (!started || index <= 0) return
     index -= 1
-    const scenario = current()
-    saveAssessment(answers, index, order)
+    persist()
     updateHud()
-    scene.show(scenario, { dir: "back", answer: choiceFor(scenario) })
+    showItem("back")
   }
 
   async function handleAdvance() {
     await scene.leave()
-    const scenarios = list()
-    if (index < scenarios.length - 1) {
+    advance()
+  }
+
+  function advance() {
+    const items = list()
+    if (index < items.length - 1) {
       index += 1
-      saveAssessment(answers, index, order)
+      persist()
       updateHud()
-      scene.show(current(), { dir: "next", answer: choiceFor(current()) })
+      showItem("next")
       return
     }
-    const firstOpen = scenarios.findIndex((scenario) => !answers[scenario.id])
+    const firstOpen = items.findIndex((item) => !answers[item.id])
     if (firstOpen >= 0) {
       index = firstOpen
-      saveAssessment(answers, index, order)
+      persist()
       updateHud()
-      scene.show(current(), { dir: "back", answer: choiceFor(current()) })
+      showItem("back")
       return
     }
     finish()
@@ -169,20 +275,19 @@ export function renderAssessment(mount, { navigate }) {
   function finish() {
     // Chốt một lần duy nhất cho mỗi lượt làm bài, dù nút được bấm liên tục.
     if (!started || finished) return
-    const scenarios = list()
-    if (scenarios.some((scenario) => !answers[scenario.id])) return
+    if (list().some((item) => !answers[item.id])) return
     finished = true
-    saveAssessment(answers, index, order)
-    reportStats()
+    persist()
+    const attempt = finishAttempt()
+    reportStats(attempt)
     navigate("/result")
   }
 
-  function reportStats() {
-    if (statsSent) return
-    statsSent = true
-    const elapsed = Math.max(0, Math.round((Date.now() - startedAt) / 1000))
+  function reportStats(attempt) {
+    if (!attempt) return
+    const elapsed = Math.max(0, Math.round(((attempt.finishedAt || Date.now()) - (attempt.startedAt || Date.now())) / 1000))
     // Chỉ gửi mức tổng dạng bậc và thời gian làm bài: không gửi câu trả lời, không gửi mã tình huống.
-    const band = scoreAnswers(answers).overallLevel
+    const band = scoreAttempt(attempt)?.overallLevel ?? "low"
     window
       .fetch?.("/api/stats", {
         method: "POST",
@@ -193,21 +298,9 @@ export function renderAssessment(mount, { navigate }) {
       ?.catch(() => {})
   }
 
-  /* --------------------------------------------------------- bài đang làm */
-  const saved = loadAssessment()
-  resumable = Object.keys(saved.answers || {}).length
-  if (resumable > 0) {
-    resumeBtn.style.display = ""
-    startBtn.replaceChildren(el("span", { class: "pxf-in", text: "Làm lại từ đầu" }))
-    startBtn.classList.remove("btn--accent")
-    startBtn.classList.add("btn--ghost")
-    intro.querySelector(".quiz-intro__note")?.append(
-      el("p", { class: "prose", text: `Bạn đang làm dở: đã trả lời ${resumable}/${TOTAL_SCENARIOS} tình huống.` }),
-    )
-  }
-
   return {
     destroy() {
+      stopRuntime()
       scene.destroy()
       mount.textContent = ""
     },

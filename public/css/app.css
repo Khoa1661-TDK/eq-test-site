@@ -411,6 +411,9 @@
 }
 
 .foot__in {
+  max-width: var(--shell);
+  margin: 0 auto;
+  padding: 0 22px;
   display: flex;
   flex-wrap: wrap;
   gap: var(--gap-4);
@@ -729,4 +732,25 @@
   cursor: default;
   background: rgba(243, 240, 231, 0.04);
   color: var(--console-text);
+}
+
+/* Điện thoại: bốn mục điều hướng xuống một hàng riêng dưới tên trang, không bẻ chữ. */
+@media (max-width: 620px) {
+  .topbar__in {
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+
+  .topbar__spacer {
+    display: none;
+  }
+
+  .topnav {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .topnav a {
+    white-space: nowrap;
+  }
 }

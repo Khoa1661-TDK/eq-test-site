@@ -6,24 +6,33 @@
  * Điểm số gắn với TÍNH HIỆU QUẢ của chiến lược cảm xúc, không gắn với việc người trả lời
  * là người tốt hay người xấu.
  *
- * QUY ƯỚC BẮT BUỘC KHI SỬA FILE NÀY:
- * - Mọi phương án trong CÙNG MỘT tình huống phải có cùng tập khoá trong `scores`
- *   (ví dụ cả bốn phương án đều có `regulation` và `relationship`).
- *   Nhờ vậy điểm tối đa của một chiều được tính công bằng: mỗi tình huống đo một chiều
- *   thì chiều đó có 3 điểm tối đa, bất kể người trả lời chọn phương án nào.
- * - Thang điểm mỗi chiều: 3 = hiệu quả rõ ràng · 2 = có ích nhưng còn thiếu · 1 = kém hiệu quả · 0 = còn làm tình huống xấu đi.
+ * MÔ HÌNH SÁU KỸ NĂNG (eq6-v1):
+ * `domain` dùng đúng 6 khoá: selfAwareness · regulation · empathy · socialAwareness ·
+ * communication · relationship (nghĩa của từng kỹ năng xem eqDimensions.js).
+ * - `weights`: kỹ năng CHÍNH có trọng số 1, mỗi kỹ năng PHỤ có trọng số 0,5;
+ *   một tình huống đo 2–3 kỹ năng.
+ * - Mọi phương án trong CÙNG MỘT tình huống phải có cùng tập khoá trong `scores`,
+ *   khớp chính xác với các khoá của `weights`.
+ * - Thang điểm mỗi kỹ năng: 3 = hiệu quả rõ ràng · 2 = có ích nhưng còn thiếu ·
+ *   1 = kém hiệu quả · 0 = còn làm tình huống xấu đi.
+ * - Kỹ năng chính phải có phương án đạt 3 và phương án ≤ 1.
+ * - Phải có MỘT phương án mạnh nhất đạt điểm cao nhất của cột trên MỌI kỹ năng được đo
+ *   (nhờ vậy chọn đúng hết thì điểm tối đa của tình huống đúng 100).
+ * - Mỗi phương án có một `pattern` — kiểu chiến lược nó thể hiện, lấy từ 19 mẫu trong
+ *   eqPatterns.js (ví dụ nhắn tin lúc đang nóng là `vents`, hỏi "bạn ổn không?" là `checks_in`).
  * - Tình huống CHỈ chứa dữ liệu trình bày + dữ liệu chấm điểm. Không chứa logic giao diện.
- *
- * `domain` dùng đúng 5 khoá: awareness · understanding · regulation · empathy · relationship.
  */
 
-export const EQ_DOMAIN_ORDER = ["awareness", "understanding", "regulation", "empathy", "relationship"]
+import { MORE_SCENARIOS } from "./scenariosMore.js"
 
-export const SCENARIOS = [
+export const EQ_DOMAIN_ORDER = ["selfAwareness", "regulation", "empathy", "socialAwareness", "communication", "relationship"]
+
+const BASE_SCENARIOS = [
   /* ---------------------------------------------- nhận biết cảm xúc (AW) */
   {
     id: "AW_01",
-    domain: "awareness",
+    domain: "selfAwareness",
+    weights: { selfAwareness: 1, regulation: 0.5 },
     face: "concerned",
     title: "Bị gọi tên trước lớp",
     dialogue: [
@@ -39,7 +48,8 @@ export const SCENARIOS = [
         text: "Mình đang tức. Cô luôn nhắm vào mình.",
         strategy: "Chỉ thấy được lớp cảm xúc trên cùng",
         consequence: "Cơn tức che mất điều đang thật sự làm bạn khó chịu, nên rất dễ phản ứng quá mức.",
-        scores: { awareness: 1, understanding: 0 },
+        scores: { selfAwareness: 1, regulation: 1 },
+        pattern: "blames",
       },
       {
         id: "AW_01_B",
@@ -47,7 +57,8 @@ export const SCENARIOS = [
         text: "Không có gì to tát, chuyện này bình thường.",
         strategy: "Phủ nhận cảm xúc để đi qua tình huống",
         consequence: "Cảm xúc không biến mất, nó chỉ ở lại và chờ một dịp khác để bùng lên.",
-        scores: { awareness: 0, understanding: 0 },
+        scores: { selfAwareness: 0, regulation: 1 },
+        pattern: "ignores_feeling",
       },
       {
         id: "AW_01_C",
@@ -55,7 +66,8 @@ export const SCENARIOS = [
         text: "Mình đang xấu hổ, và ngay sau đó là tức vì bị hiểu oan.",
         strategy: "Gọi đúng tên hai cảm xúc đang chồng lên nhau",
         consequence: "Khi biết mình đang vừa xấu hổ vừa tức, bạn có thể chọn cách nói thay vì để cơn tức nói.",
-        scores: { awareness: 3, understanding: 2 },
+        scores: { selfAwareness: 3, regulation: 2 },
+        pattern: "names_feeling",
       },
       {
         id: "AW_01_D",
@@ -63,7 +75,8 @@ export const SCENARIOS = [
         text: "Tim mình đập nhanh, người nóng ran — nhưng mình chưa gọi được tên cảm xúc đó.",
         strategy: "Nhận ra tín hiệu cơ thể trước khi gọi được tên cảm xúc",
         consequence: "Đây là bước đầu tốt: bạn biết cơ thể đang phản ứng, chỉ còn thiếu một cái tên.",
-        scores: { awareness: 2, understanding: 1 },
+        scores: { selfAwareness: 2, regulation: 2 },
+        pattern: "names_feeling",
       },
     ],
     practice: {
@@ -74,7 +87,8 @@ export const SCENARIOS = [
   },
   {
     id: "AW_02",
-    domain: "awareness",
+    domain: "selfAwareness",
+    weights: { selfAwareness: 1, empathy: 0.5 },
     face: "thinking",
     title: "Bạn thân im lặng cả buổi",
     dialogue: [
@@ -90,7 +104,8 @@ export const SCENARIOS = [
         text: "Bạn ấy im hơn mọi ngày. Có gì đó đang nặng, mà mình chưa biết là gì.",
         strategy: "Nhận ra sự khác thường và giữ nguyên chỗ trống đó",
         consequence: "Bạn còn một chỗ để hỏi tiếp, thay vì phải phòng thủ.",
-        scores: { awareness: 3, empathy: 2 },
+        scores: { selfAwareness: 3, empathy: 2 },
+        pattern: "reads_room",
       },
       {
         id: "AW_02_B",
@@ -98,7 +113,8 @@ export const SCENARIOS = [
         text: "Bạn ấy đang né mình. Chắc có chuyện gì với mình.",
         strategy: "Đọc sự im lặng thành một lời buộc tội dành cho mình",
         consequence: "Bạn biến sự im lặng của người khác thành chuyện của mình, và tạo ra căng thẳng không có thật.",
-        scores: { awareness: 1, empathy: 0 },
+        scores: { selfAwareness: 1, empathy: 0 },
+        pattern: "assumes",
       },
       {
         id: "AW_02_C",
@@ -106,7 +122,8 @@ export const SCENARIOS = [
         text: "Chắc bạn ấy mệt.",
         strategy: "Chọn ngay một lời giải thích rồi dừng ở đó",
         consequence: "Bạn đọc đúng phần nổi, nhưng nếu lý do thật khác thì bạn không còn cách nào biết.",
-        scores: { awareness: 1, empathy: 1 },
+        scores: { selfAwareness: 1, empathy: 1 },
+        pattern: "assumes",
       },
       {
         id: "AW_02_D",
@@ -114,7 +131,8 @@ export const SCENARIOS = [
         text: "Bạn ấy im, còn mình thấy hơi lo — nhưng mình đang nghĩ cho mình nhiều hơn cho bạn ấy.",
         strategy: "Nhận ra cảm xúc của mình mà chưa đọc được phía bên kia",
         consequence: "Tự nhận biết là tốt, nhưng bạn vẫn đang đứng hoàn toàn ở phía mình.",
-        scores: { awareness: 2, empathy: 1 },
+        scores: { selfAwareness: 2, empathy: 1 },
+        pattern: "names_feeling",
       },
     ],
     practice: {
@@ -125,7 +143,8 @@ export const SCENARIOS = [
   },
   {
     id: "AW_03",
-    domain: "awareness",
+    domain: "selfAwareness",
+    weights: { selfAwareness: 1, regulation: 0.5 },
     face: "thinking",
     title: "Lo lắng hay hồi hộp",
     dialogue: [
@@ -141,7 +160,8 @@ export const SCENARIOS = [
         text: "Mình đang lo. Lo là phải mở lại bài kiểm tra một lượt cho chắc.",
         strategy: "Gọi được tên cảm giác, rồi xử lý nó bằng một việc quen thuộc",
         consequence: "Bạn làm được một việc cụ thể, nhưng chưa phân biệt được lo với hồi hộp.",
-        scores: { awareness: 2, understanding: 1 },
+        scores: { selfAwareness: 2, regulation: 1 },
+        pattern: "names_feeling",
       },
       {
         id: "AW_03_B",
@@ -149,7 +169,8 @@ export const SCENARIOS = [
         text: "Mình đang hồi hộp — cơ thể đang nạp năng lượng cho một việc khó.",
         strategy: "Phân biệt hồi hộp với sợ và đọc đúng chức năng của nó",
         consequence: "Bạn giữ được chân trong khi vẫn làm việc cần làm.",
-        scores: { awareness: 3, understanding: 2 },
+        scores: { selfAwareness: 3, regulation: 3 },
+        pattern: "names_feeling",
       },
       {
         id: "AW_03_C",
@@ -157,7 +178,8 @@ export const SCENARIOS = [
         text: "Người mình đang lạ, chắc tại cà phê sáng nay.",
         strategy: "Quy cảm giác cho một nguyên nhân bên ngoài rồi dừng ở đó",
         consequence: "Bạn có một cách giải thích gọn, và bỏ qua luôn phần việc đang chờ.",
-        scores: { awareness: 1, understanding: 0 },
+        scores: { selfAwareness: 1, regulation: 0 },
+        pattern: "ignores_feeling",
       },
       {
         id: "AW_03_D",
@@ -165,7 +187,8 @@ export const SCENARIOS = [
         text: "Mình đang sợ. Sợ là vì mình chưa làm được gì cho ra hồn.",
         strategy: "Đọc cảm giác của mình thành một bản án về năng lực",
         consequence: "Bạn tự thêm một tầng sợ lên một cảm giác vốn chỉ là hồi hộp.",
-        scores: { awareness: 1, understanding: 1 },
+        scores: { selfAwareness: 1, regulation: 1 },
+        pattern: "self_blames",
       },
     ],
     practice: {
@@ -176,7 +199,8 @@ export const SCENARIOS = [
   },
   {
     id: "AW_04",
-    domain: "awareness",
+    domain: "selfAwareness",
+    weights: { selfAwareness: 1, empathy: 0.5 },
     face: "concerned",
     title: "Bạn cùng lớp được giải",
     dialogue: [
@@ -192,7 +216,8 @@ export const SCENARIOS = [
         text: "Mình ghen tị. Mà sâu hơn chắc là mình đang lo mình không đủ giỏi.",
         strategy: "Gọi được cảm xúc nổi lên và điều mình đang lo phía dưới",
         consequence: "Bạn biết cảm giác này là dữ liệu về điều mình đang muốn, không phải về bạn kia.",
-        scores: { awareness: 3, empathy: 2 },
+        scores: { selfAwareness: 3, empathy: 2 },
+        pattern: "names_feeling",
       },
       {
         id: "AW_04_B",
@@ -200,7 +225,8 @@ export const SCENARIOS = [
         text: "Mình mừng cho bạn ấy, mà trong bụng vẫn nặng. Chắc để mai nghĩ.",
         strategy: "Thấy có hai thứ cùng lúc rồi gác lại",
         consequence: "Bạn qua được buổi này, và cảm giác đó vẫn còn nguyên khi gặp lại bạn ấy.",
-        scores: { awareness: 2, empathy: 1 },
+        scores: { selfAwareness: 2, empathy: 1 },
+        pattern: "suppresses",
       },
       {
         id: "AW_04_C",
@@ -208,7 +234,8 @@ export const SCENARIOS = [
         text: "Mình thấy khó chịu với bạn ấy. Bạn ấy lúc nào cũng khoe.",
         strategy: "Đẩy cảm xúc của mình thành lỗi của người khác",
         consequence: "Bạn mất dữ liệu về chính mình và có thêm một mâu thuẫn không cần thiết.",
-        scores: { awareness: 1, empathy: 1 },
+        scores: { selfAwareness: 1, empathy: 1 },
+        pattern: "blames",
       },
       {
         id: "AW_04_D",
@@ -216,7 +243,8 @@ export const SCENARIOS = [
         text: "Mình phải thấy vui cho bạn ấy chứ, ghen tị là xấu.",
         strategy: "Tự phán xét cảm xúc nên nó khó được gọi tên",
         consequence: "Cảm xúc bị đẩy xuống nhưng vẫn ảnh hưởng tới cách bạn cư xử.",
-        scores: { awareness: 1, empathy: 0 },
+        scores: { selfAwareness: 1, empathy: 0 },
+        pattern: "suppresses",
       },
     ],
     practice: {
@@ -227,7 +255,8 @@ export const SCENARIOS = [
   },
   {
     id: "AW_05",
-    domain: "awareness",
+    domain: "selfAwareness",
+    weights: { selfAwareness: 1, regulation: 0.5 },
     face: "neutral",
     title: "Cơ thể căng mà cảm xúc “bình thường”",
     dialogue: [
@@ -243,7 +272,8 @@ export const SCENARIOS = [
         text: "“Ổn” nghĩa là không cần nghĩ gì. Đây là bình thường của mùa thi.",
         strategy: "Dùng một lời giải thích chung để đi qua tín hiệu của cơ thể",
         consequence: "Cơ thể tiếp tục báo mà không được xử lý, cho tới khi bạn không còn đủ sức.",
-        scores: { awareness: 0, regulation: 1 },
+        scores: { selfAwareness: 0, regulation: 1 },
+        pattern: "ignores_feeling",
       },
       {
         id: "AW_05_B",
@@ -251,7 +281,8 @@ export const SCENARIOS = [
         text: "Vai cứng và ngủ ít là tín hiệu mình đang quá tải — kể cả khi mình chưa gọi được tên cảm xúc.",
         strategy: "Đọc cơ thể như một tín hiệu đến sớm",
         consequence: "Bạn có thể xử lý trước khi tình trạng này thành kiệt sức.",
-        scores: { awareness: 3, regulation: 2 },
+        scores: { selfAwareness: 3, regulation: 2 },
+        pattern: "names_feeling",
       },
       {
         id: "AW_05_C",
@@ -259,7 +290,8 @@ export const SCENARIOS = [
         text: "Mình đang yếu. Không nên để ai thấy điều này.",
         strategy: "Nghe đúng tín hiệu nhưng biến nó thành phán xét bản thân",
         consequence: "Bạn giấu tình trạng của mình và giấu luôn cách để được giúp.",
-        scores: { awareness: 1, regulation: 0 },
+        scores: { selfAwareness: 1, regulation: 0 },
+        pattern: "self_blames",
       },
       {
         id: "AW_05_D",
@@ -267,7 +299,8 @@ export const SCENARIOS = [
         text: "Chắc tại thiếu ngủ thôi, ngủ bù là hết.",
         strategy: "Giải thích tín hiệu bằng một nguyên nhân duy nhất",
         consequence: "Ngủ bù giúp được một phần, nhưng phần quá tải phía sau vẫn còn.",
-        scores: { awareness: 2, regulation: 1 },
+        scores: { selfAwareness: 2, regulation: 1 },
+        pattern: "ignores_feeling",
       },
     ],
     practice: {
@@ -278,7 +311,8 @@ export const SCENARIOS = [
   },
   {
     id: "AW_06",
-    domain: "awareness",
+    domain: "selfAwareness",
+    weights: { selfAwareness: 1, socialAwareness: 0.5 },
     face: "thinking",
     title: "Tin nhắn cụt trong nhóm",
     dialogue: [
@@ -294,7 +328,8 @@ export const SCENARIOS = [
         text: "Cả nhóm đang khó chịu với mình.",
         strategy: "Biến một tin nhắn ngắn thành kết luận về cả nhóm",
         consequence: "Bạn phản ứng với một kết luận mình vừa tự viết ra, không phải với tin nhắn.",
-        scores: { awareness: 0, understanding: 0 },
+        scores: { selfAwareness: 0, socialAwareness: 0 },
+        pattern: "assumes",
       },
       {
         id: "AW_06_B",
@@ -302,7 +337,8 @@ export const SCENARIOS = [
         text: "Mình đang cần được ghi nhận, và sự im lặng làm mình lo.",
         strategy: "Gọi được nhu cầu nằm phía dưới phản ứng",
         consequence: "Bạn biết mình đang thiếu gì, nên có thể nói ra thay vì tự suy diễn.",
-        scores: { awareness: 3, understanding: 2 },
+        scores: { selfAwareness: 3, socialAwareness: 2 },
+        pattern: "names_feeling",
       },
       {
         id: "AW_06_C",
@@ -310,7 +346,8 @@ export const SCENARIOS = [
         text: "Chắc mọi người bận. Không có gì.",
         strategy: "Chọn cách giải thích dễ chịu rồi để cảm giác của mình lại đó",
         consequence: "Bạn qua được lúc này nhưng nhu cầu của mình vẫn chưa được nói ra.",
-        scores: { awareness: 1, understanding: 1 },
+        scores: { selfAwareness: 1, socialAwareness: 2 },
+        pattern: "ignores_feeling",
       },
       {
         id: "AW_06_D",
@@ -318,7 +355,8 @@ export const SCENARIOS = [
         text: "Mình thấy hơi lo nhưng không rõ vì sao.",
         strategy: "Nhận ra cảm xúc mà chưa đọc được điều mình đang cần",
         consequence: "Bạn biết có chuyện mà chưa biết nên làm gì với nó.",
-        scores: { awareness: 2, understanding: 1 },
+        scores: { selfAwareness: 2, socialAwareness: 1 },
+        pattern: "names_feeling",
       },
     ],
     practice: {
@@ -330,7 +368,8 @@ export const SCENARIOS = [
   /* ------------------------------------------------- hiểu cảm xúc (EU) */
   {
     id: "EU_01",
-    domain: "understanding",
+    domain: "selfAwareness",
+    weights: { selfAwareness: 1, regulation: 0.5 },
     face: "thinking",
     title: "Được chọn vào đội tuyển",
     dialogue: [
@@ -346,7 +385,8 @@ export const SCENARIOS = [
         text: "Nếu mình lo thì chứng tỏ mình không thật sự muốn điều này.",
         strategy: "Cho rằng hai cảm xúc trái chiều không thể cùng tồn tại",
         consequence: "Bạn phải chọn một nửa cảm xúc của mình và tự làm mình rối thêm.",
-        scores: { understanding: 0, awareness: 1 },
+        scores: { selfAwareness: 0, regulation: 1 },
+        pattern: "assumes",
       },
       {
         id: "EU_01_B",
@@ -354,7 +394,8 @@ export const SCENARIOS = [
         text: "Mừng và lo là hai cảm xúc cùng đúng: mình muốn điều này và mình biết nó có giá.",
         strategy: "Hiểu rằng cảm xúc trái chiều có thể cùng tồn tại",
         consequence: "Bạn giữ được cả động lực và sự thật về những gì mình phải bỏ.",
-        scores: { understanding: 3, awareness: 2 },
+        scores: { selfAwareness: 3, regulation: 3 },
+        pattern: "names_feeling",
       },
       {
         id: "EU_01_C",
@@ -362,7 +403,8 @@ export const SCENARIOS = [
         text: "Mình sẽ vui cho tới khi có lý do để lo.",
         strategy: "Chọn một cảm xúc và cắt phần còn lại",
         consequence: "Phần lo không biến mất, nó chỉ xuất hiện muộn hơn, lúc bạn đã nhận việc.",
-        scores: { understanding: 1, awareness: 1 },
+        scores: { selfAwareness: 1, regulation: 1 },
+        pattern: "ignores_feeling",
       },
       {
         id: "EU_01_D",
@@ -370,7 +412,8 @@ export const SCENARIOS = [
         text: "Mình thấy lẫn lộn, chắc tại mình nghĩ nhiều quá.",
         strategy: "Nhận ra sự lẫn lộn nhưng coi nó là lỗi của mình",
         consequence: "Bạn biết mình đang có hai cảm xúc nhưng không xem chúng là thông tin dùng được.",
-        scores: { understanding: 2, awareness: 1 },
+        scores: { selfAwareness: 2, regulation: 1 },
+        pattern: "self_blames",
       },
     ],
     practice: {
@@ -381,7 +424,8 @@ export const SCENARIOS = [
   },
   {
     id: "EU_02",
-    domain: "understanding",
+    domain: "selfAwareness",
+    weights: { selfAwareness: 1, regulation: 0.5 },
     face: "concerned",
     title: "Bực vô cớ với người vô can",
     dialogue: [
@@ -397,7 +441,8 @@ export const SCENARIOS = [
         text: "Mình vừa về tới nhà, chưa kịp thở. Mẹ hỏi đúng lúc đó nên mình gắt.",
         strategy: "Quy cơn gắt cho thời điểm, không cho chuyện vừa xảy ra",
         consequence: "Bạn có một lý do dễ chịu cho cơn gắt, còn chuyện điểm thì vẫn nằm nguyên đó.",
-        scores: { understanding: 1, regulation: 1 },
+        scores: { selfAwareness: 1, regulation: 1 },
+        pattern: "assumes",
       },
       {
         id: "EU_02_B",
@@ -405,7 +450,8 @@ export const SCENARIOS = [
         text: "Mình đang giận chuyện điểm, nhưng lại trút lên người an toàn nhất.",
         strategy: "Nhận ra cảm xúc đã bị chuyển sang chỗ khác",
         consequence: "Bạn biết nguồn thật ở đâu, nên có thể nói lại đúng chuyện.",
-        scores: { understanding: 3, regulation: 2 },
+        scores: { selfAwareness: 3, regulation: 2 },
+        pattern: "names_feeling",
       },
       {
         id: "EU_02_C",
@@ -413,7 +459,8 @@ export const SCENARIOS = [
         text: "Chắc mình vừa đói vừa mệt. Ăn xong là hết.",
         strategy: "Tìm một nguyên nhân khác dễ chấp nhận hơn",
         consequence: "Bạn bớt khó chịu được một lúc, còn nguồn thật thì vẫn chưa được gọi tên.",
-        scores: { understanding: 2, regulation: 1 },
+        scores: { selfAwareness: 2, regulation: 1 },
+        pattern: "ignores_feeling",
       },
       {
         id: "EU_02_D",
@@ -421,7 +468,8 @@ export const SCENARIOS = [
         text: "Mình đang bực mà không rõ vì sao. Tốt nhất là vào phòng trước đã.",
         strategy: "Thấy cơn bực nhưng chưa truy được nó từ đâu tới",
         consequence: "Bạn không trút lên mẹ nữa, còn cơn bực thì vẫn ở đó tới tối.",
-        scores: { understanding: 1, regulation: 2 },
+        scores: { selfAwareness: 1, regulation: 2 },
+        pattern: "pauses",
       },
     ],
     practice: {
@@ -432,7 +480,8 @@ export const SCENARIOS = [
   },
   {
     id: "EU_03",
-    domain: "understanding",
+    domain: "empathy",
+    weights: { empathy: 1, selfAwareness: 0.5 },
     face: "thinking",
     title: "Bạn thân không nhắn lại",
     dialogue: [
@@ -448,7 +497,8 @@ export const SCENARIOS = [
         text: "Bạn ấy đang tránh mình. Mình cần hỏi cho ra chuyện.",
         strategy: "Đi thẳng tới một kết luận chưa có bằng chứng",
         consequence: "Bạn mở cuộc trò chuyện bằng một cáo buộc, và rất dễ bị phòng thủ lại.",
-        scores: { understanding: 1, awareness: 1 },
+        scores: { empathy: 1, selfAwareness: 1 },
+        pattern: "assumes",
       },
       {
         id: "EU_03_B",
@@ -456,7 +506,8 @@ export const SCENARIOS = [
         text: "Bạn ấy có việc khác, và phần “chắc mình làm gì rồi” là do mình đang lo.",
         strategy: "Tách sự việc khỏi suy diễn của mình",
         consequence: "Bạn giữ được chỗ cho thông tin thật, thay vì phản ứng với điều mình tự viết ra.",
-        scores: { understanding: 3, awareness: 2 },
+        scores: { empathy: 3, selfAwareness: 2 },
+        pattern: "checks_in",
       },
       {
         id: "EU_03_C",
@@ -464,7 +515,8 @@ export const SCENARIOS = [
         text: "Không có gì. Bận thì bận.",
         strategy: "Loại bỏ luôn phần cảm xúc của mình",
         consequence: "Bạn qua được lúc này nhưng để lại một nỗi lo chưa được nhìn tới.",
-        scores: { understanding: 1, awareness: 0 },
+        scores: { empathy: 1, selfAwareness: 0 },
+        pattern: "ignores_feeling",
       },
       {
         id: "EU_03_D",
@@ -472,7 +524,8 @@ export const SCENARIOS = [
         text: "Mình đang lo, nhưng chưa biết vì sao bạn ấy im.",
         strategy: "Nhận ra cảm xúc của mình và giữ được khoảng trống thông tin",
         consequence: "Bạn có thể chờ, hoặc hỏi một câu trung tính — cả hai đều còn đường.",
-        scores: { understanding: 2, awareness: 2 },
+        scores: { empathy: 2, selfAwareness: 2 },
+        pattern: "names_feeling",
       },
     ],
     practice: {
@@ -483,7 +536,8 @@ export const SCENARIOS = [
   },
   {
     id: "EU_04",
-    domain: "understanding",
+    domain: "selfAwareness",
+    weights: { selfAwareness: 1, regulation: 0.5 },
     face: "surprised",
     title: "Một tin nhắn làm bùng nổ",
     dialogue: [
@@ -499,7 +553,8 @@ export const SCENARIOS = [
         text: "Mình cần phản hồi ngay, càng nhanh càng tốt.",
         strategy: "Để tốc độ của cảm xúc quyết định tốc độ hành động",
         consequence: "Bạn gửi đi một tin nhắn viết lúc đỉnh cảm xúc — thứ khó rút lại nhất.",
-        scores: { understanding: 0, regulation: 1 },
+        scores: { selfAwareness: 0, regulation: 1 },
+        pattern: "vents",
       },
       {
         id: "EU_04_B",
@@ -507,7 +562,8 @@ export const SCENARIOS = [
         text: "Mình bị tổn thương, và cảm xúc này đang ở mức mạnh nhất trong vài phút đầu.",
         strategy: "Biết được đường cong của cảm xúc",
         consequence: "Bạn biết có thể chờ vài phút để nói điều mình thật sự muốn nói.",
-        scores: { understanding: 3, regulation: 2 },
+        scores: { selfAwareness: 3, regulation: 2 },
+        pattern: "pauses",
       },
       {
         id: "EU_04_C",
@@ -515,7 +571,8 @@ export const SCENARIOS = [
         text: "Không sao, chỉ là ảnh thôi, mình không để bụng.",
         strategy: "Hạ thấp cảm xúc để không phải xử lý nó",
         consequence: "Bạn bỏ qua tín hiệu rằng có điều gì đó đã vượt qua giới hạn của mình.",
-        scores: { understanding: 1, regulation: 0 },
+        scores: { selfAwareness: 1, regulation: 0 },
+        pattern: "ignores_feeling",
       },
       {
         id: "EU_04_D",
@@ -523,7 +580,8 @@ export const SCENARIOS = [
         text: "Mình đang rất tức, và cũng thấy xấu hổ.",
         strategy: "Gọi được tên cảm xúc nhưng chưa biết nó sẽ đổi thế nào",
         consequence: "Bạn biết mình đang ở đâu, nhưng vẫn cần biết nó sẽ hạ xuống nếu chờ.",
-        scores: { understanding: 2, regulation: 2 },
+        scores: { selfAwareness: 2, regulation: 2 },
+        pattern: "names_feeling",
       },
     ],
     practice: {
@@ -534,7 +592,8 @@ export const SCENARIOS = [
   },
   {
     id: "EU_05",
-    domain: "understanding",
+    domain: "selfAwareness",
+    weights: { selfAwareness: 1, relationship: 0.5 },
     face: "neutral",
     title: "Vài ngày sau, chuyện nhẹ hơn",
     dialogue: [
@@ -550,7 +609,8 @@ export const SCENARIOS = [
         text: "Chắc mình không còn quan tâm chuyện đó nữa.",
         strategy: "Đọc cường độ giảm thành mức độ quan trọng giảm",
         consequence: "Bạn dễ bỏ qua một việc vẫn đang chờ được nói ra.",
-        scores: { understanding: 1, relationship: 1 },
+        scores: { selfAwareness: 1, relationship: 1 },
+        pattern: "ignores_feeling",
       },
       {
         id: "EU_05_B",
@@ -558,7 +618,8 @@ export const SCENARIOS = [
         text: "Cường độ cảm xúc giảm không có nghĩa là chuyện đã được giải quyết.",
         strategy: "Phân biệt mức độ cảm xúc với mức độ cần xử lý",
         consequence: "Bạn dùng được lúc đã nguội để nói chuyện, thay vì để nó trôi đi.",
-        scores: { understanding: 3, relationship: 2 },
+        scores: { selfAwareness: 3, relationship: 2 },
+        pattern: "names_feeling",
       },
       {
         id: "EU_05_C",
@@ -566,7 +627,8 @@ export const SCENARIOS = [
         text: "Quên được thì tốt hơn, coi như không có gì.",
         strategy: "Dùng thời gian như cách xoá vấn đề",
         consequence: "Chuyện có thể quay lại sau, và lúc đó khó nói hơn.",
-        scores: { understanding: 1, relationship: 0 },
+        scores: { selfAwareness: 1, relationship: 0 },
+        pattern: "suppresses",
       },
       {
         id: "EU_05_D",
@@ -574,7 +636,8 @@ export const SCENARIOS = [
         text: "Mình bớt giận rồi, nhưng có thể chuyện vẫn còn.",
         strategy: "Nhận ra hai chuyện là khác nhau nhưng chưa biết làm gì tiếp",
         consequence: "Bạn biết đây là lúc thuận lợi để nói, chỉ còn thiếu một bước.",
-        scores: { understanding: 2, relationship: 2 },
+        scores: { selfAwareness: 2, relationship: 2 },
+        pattern: "names_feeling",
       },
     ],
     practice: {
@@ -587,6 +650,7 @@ export const SCENARIOS = [
   {
     id: "ER_01",
     domain: "regulation",
+    weights: { regulation: 1, communication: 0.5 },
     face: "concerned",
     title: "Nhóm chưa xong việc",
     dialogue: [
@@ -603,7 +667,8 @@ export const SCENARIOS = [
         text: "Nhắn riêng hỏi bạn ấy đang vướng gì, nghe hết rồi để bạn ấy tự sắp lịch.",
         strategy: "Mở một cửa để nghe, nhưng không chốt gì",
         consequence: "Bạn ấy thấy được nghe, còn bạn thì vẫn chưa biết tối nay có kịp hay không.",
-        scores: { regulation: 1, relationship: 3 },
+        scores: { regulation: 1, communication: 2 },
+        pattern: "checks_in",
       },
       {
         id: "ER_01_B",
@@ -611,7 +676,8 @@ export const SCENARIOS = [
         text: "Nhắn riêng, chốt một mốc: “9 giờ tớ lấy phần cậu nhé. Có gì vướng thì nói tớ.”",
         strategy: "Vừa nêu mốc vừa để một cửa cho bạn ấy nói",
         consequence: "Bạn ấy biết chính xác cần gì, và có chỗ để nói nếu đang vướng thật.",
-        scores: { regulation: 3, relationship: 2 },
+        scores: { regulation: 3, communication: 3 },
+        pattern: "states_need",
       },
       {
         id: "ER_01_C",
@@ -619,7 +685,8 @@ export const SCENARIOS = [
         text: "Kể với một bạn khác trong nhóm cho nhẹ, rồi tối tự làm phần mình.",
         strategy: "Xả cơn bực ra chỗ khác rồi tự xử lý phần mình",
         consequence: "Bạn nhẹ đi một chút, và câu chuyện thì lan ra ngoài nhóm.",
-        scores: { regulation: 2, relationship: 1 },
+        scores: { regulation: 2, communication: 1 },
+        pattern: "vents",
       },
       {
         id: "ER_01_D",
@@ -627,7 +694,8 @@ export const SCENARIOS = [
         text: "Không nói gì, tối nay tự làm luôn phần đó cho kịp.",
         strategy: "Nuốt cảm xúc và tự gánh cho xong",
         consequence: "Việc xong, còn cơn bực thì ở lại và lần sau tình huống này lặp lại.",
-        scores: { regulation: 1, relationship: 1 },
+        scores: { regulation: 1, communication: 0 },
+        pattern: "suppresses",
       },
     ],
     practice: {
@@ -639,6 +707,7 @@ export const SCENARIOS = [
   {
     id: "ER_02",
     domain: "regulation",
+    weights: { regulation: 1, selfAwareness: 0.5 },
     face: "concerned",
     title: "Điểm thấp hơn rất nhiều",
     dialogue: [
@@ -654,7 +723,8 @@ export const SCENARIOS = [
         text: "Bỏ cuốn vở đó đi, mấy hôm không muốn nghĩ tới chuyện học.",
         strategy: "Tránh né để giảm đau trước mắt",
         consequence: "Bạn tránh được cảm giác khó chịu và tránh luôn việc sửa lỗi.",
-        scores: { regulation: 1, understanding: 1 },
+        scores: { regulation: 1, selfAwareness: 1 },
+        pattern: "avoids",
       },
       {
         id: "ER_02_B",
@@ -662,7 +732,8 @@ export const SCENARIOS = [
         text: "Cho mình một tối để thất vọng, rồi mai mở bài ra xem từng lỗi.",
         strategy: "Chừa chỗ cho cảm xúc rồi mới quay lại việc",
         consequence: "Bạn không phải giả vờ ổn, và vẫn có đường quay lại bài.",
-        scores: { regulation: 3, understanding: 2 },
+        scores: { regulation: 3, selfAwareness: 2 },
+        pattern: "pauses",
       },
       {
         id: "ER_02_C",
@@ -670,7 +741,8 @@ export const SCENARIOS = [
         text: "Học kỹ vậy mà vẫn thế, chắc mình không có năng khiếu môn này.",
         strategy: "Rút một kết luận về bản thân từ một kết quả",
         consequence: "Bạn có sẵn một lý do để không thử lại, và nó không dựa trên bài làm.",
-        scores: { regulation: 1, understanding: 0 },
+        scores: { regulation: 1, selfAwareness: 0 },
+        pattern: "self_blames",
       },
       {
         id: "ER_02_D",
@@ -678,7 +750,8 @@ export const SCENARIOS = [
         text: "Cất bài đi, tối nay học môn khác cho đầu nhẹ lại.",
         strategy: "Đổi việc để giữ nhịp học",
         consequence: "Bạn giữ được nhịp học hôm nay, còn phần lỗi sai thì vẫn chưa được xem lại.",
-        scores: { regulation: 2, understanding: 1 },
+        scores: { regulation: 2, selfAwareness: 1 },
+        pattern: "pauses",
       },
     ],
     practice: {
@@ -690,6 +763,7 @@ export const SCENARIOS = [
   {
     id: "ER_03",
     domain: "regulation",
+    weights: { regulation: 1, communication: 0.5 },
     face: "concerned",
     title: "Bị mắng oan trước nhiều người",
     dialogue: [
@@ -705,7 +779,8 @@ export const SCENARIOS = [
         text: "Nói ngay tại chỗ: “phần đó không phải em làm”, giọng vừa đủ nghe.",
         strategy: "Nêu sự thật ngay, giữa lúc nhiều người đang có mặt",
         consequence: "Sự thật được nói ra, còn cả buổi thì chuyển sang căng thẳng.",
-        scores: { regulation: 2, relationship: 1 },
+        scores: { regulation: 2, communication: 2 },
+        pattern: "misreads_room",
       },
       {
         id: "ER_03_B",
@@ -713,7 +788,8 @@ export const SCENARIOS = [
         text: "Im lặng cho qua buổi, hết buổi tìm anh chị nói riêng.",
         strategy: "Chọn đúng chỗ để nói, đổi lại là nói muộn hơn",
         consequence: "Buổi sinh hoạt êm, và bạn phải mang điều đó tới hết buổi.",
-        scores: { regulation: 1, relationship: 2 },
+        scores: { regulation: 1, communication: 2 },
+        pattern: "pauses",
       },
       {
         id: "ER_03_C",
@@ -721,7 +797,8 @@ export const SCENARIOS = [
         text: "Nói một câu ngắn tại chỗ để giữ sự thật, rồi xin nói riêng sau buổi.",
         strategy: "Giữ sự thật ở mức tối thiểu rồi hạ nhiệt tình huống",
         consequence: "Bạn không nhận phần không phải của mình, và vẫn còn chỗ nói tiếp khi cả hai đã bình tĩnh.",
-        scores: { regulation: 3, relationship: 3 },
+        scores: { regulation: 3, communication: 3 },
+        pattern: "states_need",
       },
       {
         id: "ER_03_D",
@@ -729,7 +806,8 @@ export const SCENARIOS = [
         text: "Nhận cho yên buổi, rồi về thấy uất ức.",
         strategy: "Nhận vào mình như một cách thoát khỏi tình huống",
         consequence: "Tình huống qua nhanh, đổi lại bạn mang theo một điều không phải của mình.",
-        scores: { regulation: 1, relationship: 1 },
+        scores: { regulation: 1, communication: 1 },
+        pattern: "suppresses",
       },
     ],
     practice: {
@@ -741,6 +819,7 @@ export const SCENARIOS = [
   {
     id: "ER_04",
     domain: "regulation",
+    weights: { regulation: 1, empathy: 0.5 },
     face: "thinking",
     title: "Bị từ chối lời mời",
     dialogue: [
@@ -757,6 +836,7 @@ export const SCENARIOS = [
         strategy: "Tránh rủi ro bị từ chối bằng cách tự đóng lại",
         consequence: "Bạn không còn bị từ chối, và cũng không còn cơ hội nào.",
         scores: { regulation: 0, empathy: 1 },
+        pattern: "avoids",
       },
       {
         id: "ER_04_B",
@@ -765,6 +845,7 @@ export const SCENARIOS = [
         strategy: "Hỏi để lấy thông tin, không hỏi để thuyết phục",
         consequence: "Bạn biết mình đang ở đâu, và cũng không làm bạn ấy phải giải thích thêm.",
         scores: { regulation: 3, empathy: 2 },
+        pattern: "checks_in",
       },
       {
         id: "ER_04_C",
@@ -773,6 +854,7 @@ export const SCENARIOS = [
         strategy: "Điền một kết luận về bản thân vào khoảng trống",
         consequence: "Bạn phản ứng với một điều mình vừa tự nghĩ ra, không phải với câu trả lời.",
         scores: { regulation: 1, empathy: 0 },
+        pattern: "self_blames",
       },
       {
         id: "ER_04_D",
@@ -781,6 +863,7 @@ export const SCENARIOS = [
         strategy: "Giữ được khoảng cách giữa một sự kiện và bản thân",
         consequence: "Bạn qua được cú hụt mà không mang thêm một kết luận nặng về mình.",
         scores: { regulation: 2, empathy: 2 },
+        pattern: "names_feeling",
       },
     ],
     practice: {
@@ -792,6 +875,7 @@ export const SCENARIOS = [
   {
     id: "ER_05",
     domain: "regulation",
+    weights: { regulation: 1, selfAwareness: 0.5 },
     face: "concerned",
     title: "Quá tải vì deadline",
     dialogue: [
@@ -807,7 +891,8 @@ export const SCENARIOS = [
         text: "Thức tới sáng làm cho xong hết, kịp hạn là được.",
         strategy: "Lấy sức ra bù cho tình trạng quá tải",
         consequence: "Bạn có thể xong tuần này, và tuần sau thì không còn sức.",
-        scores: { regulation: 1, awareness: 1 },
+        scores: { regulation: 1, selfAwareness: 1 },
+        pattern: "ignores_feeling",
       },
       {
         id: "ER_05_B",
@@ -815,7 +900,8 @@ export const SCENARIOS = [
         text: "Nhắn xin giãn hạn hai bài, rồi đi ngủ, sáng mai tính.",
         strategy: "Bớt tải trước rồi mới tính tiếp",
         consequence: "Đêm nay bạn ngủ được, còn bốn bài thì vẫn nằm đó và bạn chưa chọn được bài nào.",
-        scores: { regulation: 2, awareness: 2 },
+        scores: { regulation: 2, selfAwareness: 2 },
+        pattern: "states_need",
       },
       {
         id: "ER_05_C",
@@ -823,7 +909,8 @@ export const SCENARIOS = [
         text: "Dừng mười phút, chọn đúng một bài quan trọng nhất, và xin giãn hạn phần còn lại.",
         strategy: "Hạ nhiệt rồi chọn việc và bớt tải",
         consequence: "Bạn vừa xử lý được cảm giác vừa đổi được tình huống.",
-        scores: { regulation: 3, awareness: 3 },
+        scores: { regulation: 3, selfAwareness: 3 },
+        pattern: "pauses",
       },
       {
         id: "ER_05_D",
@@ -831,7 +918,8 @@ export const SCENARIOS = [
         text: "Làm phần dễ nhất trước để thấy mình đang tiến.",
         strategy: "Tạo đà bằng một việc nhỏ",
         consequence: "Bạn lấy lại được chút kiểm soát, còn bài khó thì vẫn đang chờ.",
-        scores: { regulation: 1, awareness: 1 },
+        scores: { regulation: 1, selfAwareness: 1 },
+        pattern: "fixes_too_fast",
       },
     ],
     practice: {
@@ -842,7 +930,8 @@ export const SCENARIOS = [
   },
   {
     id: "ER_06",
-    domain: "regulation",
+    domain: "relationship",
+    weights: { relationship: 1, regulation: 0.5 },
     face: "concerned",
     title: "Bạn thân nói lộ chuyện riêng",
     dialogue: [
@@ -858,7 +947,8 @@ export const SCENARIOS = [
         text: "Nhắn ngay lúc đang tức: “cậu kể chuyện của tớ cho người khác hả?”",
         strategy: "Nói ngay khi cơn tức còn đang đỉnh",
         consequence: "Bạn ấy nhận được một câu hỏi đang nóng, và rất dễ trả lời phòng thủ.",
-        scores: { regulation: 2, relationship: 1 },
+        scores: { relationship: 1, regulation: 2 },
+        pattern: "vents",
       },
       {
         id: "ER_06_B",
@@ -866,7 +956,8 @@ export const SCENARIOS = [
         text: "Không nhắc gì, nhưng từ nay không kể chuyện riêng cho bạn ấy nữa.",
         strategy: "Rút lại niềm tin trong im lặng",
         consequence: "Bạn bớt phải đối diện, và bạn ấy không biết mình vừa mất gì.",
-        scores: { regulation: 1, relationship: 2 },
+        scores: { relationship: 2, regulation: 1 },
+        pattern: "avoids",
       },
       {
         id: "ER_06_C",
@@ -874,7 +965,8 @@ export const SCENARIOS = [
         text: "Chờ tới khi nguội, rồi nói: “chuyện đó mình đã dặn là riêng. Từ giờ mình không kể cho cậu nữa.”",
         strategy: "Chờ hết đỉnh cảm xúc rồi nói đúng điều đã hỏng",
         consequence: "Bạn ấy nghe được điều đã mất, thay vì chỉ nghe một cơn giận.",
-        scores: { regulation: 3, relationship: 3 },
+        scores: { relationship: 3, regulation: 3 },
+        pattern: "sets_boundary",
       },
       {
         id: "ER_06_D",
@@ -882,7 +974,8 @@ export const SCENARIOS = [
         text: "Không nói gì, coi như mình đã hiểu bạn ấy là người thế nào.",
         strategy: "Kết luận trong im lặng và giữ một cơn giận dài",
         consequence: "Quan hệ nguội đi mà bạn ấy không có cơ hội biết vì sao.",
-        scores: { regulation: 1, relationship: 1 },
+        scores: { relationship: 1, regulation: 1 },
+        pattern: "assumes",
       },
     ],
     practice: {
@@ -895,6 +988,7 @@ export const SCENARIOS = [
   {
     id: "EM_01",
     domain: "empathy",
+    weights: { empathy: 1, relationship: 0.5 },
     face: "concerned",
     title: "Bạn cùng bàn nói “không sao”",
     dialogue: [
@@ -911,6 +1005,7 @@ export const SCENARIOS = [
         strategy: "Ở bên bằng một việc nhẹ, không hỏi gì",
         consequence: "Bạn ấy được rời khỏi bàn một lúc, còn chuyện đang làm bạn ấy gục xuống thì vẫn chưa được nhắc tới.",
         scores: { empathy: 1, relationship: 2 },
+        pattern: "ignores_feeling",
       },
       {
         id: "EM_01_B",
@@ -919,6 +1014,7 @@ export const SCENARIOS = [
         strategy: "Có mặt mà không đòi người khác mở lòng",
         consequence: "Bạn ấy có thể im mà vẫn không ở một mình.",
         scores: { empathy: 3, relationship: 2 },
+        pattern: "checks_in",
       },
       {
         id: "EM_01_C",
@@ -927,6 +1023,7 @@ export const SCENARIOS = [
         strategy: "Quan tâm nhưng không cho người kia quyền giữ im lặng",
         consequence: "Bạn ấy có thể phải dựng lên một câu trả lời cho xong, thay vì được im.",
         scores: { empathy: 1, relationship: 1 },
+        pattern: "fixes_too_fast",
       },
       {
         id: "EM_01_D",
@@ -935,6 +1032,7 @@ export const SCENARIOS = [
         strategy: "Ở bên bằng một cử chỉ, không nói gì",
         consequence: "Bạn ấy biết có người đang ở đó, mà cũng không phải mở lời.",
         scores: { empathy: 2, relationship: 2 },
+        pattern: "reads_room",
       },
     ],
     practice: {
@@ -946,6 +1044,7 @@ export const SCENARIOS = [
   {
     id: "EM_02",
     domain: "empathy",
+    weights: { empathy: 1, relationship: 0.5 },
     face: "thinking",
     title: "Bạn muốn ở một mình",
     dialogue: [
@@ -962,6 +1061,7 @@ export const SCENARIOS = [
         strategy: "Lo lắng biến thành sức ép",
         consequence: "Bạn ấy phải phòng thủ thêm một thứ, trong lúc đã đang quá tải.",
         scores: { empathy: 0, relationship: 0 },
+        pattern: "vents",
       },
       {
         id: "EM_02_B",
@@ -970,6 +1070,7 @@ export const SCENARIOS = [
         strategy: "Tôn trọng khoảng riêng và giữ cửa mở",
         consequence: "Bạn ấy biết mình không bị bỏ, và vẫn được quyết định lúc nào nói.",
         scores: { empathy: 3, relationship: 3 },
+        pattern: "checks_in",
       },
       {
         id: "EM_02_C",
@@ -978,6 +1079,7 @@ export const SCENARIOS = [
         strategy: "Dùng không khí vui để lấp cảm xúc",
         consequence: "Bạn ấy có thể thấy nhẹ hơn một buổi, nhưng điều đang nặng vẫn còn nguyên.",
         scores: { empathy: 1, relationship: 2 },
+        pattern: "ignores_feeling",
       },
       {
         id: "EM_02_D",
@@ -986,6 +1088,7 @@ export const SCENARIOS = [
         strategy: "Nói được điều mình cảm thấy mà không tạo nghĩa vụ cho người kia",
         consequence: "Bạn ấy biết có người đang nghĩ tới mình mà không phải trả lời ngay.",
         scores: { empathy: 2, relationship: 3 },
+        pattern: "names_feeling",
       },
     ],
     practice: {
@@ -997,6 +1100,7 @@ export const SCENARIOS = [
   {
     id: "EM_03",
     domain: "empathy",
+    weights: { empathy: 1, socialAwareness: 0.5 },
     face: "neutral",
     title: "Bạn gay gắt trong nhóm",
     dialogue: [
@@ -1012,7 +1116,8 @@ export const SCENARIOS = [
         text: "Không có lý do gì để nói với mọi người như vậy, dù hoàn cảnh thế nào.",
         strategy: "Đúng về chuẩn mực nhưng chưa đọc gì phía sau",
         consequence: "Bạn giữ được chuẩn mực và bỏ lỡ điều đang xảy ra với bạn ấy.",
-        scores: { empathy: 1, understanding: 1 },
+        scores: { empathy: 1, socialAwareness: 1 },
+        pattern: "blames",
       },
       {
         id: "EM_03_B",
@@ -1020,7 +1125,8 @@ export const SCENARIOS = [
         text: "Bạn ấy đang mang cơn bực từ nhà sang nhóm, và điều đó không làm cho nó đúng.",
         strategy: "Đọc được nguồn gốc mà vẫn giữ được chuẩn mực",
         consequence: "Bạn có thể vừa hiểu bạn ấy vừa giữ được ranh giới cho cả nhóm.",
-        scores: { empathy: 3, understanding: 2 },
+        scores: { empathy: 3, socialAwareness: 3 },
+        pattern: "reads_room",
       },
       {
         id: "EM_03_C",
@@ -1028,7 +1134,8 @@ export const SCENARIOS = [
         text: "Thông cảm hết cho bạn ấy, mặc kệ mọi người thấy thế nào.",
         strategy: "Đọc được hoàn cảnh nhưng bỏ qua ảnh hưởng lên người khác",
         consequence: "Cả nhóm phải chịu một cách nói không ổn, và bạn ấy không có dịp nhìn lại.",
-        scores: { empathy: 1, understanding: 2 },
+        scores: { empathy: 1, socialAwareness: 1 },
+        pattern: "people_pleases",
       },
       {
         id: "EM_03_D",
@@ -1036,7 +1143,8 @@ export const SCENARIOS = [
         text: "Chắc tại bạn ấy quá áp lực. Thôi kệ.",
         strategy: "Có một lời giải thích rồi dừng lại",
         consequence: "Bạn không còn bực, và cũng không còn gì để làm với tình huống.",
-        scores: { empathy: 1, understanding: 1 },
+        scores: { empathy: 1, socialAwareness: 1 },
+        pattern: "assumes",
       },
     ],
     practice: {
@@ -1047,7 +1155,8 @@ export const SCENARIOS = [
   },
   {
     id: "EM_04",
-    domain: "empathy",
+    domain: "socialAwareness",
+    weights: { socialAwareness: 1, empathy: 0.5 },
     face: "concerned",
     title: "Không được rủ đi ăn",
     dialogue: [
@@ -1063,7 +1172,8 @@ export const SCENARIOS = [
         text: "Họ cố tình bỏ mình ra ngoài.",
         strategy: "Đọc một sự việc mơ hồ thành ý định xấu",
         consequence: "Bạn đau vì một điều có thể chưa từng xảy ra, và rất khó nói chuyện bình thường lại.",
-        scores: { empathy: 0, understanding: 0 },
+        scores: { socialAwareness: 0, empathy: 0 },
+        pattern: "assumes",
       },
       {
         id: "EM_04_B",
@@ -1071,7 +1181,8 @@ export const SCENARIOS = [
         text: "Mình không biết vì sao, và có thể có nhiều lý do, kể cả lý do không liên quan tới mình.",
         strategy: "Giữ chỗ cho các khả năng khi chưa có thông tin",
         consequence: "Bạn vẫn còn đường để hỏi thay vì phải phòng thủ.",
-        scores: { empathy: 3, understanding: 2 },
+        scores: { socialAwareness: 3, empathy: 2 },
+        pattern: "checks_in",
       },
       {
         id: "EM_04_C",
@@ -1079,7 +1190,8 @@ export const SCENARIOS = [
         text: "Chắc mình ít nói nên người ta không nhớ. Đành vậy.",
         strategy: "Tự nhận một kết luận về bản thân thay vì hỏi",
         consequence: "Bạn biến một chuyện chưa rõ thành một điều về mình, và không hỏi ai cả.",
-        scores: { empathy: 1, understanding: 1 },
+        scores: { socialAwareness: 1, empathy: 1 },
+        pattern: "self_blames",
       },
       {
         id: "EM_04_D",
@@ -1087,7 +1199,8 @@ export const SCENARIOS = [
         text: "Mình thấy tủi, và mình muốn biết thật ra chuyện gì.",
         strategy: "Nhận đúng cảm xúc và có một nhu cầu rõ ràng",
         consequence: "Bạn biết mình cần thông tin, chỉ còn chọn người và cách để hỏi.",
-        scores: { empathy: 2, understanding: 2 },
+        scores: { socialAwareness: 2, empathy: 2 },
+        pattern: "names_feeling",
       },
     ],
     practice: {
@@ -1099,6 +1212,7 @@ export const SCENARIOS = [
   {
     id: "EM_05",
     domain: "empathy",
+    weights: { empathy: 1, communication: 0.5 },
     face: "neutral",
     title: "Bạn đổ lỗi cho đề khó",
     dialogue: [
@@ -1114,7 +1228,8 @@ export const SCENARIOS = [
         text: "“Cậu có học đâu, đừng đổ lỗi cho đề.”",
         strategy: "Nói đúng sự thật nhưng bỏ qua điều bạn ấy đang phải chịu",
         consequence: "Bạn ấy phải phòng thủ bằng cách bảo vệ lời giải thích của mình.",
-        scores: { empathy: 1, relationship: 1 },
+        scores: { empathy: 1, communication: 1 },
+        pattern: "blames",
       },
       {
         id: "EM_05_B",
@@ -1122,7 +1237,8 @@ export const SCENARIOS = [
         text: "“Ừ, đề khó thật”, rồi đổi chủ đề.",
         strategy: "Công nhận cho xong để tránh căng thẳng",
         consequence: "Bạn ấy qua được lúc này và không có gì để nhìn lại.",
-        scores: { empathy: 1, relationship: 2 },
+        scores: { empathy: 1, communication: 2 },
+        pattern: "people_pleases",
       },
       {
         id: "EM_05_C",
@@ -1130,7 +1246,8 @@ export const SCENARIOS = [
         text: "“Tớ hiểu cậu thấy tệ. Tớ thấy mấy hôm nay cậu không học nhiều — cậu muốn tớ nói thật không?”",
         strategy: "Công nhận cảm xúc rồi xin phép trước khi góp ý",
         consequence: "Bạn ấy được giữ thể diện và vẫn có cửa để nghe điều thật.",
-        scores: { empathy: 3, relationship: 3 },
+        scores: { empathy: 3, communication: 3 },
+        pattern: "checks_in",
       },
       {
         id: "EM_05_D",
@@ -1138,7 +1255,8 @@ export const SCENARIOS = [
         text: "Không nói gì về chuyện học, chỉ rủ đi ăn cho khuây.",
         strategy: "Chuyển hướng để giữ không khí",
         consequence: "Buổi đi ăn dễ chịu, còn chuyện học vẫn chưa được nói tới.",
-        scores: { empathy: 1, relationship: 1 },
+        scores: { empathy: 1, communication: 1 },
+        pattern: "avoids",
       },
     ],
     practice: {
@@ -1150,7 +1268,8 @@ export const SCENARIOS = [
   /* ------------------------------------------- quan hệ & xung đột (RS) */
   {
     id: "RS_01",
-    domain: "relationship",
+    domain: "communication",
+    weights: { communication: 1, regulation: 0.5 },
     face: "concerned",
     title: "Bị đổ lỗi cho phần của người khác",
     dialogue: [
@@ -1167,7 +1286,8 @@ export const SCENARIOS = [
         text: "Mở lịch sử chỉnh sửa và nói ngắn gọn: “bản cuối là bạn ấy sửa lúc 10 giờ”.",
         strategy: "Dùng bằng chứng, không dùng giọng điệu",
         consequence: "Sự thật được nói ra mà bạn không phải mở một cuộc đối đầu.",
-        scores: { relationship: 3, regulation: 2 },
+        scores: { communication: 3, regulation: 2 },
+        pattern: "states_need",
       },
       {
         id: "RS_01_B",
@@ -1175,7 +1295,8 @@ export const SCENARIOS = [
         text: "Im lặng nhận cho xong, rồi nói chuyện riêng sau.",
         strategy: "Giữ hoà khí trước mặt cô nhưng không đòi lại sự thật",
         consequence: "Bạn giữ được buổi học yên, và bạn ấy không phải chịu trách nhiệm.",
-        scores: { relationship: 1, regulation: 2 },
+        scores: { communication: 1, regulation: 2 },
+        pattern: "suppresses",
       },
       {
         id: "RS_01_C",
@@ -1183,7 +1304,8 @@ export const SCENARIOS = [
         text: "Nói: “cậu xem lại đi, rõ ràng cậu làm hỏng rồi”.",
         strategy: "Đúng về sự việc nhưng đẩy mâu thuẫn lên trước người khác",
         consequence: "Bạn có thể đúng và đồng thời làm cả nhóm phải đứng về một phía.",
-        scores: { relationship: 1, regulation: 1 },
+        scores: { communication: 1, regulation: 1 },
+        pattern: "blames",
       },
       {
         id: "RS_01_D",
@@ -1191,7 +1313,8 @@ export const SCENARIOS = [
         text: "Cười cho qua, rồi về kể hết chuyện này cho cả lớp.",
         strategy: "Xử lý ngoài mặt tình huống",
         consequence: "Câu chuyện lan ra ngoài phạm vi nhóm và khó sửa hơn nhiều.",
-        scores: { relationship: 0, regulation: 0 },
+        scores: { communication: 0, regulation: 0 },
+        pattern: "vents",
       },
     ],
     practice: {
@@ -1202,7 +1325,8 @@ export const SCENARIOS = [
   },
   {
     id: "RS_02",
-    domain: "relationship",
+    domain: "communication",
+    weights: { communication: 1, regulation: 0.5 },
     face: "concerned",
     title: "Chia việc không đều",
     dialogue: [
@@ -1218,7 +1342,8 @@ export const SCENARIOS = [
         text: "Nhận hết cho xong, kệ mọi người.",
         strategy: "Giữ việc chạy bằng cách tự chịu thiệt",
         consequence: "Bài xong nhưng bạn giữ cơn bực và cách chia này sẽ lặp lại.",
-        scores: { relationship: 0, regulation: 1 },
+        scores: { communication: 0, regulation: 1 },
+        pattern: "people_pleases",
       },
       {
         id: "RS_02_B",
@@ -1226,7 +1351,8 @@ export const SCENARIOS = [
         text: "Nói với nhóm trưởng: “tớ đang làm phần của cả hai người, mình chia lại việc được không?”",
         strategy: "Nói về tải công việc, không nói về con người",
         consequence: "Vấn đề được đặt ra ở dạng sửa được, không ở dạng buộc tội.",
-        scores: { relationship: 3, regulation: 3 },
+        scores: { communication: 3, regulation: 3 },
+        pattern: "states_need",
       },
       {
         id: "RS_02_C",
@@ -1234,7 +1360,8 @@ export const SCENARIOS = [
         text: "Nhắn riêng cho bạn kia rằng bạn ấy lười và đang làm chậm cả nhóm.",
         strategy: "Đưa phán xét về con người vào cuộc",
         consequence: "Bạn ấy phòng thủ, và cuộc nói chuyện thành chuyện bạn ấy là người thế nào.",
-        scores: { relationship: 0, regulation: 1 },
+        scores: { communication: 0, regulation: 1 },
+        pattern: "blames",
       },
       {
         id: "RS_02_D",
@@ -1242,7 +1369,8 @@ export const SCENARIOS = [
         text: "Chờ tới khi nộp bài rồi nói thẳng trong phần đánh giá nhóm.",
         strategy: "Để tới lúc kết thúc mới nói",
         consequence: "Bạn không còn cơ hội để thay đổi tình huống, chỉ còn cơ hội để trả đũa.",
-        scores: { relationship: 1, regulation: 1 },
+        scores: { communication: 1, regulation: 1 },
+        pattern: "avoids",
       },
     ],
     practice: {
@@ -1254,6 +1382,7 @@ export const SCENARIOS = [
   {
     id: "RS_03",
     domain: "relationship",
+    weights: { relationship: 1, regulation: 0.5 },
     face: "concerned",
     title: "Bạn vay tiền chưa trả",
     dialogue: [
@@ -1271,6 +1400,7 @@ export const SCENARIOS = [
         strategy: "Dùng sức ép xã hội để đòi lại",
         consequence: "Bạn có thể lấy lại tiền và chắc chắn mất quan hệ, cùng với uy tín của mình.",
         scores: { relationship: 0, regulation: 1 },
+        pattern: "escalates",
       },
       {
         id: "RS_03_B",
@@ -1279,6 +1409,7 @@ export const SCENARIOS = [
         strategy: "Cắt quan hệ thay vì nói ra ranh giới",
         consequence: "Bạn không phải nhắc nữa và vẫn không cho bạn ấy biết điều gì đã hỏng.",
         scores: { relationship: 1, regulation: 1 },
+        pattern: "avoids",
       },
       {
         id: "RS_03_C",
@@ -1287,6 +1418,7 @@ export const SCENARIOS = [
         strategy: "Nói rõ yêu cầu và mốc thời gian",
         consequence: "Bạn ấy biết chính xác cần làm gì, và bạn không phải nhắc lại nhiều lần.",
         scores: { relationship: 3, regulation: 3 },
+        pattern: "states_need",
       },
       {
         id: "RS_03_D",
@@ -1295,6 +1427,7 @@ export const SCENARIOS = [
         strategy: "Giảm căng thẳng nhưng để yêu cầu mờ",
         consequence: "Cuộc nói chuyện dễ chịu hơn, và có thể bạn vẫn chưa nhận được tiền.",
         scores: { relationship: 2, regulation: 2 },
+        pattern: "hints",
       },
     ],
     practice: {
@@ -1306,6 +1439,7 @@ export const SCENARIOS = [
   {
     id: "RS_04",
     domain: "relationship",
+    weights: { relationship: 1, regulation: 0.5 },
     face: "concerned",
     title: "Đã nói nặng lời lúc tức",
     dialogue: [
@@ -1322,6 +1456,7 @@ export const SCENARIOS = [
         strategy: "Để thời gian quyết định thay mình",
         consequence: "Cả hai cùng chờ, và khoảng cách lớn dần theo số ngày.",
         scores: { relationship: 1, regulation: 1 },
+        pattern: "avoids",
       },
       {
         id: "RS_04_B",
@@ -1330,6 +1465,7 @@ export const SCENARIOS = [
         strategy: "Sửa đúng điều mình đã gây ra, không kèm lý do",
         consequence: "Bạn ấy nhận được điều cần nhận, và cánh cửa nói tiếp được mở.",
         scores: { relationship: 3, regulation: 3 },
+        pattern: "repairs",
       },
       {
         id: "RS_04_C",
@@ -1338,6 +1474,7 @@ export const SCENARIOS = [
         strategy: "Xin hoà mà không nhận phần của mình",
         consequence: "Bạn ấy được đề nghị bỏ qua một chuyện mà bạn chưa nhận là mình gây ra.",
         scores: { relationship: 1, regulation: 2 },
+        pattern: "hints",
       },
       {
         id: "RS_04_D",
@@ -1346,6 +1483,7 @@ export const SCENARIOS = [
         strategy: "Sửa bằng hành động mà không có lời",
         consequence: "Không khí dịu lại, nhưng câu nói hôm qua vẫn chưa được nhắc tới.",
         scores: { relationship: 2, regulation: 1 },
+        pattern: "repairs",
       },
     ],
     practice: {
@@ -1356,7 +1494,8 @@ export const SCENARIOS = [
   },
   {
     id: "RS_05",
-    domain: "relationship",
+    domain: "communication",
+    weights: { communication: 1, regulation: 0.5 },
     face: "thinking",
     title: "Bị rủ trốn tiết",
     dialogue: [
@@ -1372,7 +1511,8 @@ export const SCENARIOS = [
         text: "Đi cho vui, dù trong lòng thấy không ổn.",
         strategy: "Mua sự thuộc về bằng một việc mình không muốn",
         consequence: "Bạn ở cùng họ hôm nay và tự đặt giá cho lần sau.",
-        scores: { relationship: 0, regulation: 1 },
+        scores: { communication: 0, regulation: 1 },
+        pattern: "people_pleases",
       },
       {
         id: "RS_05_B",
@@ -1380,7 +1520,8 @@ export const SCENARIOS = [
         text: "Nói: “tớ không trốn được”, rồi rủ họ đi cùng vào cuối tuần.",
         strategy: "Từ chối việc, không từ chối người",
         consequence: "Bạn giữ được ranh giới mà không phải rời khỏi nhóm.",
-        scores: { relationship: 3, regulation: 3 },
+        scores: { communication: 3, regulation: 3 },
+        pattern: "sets_boundary",
       },
       {
         id: "RS_05_C",
@@ -1388,7 +1529,8 @@ export const SCENARIOS = [
         text: "Từ chối thẳng: “tớ không tham gia mấy chuyện này”.",
         strategy: "Giữ ranh giới nhưng đặt mình lên trên họ",
         consequence: "Ranh giới được giữ, và bạn bị nghe thành người đang phán xét.",
-        scores: { relationship: 2, regulation: 2 },
+        scores: { communication: 2, regulation: 2 },
+        pattern: "sets_boundary",
       },
       {
         id: "RS_05_D",
@@ -1396,7 +1538,8 @@ export const SCENARIOS = [
         text: "Im lặng rồi tự bỏ về, không nói gì.",
         strategy: "Rời khỏi mà không cho họ một thông tin nào",
         consequence: "Bạn không phải giải thích, và họ tự viết lý do cho việc bạn rời đi.",
-        scores: { relationship: 1, regulation: 1 },
+        scores: { communication: 1, regulation: 1 },
+        pattern: "avoids",
       },
     ],
     practice: {
@@ -1407,7 +1550,8 @@ export const SCENARIOS = [
   },
   {
     id: "RS_06",
-    domain: "relationship",
+    domain: "communication",
+    weights: { communication: 1, regulation: 0.5 },
     face: "concerned",
     title: "Nhận xét tiêu cực trước lớp",
     dialogue: [
@@ -1423,7 +1567,8 @@ export const SCENARIOS = [
         text: "Nhận lỗi và im, rồi về nhà tự học lại từ đầu.",
         strategy: "Thu mình lại và tự chịu",
         consequence: "Bạn có thể làm lại nhưng không biết mình cần sửa đúng chỗ nào.",
-        scores: { relationship: 1, regulation: 1 },
+        scores: { communication: 1, regulation: 1 },
+        pattern: "self_blames",
       },
       {
         id: "RS_06_B",
@@ -1431,7 +1576,8 @@ export const SCENARIOS = [
         text: "Nói lại trước lớp rằng mình đã làm rất kỹ phần đó.",
         strategy: "Bảo vệ công sức bằng cách mở một cuộc tranh luận",
         consequence: "Bạn biến buổi học thành chỗ phân xử, và thầy thành người phải thắng.",
-        scores: { relationship: 0, regulation: 0 },
+        scores: { communication: 0, regulation: 0 },
+        pattern: "escalates",
       },
       {
         id: "RS_06_C",
@@ -1439,7 +1585,8 @@ export const SCENARIOS = [
         text: "Hỏi lại cụ thể trong giờ: “em yếu ở chỗ lập luận hay chỗ dẫn chứng ạ?”",
         strategy: "Biến một nhận xét chung thành thông tin dùng được",
         consequence: "Bạn ra khỏi buổi học với một việc cụ thể cần sửa.",
-        scores: { relationship: 3, regulation: 3 },
+        scores: { communication: 3, regulation: 3 },
+        pattern: "checks_in",
       },
       {
         id: "RS_06_D",
@@ -1447,7 +1594,8 @@ export const SCENARIOS = [
         text: "Coi như thầy không hiểu ý mình, rồi làm lại theo cách cũ.",
         strategy: "Giữ nguyên và không lấy được gì từ nhận xét",
         consequence: "Bạn bảo vệ được cảm giác của mình và mất luôn thông tin trong lời góp ý.",
-        scores: { relationship: 0, regulation: 1 },
+        scores: { communication: 0, regulation: 1 },
+        pattern: "assumes",
       },
     ],
     practice: {
@@ -1457,6 +1605,9 @@ export const SCENARIOS = [
     },
   },
 ]
+
+/** Ngân hàng đầy đủ: 28 tình huống gốc + tình huống bổ sung cho sáu kỹ năng (scenariosMore.js). */
+export const SCENARIOS = [...BASE_SCENARIOS, ...MORE_SCENARIOS]
 
 export const SCENARIO_BY_ID = Object.fromEntries(SCENARIOS.map((s) => [s.id, s]))
 

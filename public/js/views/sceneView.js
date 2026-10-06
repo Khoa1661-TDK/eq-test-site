@@ -1,36 +1,21 @@
-/* sceneView.js — view cho route /scenes: "Một tuần ở nhóm dự án".
-   Năm cảnh nối nhau, mỗi cảnh một quyết định. Sau mỗi quyết định: hậu quả diễn
-   trên stage, rồi một khung phản hồi ngắn (người chơi tự bấm Tiếp tục).
-   Cuối chuỗi: hồ sơ sáu kỹ năng (thanh đo, điểm mạnh, điểm cần luyện, mẹo
-   luyện cho từng kỹ năng) và so sánh với lần chơi trước nếu có.
+/* sceneView.js — view cho route /scenes: "Một tuần ở lớp" — chế độ LUYỆN bằng cảnh động.
+   Các cảnh nối nhau, mỗi cảnh một quyết định. Sau mỗi quyết định: hậu quả diễn trên
+   stage, rồi một khung phản hồi (người chơi tự bấm Tiếp tục). Cuối tuần: nhìn lại từng
+   cảnh, cách mạnh hơn, và kỹ năng mà mỗi cảnh luyện.
+
+   Chỉ dùng cảnh của kho luyện (không trùng hai đề đánh giá), và chỉ ghi lượt luyện:
+   điểm sáu kỹ năng đến từ bài đánh giá, nơi có cả tình huống chữ lẫn cảnh động.
    Tái dùng console.js / choices.js / typewriter.js / sound.js qua sceneRuntime. */
 
 import { el, frame } from "../core/dom.js"
 import { soundToggle } from "../core/sound.js"
 import { createSceneRuntime } from "../scene/sceneRuntime.js"
-import { SCENE_SCENARIOS } from "../data/sceneScenarios.js"
-import { scoreStory } from "../data/storySkills.js"
-import { meterCells } from "../ui/meter.js"
+import { EQ_BY_KEY } from "../data/eqDimensions.js"
+import { ITEMS, ITEM_BY_ID, PRACTICE_IDS, hasResult, recordPractice, strongestChoice } from "../core/eqScoring.js"
 
-const LAST_RUN_KEY = "eq_story_last_v1"
-
-function loadLastRun() {
-  try {
-    const raw = localStorage.getItem(LAST_RUN_KEY)
-    const parsed = raw ? JSON.parse(raw) : null
-    return parsed && typeof parsed === "object" ? parsed : null
-  } catch {
-    return null
-  }
-}
-
-function saveRun(skills) {
-  try {
-    const pcts = Object.fromEntries(skills.map((s) => [s.key, s.pct]))
-    localStorage.setItem(LAST_RUN_KEY, JSON.stringify({ at: new Date().toISOString(), pcts }))
-  } catch {
-    /* bộ nhớ trình duyệt bị chặn: vẫn hiện kết quả, chỉ không so sánh được lần sau */
-  }
+function storyScenes() {
+  const pool = PRACTICE_IDS.map((id) => ITEM_BY_ID[id]).filter((item) => item?.kind === "scene")
+  return pool.length ? pool : ITEMS.filter((item) => item.kind === "scene")
 }
 
 function button(text, { primary = false, onClick } = {}) {
@@ -44,7 +29,8 @@ function button(text, { primary = false, onClick } = {}) {
 }
 
 export function renderSceneView(mount, { navigate } = {}) {
-  const total = SCENE_SCENARIOS.length
+  const scenes = storyScenes()
+  const total = scenes.length
   const wrap = el("div", { class: "scene-view" })
 
   const hud = el("div", { class: "scene-hud" })
@@ -83,24 +69,24 @@ export function renderSceneView(mount, { navigate } = {}) {
     const card = el(
       "div",
       { class: "story-intro" },
-      el("p", { class: "story-kicker", text: "Chế độ câu chuyện" }),
-      el("h1", { class: "story-title", text: "Một tuần ở nhóm dự án" }),
+      el("p", { class: "story-kicker", text: "Luyện bằng cảnh động" }),
+      el("h1", { class: "story-title", text: "Một tuần ở lớp" }),
       el("p", {
         class: "prose",
-        text: `Bạn vừa vào một nhóm dự án mới. Trong ${total} ngày tới sẽ có ${total} tình huống khó. Mỗi tình huống, bạn chọn một cách phản ứng và xem điều gì xảy ra tiếp theo.`,
+        text: `Tuần này có ${total} tình huống khó ở trường. Mỗi tình huống, bạn chọn một cách phản ứng rồi xem điều gì xảy ra tiếp theo — các nhân vật sẽ diễn lại hậu quả.`,
       }),
       el("p", {
         class: "prose",
-        text: "Cuối tuần, bạn sẽ thấy mình đang mạnh và yếu ở đâu trong sáu kỹ năng cảm xúc, kèm một cách luyện cụ thể cho từng kỹ năng. Không có “kiểu người” nào ở đây cả: chỉ có kỹ năng, và kỹ năng thì luyện được.",
+        text: "Sau mỗi cảnh, bạn thấy cách mình vừa chọn dẫn tới đâu và cách nào mạnh hơn. Đây là phần luyện tập: không chấm điểm, chỉ ghi lại bạn đã luyện kỹ năng nào để so sánh ở lần đánh giá sau.",
       }),
-      el("p", { class: "story-actions" }, button("Bắt đầu thứ Hai", { primary: true, onClick: () => loadScenario(0) })),
+      el("p", { class: "story-actions" }, button("Bắt đầu", { primary: true, onClick: () => loadScenario(0) })),
     )
     stageHost.replaceChildren(frame(card, { size: "lg" }))
   }
 
   function loadScenario(i) {
     idx = i
-    const scenario = SCENE_SCENARIOS[i]
+    const scenario = scenes[i]
     countEl.textContent = `Cảnh ${i + 1}/${total}`
     setProgress(i)
     if (runtime) runtime.destroy()
@@ -109,6 +95,7 @@ export function renderSceneView(mount, { navigate } = {}) {
     runtime = createSceneRuntime(stageHost, scenario, {
       onAnswer(id) {
         answers[i] = id
+        recordPractice(scenario.id, id)
       },
       onDone() {
         setProgress(i + 1)
@@ -119,10 +106,11 @@ export function renderSceneView(mount, { navigate } = {}) {
   }
 
   function showFeedback() {
-    const scenario = SCENE_SCENARIOS[idx]
+    const scenario = scenes[idx]
     const choice = scenario.choices.find((c) => c.id === answers[idx])
+    const best = strongestChoice(scenario)
     const last = idx + 1 >= total
-    const next = button(last ? "Xem hồ sơ kỹ năng" : "Sang ngày tiếp theo →", {
+    const next = button(last ? "Nhìn lại cả tuần" : "Sang cảnh tiếp theo →", {
       primary: true,
       onClick: () => (last ? finish() : loadScenario(idx + 1)),
     })
@@ -136,7 +124,7 @@ export function renderSceneView(mount, { navigate } = {}) {
           el("p", { class: "scene-tip__title", text: "Điều vừa xảy ra" }),
           el("p", { class: "scene-tip__body", text: choice ? choice.consequence : "" }),
           choice ? el("p", { class: "scene-tip__body scene-tip__dim", text: choice.strategy }) : null,
-          scenario.practice ? el("p", { class: "scene-tip__title", text: "Nhìn lại" }) : null,
+          el("p", { class: "scene-tip__title", text: choice?.id === best.id ? "Bạn đã chọn cách mạnh nhất" : "Nhìn lại" }),
           scenario.practice ? el("p", { class: "scene-tip__body", text: scenario.practice.stronger }) : null,
           el("p", { class: "story-actions" }, next),
         ),
@@ -153,80 +141,42 @@ export function renderSceneView(mount, { navigate } = {}) {
       runtime.destroy()
       runtime = null
     }
-    countEl.textContent = "Hồ sơ kỹ năng"
+    countEl.textContent = "Nhìn lại cả tuần"
     setProgress(total)
 
-    const previous = loadLastRun()
-    const { skills, strengths, weaknesses } = scoreStory(SCENE_SCENARIOS, answers)
-    saveRun(skills)
-
-    const rows = skills.map((s) => {
-      const prev = previous?.pcts?.[s.key]
-      const delta = Number.isFinite(prev) ? s.pct - prev : null
+    let strongest = 0
+    const rows = scenes.map((scene, i) => {
+      const choice = scene.choices.find((c) => c.id === answers[i])
+      const best = strongestChoice(scene)
+      const nailed = choice?.id === best.id
+      if (nailed) strongest += 1
+      const skill = EQ_BY_KEY[scene.domain]
       return el(
         "li",
         { class: "story-skill" },
         el(
           "div",
           { class: "meter__head" },
-          el("span", { class: "story-skill__name", text: s.name }),
-          el(
-            "span",
-            { class: "meter__val" },
-            String(s.pct),
-            el("small", { text: "/100" }),
-            delta ? el("small", { class: delta > 0 ? "story-delta is-up" : "story-delta is-down", text: `${delta > 0 ? "+" : ""}${delta}` }) : null,
-          ),
+          el("span", { class: "story-skill__name", text: scene.title }),
+          el("span", { class: nailed ? "story-delta is-up" : "story-delta", text: nailed ? "cách mạnh nhất" : "còn cách mạnh hơn" }),
         ),
-        meterCells(s.pct, 100),
-        el("p", { class: "story-skill__short", text: s.short }),
-        el("p", { class: "story-skill__tip" }, el("strong", { text: "Luyện: " }), s.tip),
+        el("p", { class: "story-skill__short", text: `Luyện: ${skill?.name ?? scene.domain}` }),
+        choice ? el("p", { class: "story-skill__short" }, el("strong", { text: "Bạn chọn: " }), choice.text) : null,
+        nailed ? null : el("p", { class: "story-skill__tip" }, el("strong", { text: "Cách mạnh hơn: " }), best.text),
+        scene.practice?.principle ? el("p", { class: "story-skill__tip" }, el("strong", { text: "Nhớ: " }), scene.practice.principle) : null,
       )
     })
-
-    const card = (title, list, kind) =>
-      frame(
-        el(
-          "div",
-          { class: `story-card story-card--${kind}` },
-          el("h2", { class: "story-card__title", text: title }),
-          list.length
-            ? null
-            : el("p", {
-                class: "prose",
-                text:
-                  kind === "strong"
-                    ? "Tuần này chưa có kỹ năng nào nổi bật hẳn. Bắt đầu với một kỹ năng ở cột bên cạnh là đủ."
-                    : "Không có kỹ năng nào thấp rõ rệt trong tuần này. Thử chế độ Luyện EQ để giữ phong độ ở các tình huống khác.",
-              }),
-          ...list.map((s) =>
-            el(
-              "div",
-              { class: "story-card__item" },
-              el("p", { class: "story-card__name", text: `${s.name} · ${s.pct}/100` }),
-              el("p", { class: "prose", text: kind === "strong" ? s.strong : s.weak }),
-              kind === "weak" ? el("p", { class: "story-skill__tip" }, el("strong", { text: "Mẹo luyện: " }), s.tip) : null,
-            ),
-          ),
-        ),
-        { size: "lg" },
-      )
 
     const result = el(
       "div",
       { class: "story-result" },
       el("p", { class: "story-kicker", text: "Hết tuần" }),
-      el("h1", { class: "story-title", text: "Hồ sơ sáu kỹ năng cảm xúc của bạn" }),
+      el("h1", { class: "story-title", text: `Bạn chọn cách mạnh nhất ở ${strongest}/${total} cảnh` }),
       el("p", {
         class: "prose",
-        text: previous
-          ? "Điểm dựa trên năm quyết định bạn vừa chọn. Số nhỏ bên cạnh là thay đổi so với lần chơi trước."
-          : "Điểm dựa trên năm quyết định bạn vừa chọn. Đây là ảnh chụp cách bạn phản ứng trong tuần này, không phải nhãn cố định: chơi lại sau khi luyện để xem mình tiến bộ ra sao.",
+        text: "Đây là phần luyện tập nên không có điểm. Muốn biết sáu kỹ năng của mình đang ở đâu và đã tiến bộ ra sao, hãy làm bài đánh giá — trong đó cũng có cảnh động.",
       }),
-      el("div", { class: "story-cards" }, card("Điểm mạnh", strengths, "strong"), card("Nên luyện tiếp", weaknesses, "weak")),
-      frame(el("div", { class: "story-skills-wrap" }, el("h2", { class: "story-card__title", text: "Sáu kỹ năng" }), el("ul", { class: "story-skills" }, rows)), {
-        size: "lg",
-      }),
+      frame(el("div", { class: "story-skills-wrap" }, el("h2", { class: "story-card__title", text: "Từng cảnh" }), el("ul", { class: "story-skills" }, rows)), { size: "lg" }),
       el(
         "p",
         { class: "story-actions" },
@@ -237,13 +187,10 @@ export function renderSceneView(mount, { navigate } = {}) {
             loadScenario(0)
           },
         }),
+        button(hasResult() ? "Đánh giá lại" : "Làm bài đánh giá", { onClick: () => navigate("/assessment") }),
         button("Luyện thêm tình huống", { onClick: () => navigate("/practice") }),
-        button("Trang chủ", { onClick: () => navigate("/") }),
       ),
-      el("p", {
-        class: "story-note",
-        text: "Đây là công cụ học tập, không phải thang đo tâm lý đã được kiểm định.",
-      }),
+      el("p", { class: "story-note", text: "Đây là công cụ học tập, không phải thang đo tâm lý đã được kiểm định." }),
     )
     stageHost.replaceChildren(result)
     window.scrollTo({ top: 0, behavior: "auto" })

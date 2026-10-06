@@ -656,3 +656,110 @@
     transition: none;
   }
 }
+/* ------------------------------------------- bằng chứng · so sánh · mẫu lặp ----- */
+.pair__item {
+  display: grid;
+  gap: var(--gap-2);
+}
+
+.pair__item + .pair__item {
+  margin-top: var(--gap-4);
+  padding-top: var(--gap-4);
+  border-top: 2px dashed var(--paper-3);
+}
+
+.evidence {
+  display: grid;
+  gap: var(--gap-3);
+  margin: var(--gap-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.evidence__item {
+  display: grid;
+  gap: 4px;
+  padding: var(--gap-3);
+  background: var(--paper-2);
+  border-left: 3px solid var(--amber);
+  font-family: var(--font-text);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink-2);
+}
+
+.evidence__title {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--ink);
+}
+
+.evidence__why {
+  color: var(--ink-3);
+  font-style: italic;
+}
+
+.changes {
+  display: grid;
+  gap: var(--gap-3);
+  margin: var(--gap-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.change {
+  display: grid;
+  gap: var(--gap-2);
+  padding: var(--gap-3) var(--gap-4);
+  background: var(--paper);
+  border: 3px solid var(--paper-3);
+}
+
+.change__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--gap-3);
+}
+
+.change__name {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--ink);
+  flex: 1 1 12ch;
+}
+
+.change__nums {
+  font-family: var(--font-pixel);
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-2);
+}
+
+.change__reps {
+  font-family: var(--font-text);
+  font-size: 14.5px;
+  color: var(--ink-3);
+}
+
+.pattern {
+  display: grid;
+  gap: var(--gap-2);
+  margin-top: var(--gap-4);
+  padding: var(--gap-4);
+  background: var(--paper);
+  border: 3px solid var(--paper-3);
+}
+
+.skill--focus {
+  outline: 3px solid var(--amber);
+  outline-offset: 2px;
+}
+
+@media (max-width: 720px) {
+  .pair {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

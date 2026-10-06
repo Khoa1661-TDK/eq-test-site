@@ -12,7 +12,8 @@ import { el } from "../core/dom.js"
 import { prefersReducedMotion, onMotionChange, beat, TIMING } from "../core/motion.js"
 import { sound } from "../core/sound.js"
 import { rateFor } from "../core/typewriter.js"
-import { CHARACTERS, createSpriteSet } from "./sprites.js"
+import { CHARACTERS, CHARACTER_PALETTES, createSpriteSet } from "./sprites.js"
+import { environmentSVG } from "./environments.js"
 import { createConsole } from "../ui/console.js"
 import { createChoiceList } from "../ui/choices.js"
 
@@ -40,6 +41,7 @@ const ACTIONS = {
   point(c, { dir = "right" }, sc) { c.face(dir) },
   lookAt(c, { target }, sc) { c.lookAt(sc.charX(target)) },
   turn(c, { dir }, sc) { c.face(dir) },
+  face(c, { dir }, sc) { c.face(dir) },
   happy(c) { c.react("happy"); c.setMood("happy") },
   sad(c) { c.react("sad"); c.setMood("sad") },
   angry(c) { c.react("angry"); c.setMood("annoyed") },
@@ -96,7 +98,7 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
     if (!frames) continue
     const node = el("div", { class: "scn-char", attrs: { style: `left:${spec.x}px` } })
     const spriteBox = el("div", { class: "scn-char__sprite" })
-    const set = createSpriteSet(spriteBox, frames)
+    const set = createSpriteSet(spriteBox, frames, CHARACTER_PALETTES[spec.id])
     const bubble = el("div", { class: "scn-bubble", attrs: { hidden: true, "aria-hidden": "true" } })
     node.append(bubble, spriteBox)
     charLayer.append(node)
@@ -500,81 +502,9 @@ function makeCharCtrl(node, spriteSet, bubble, spec) {
    Phòng họp pixel tự vẽ (SVG) + lớp chuyển động phụ: quạt quay, đồng hồ,
    màn hình nhấp, đèn bàn. Tất cả bằng CSS animation (transform/opacity). */
  function buildEnvironment(envLayer, envName) {
-   const svg = environmentSVG(envName)
+   const svg = environmentSVG(envName, { STAGE_W, STAGE_H, GROUND_Y })
    envLayer.innerHTML = svg
    // lớp chuyển động phụ (mưa, màn hình, khói, đồng hồ) chạy bằng CSS animation.
  }
 
-function environmentSVG(name) {
-  /* Phòng họp: tường giấy, cửa sổ mưa nhẹ, bảng trắng, bàn họp, ghế, cây,
-     đồng hồ, màn hình máy tính nhấp nhẹ. Toàn bộ vẽ tay bằng rect SVG. */
-  const w = STAGE_W, h = STAGE_H
-  const r = []
-  const rect = (x, y, wd, ht, fill, extra = "") =>
-    r.push(`<rect x="${x}" y="${y}" width="${wd}" height="${ht}" fill="${fill}" ${extra}/>`)
-  // tường + sàn
-  rect(0, 0, w, GROUND_Y, "#e9e5d9")
-  rect(0, GROUND_Y, w, h - GROUND_Y, "#cfc9b6")
-  rect(0, GROUND_Y - 4, w, 4, "#b8b19c")
-  // cửa sổ (trái) với trời xám + mưa
-  rect(14, 22, 64, 56, "#31556b")
-  rect(18, 26, 56, 48, "#5f7b8f")
-  rect(18, 26, 56, 24, "#7d95a8")
-  // mây mưa
-  r.push(`<g class="scn-rain" fill="#9fb4c4">
-    <rect x="24" y="34" width="10" height="3"/>
-    <rect x="44" y="30" width="12" height="3"/>
-    <rect x="60" y="38" width="8" height="3"/>
-    <rect x="30" y="50" width="12" height="3"/>
-    <rect x="52" y="56" width="10" height="3"/>
-  </g>`)
-  // khung cửa sổ
-  rect(14, 22, 64, 3, "#16181c")
-  rect(14, 75, 64, 3, "#16181c")
-  rect(14, 22, 3, 56, "#16181c")
-  rect(75, 22, 3, 56, "#16181c")
-  rect(44, 22, 3, 56, "#16181c")
-  // đồng hồ (trần phải)
-  r.push(`<g class="scn-clock">
-    <circle cx="292" cy="34" r="12" fill="#f4efe2" stroke="#16181c" stroke-width="2"/>
-    <rect x="291" y="26" width="2" height="9" fill="#16181c"/>
-    <rect x="292" y="33" width="7" height="2" fill="#16181c"/>
-  </g>`)
-  // bảng trắng (giữa)
-  rect(120, 26, 96, 54, "#f4efe2")
-  rect(120, 26, 96, 54, "none", `stroke="#16181c" stroke-width="2"`)
-  rect(128, 36, 52, 3, "#8f9aa6")
-  rect(128, 44, 64, 3, "#8f9aa6")
-  rect(128, 52, 44, 3, "#8f9aa6")
-  rect(128, 60, 58, 3, "#b8b19c")
-  // máy tính + màn hình nhấp (trên bàn)
-  rect(236, 60, 40, 28, "#16181c")
-  r.push(`<rect class="scn-screen" x="239" y="63" width="34" height="22" fill="#3a6f8f"/>`)
-  rect(239, 67, 20, 2, "#e9e5d9")
-  rect(239, 72, 26, 2, "#e9e5d9")
-  rect(252, 88, 14, 4, "#16181c")
-  // bàn họp
-  rect(108, 108, 168, 10, "#7a5c3e")
-  rect(112, 118, 8, 40, "#5d4530")
-  rect(260, 118, 8, 40, "#5d4530")
-  // ly cà phê + khói
-  rect(124, 98, 12, 10, "#4f6033")
-  r.push(`<g class="scn-steam" fill="#e9e5d9">
-    <rect x="127" y="90" width="3" height="4"/>
-    <rect x="131" y="86" width="3" height="4"/>
-    <rect x="128" y="81" width="3" height="4"/>
-  </g>`)
-  // cây (phải)
-  rect(296, 96, 16, 22, "#7a5c3e")
-  rect(292, 74, 24, 24, "#4f6033")
-  rect(296, 66, 16, 12, "#6b8047")
-  // ghế (2 chiếc)
-  rect(150, 128, 26, 8, "#3a3f47")
-  rect(154, 136, 4, 22, "#2f343d")
-  rect(168, 136, 4, 22, "#2f343d")
-  rect(200, 128, 26, 8, "#3a3f47")
-  rect(204, 136, 4, 22, "#2f343d")
-  rect(218, 136, 4, 22, "#2f343d")
-  return `<svg class="scn-env__svg" viewBox="0 0 ${w} ${h}" shape-rendering="crispEdges" aria-hidden="true">${r.join("")}</svg>`
-}
 
