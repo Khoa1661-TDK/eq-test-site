@@ -286,3 +286,126 @@
     animation: none !important;
   }
 }
+
+/* ------------------------------------------------------------------ chế độ câu chuyện
+   Màn mở đầu, nút trong khung phản hồi, và hồ sơ sáu kỹ năng cuối tuần. */
+.story-intro,
+.story-skills-wrap,
+.story-card {
+  padding: 22px;
+}
+.story-kicker {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--olive);
+  margin: 0 0 4px;
+}
+.story-title {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: clamp(28px, 5vw, 40px);
+  line-height: 1.05;
+  margin: 0 0 var(--gap-3);
+}
+.story-intro .prose + .prose {
+  margin-top: var(--gap-3);
+}
+.story-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-3);
+  margin: var(--gap-4) 0 0;
+}
+.scene-tip__dim {
+  color: var(--ink-3);
+  font-style: italic;
+}
+
+.story-result {
+  display: grid;
+  gap: var(--gap-5);
+}
+.story-result > .prose {
+  margin-top: calc(var(--gap-3) * -1);
+}
+.story-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--gap-4);
+  align-items: start;
+}
+.story-card__title {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 24px;
+  margin: 0 0 var(--gap-3);
+}
+.story-card--strong .story-card__title { color: var(--olive); }
+.story-card--weak .story-card__title { color: var(--crimson); }
+.story-card__item + .story-card__item {
+  margin-top: var(--gap-4);
+  padding-top: var(--gap-4);
+  border-top: 3px solid var(--paper-3);
+}
+.story-card__name {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 20px;
+  margin: 0 0 4px;
+}
+
+.story-skills {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--gap-5) var(--gap-6);
+}
+.story-skill {
+  display: grid;
+  gap: 6px;
+}
+.story-skill__name {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 20px;
+}
+.story-skill__short {
+  margin: 0;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+.story-skill__tip {
+  margin: 4px 0 0;
+  font-size: 14px;
+  line-height: 1.45;
+  background: var(--paper-2);
+  border-left: 4px solid var(--amber);
+  padding: 6px 10px;
+}
+.story-delta {
+  font-weight: 700;
+}
+.story-delta.is-up { color: var(--olive); }
+.story-delta.is-down { color: var(--crimson); }
+.story-note {
+  font-size: 13px;
+  color: var(--ink-3);
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .story-cards,
+  .story-skills {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .story-intro,
+  .story-skills-wrap,
+  .story-card {
+    padding: 16px;
+  }
+}

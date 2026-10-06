@@ -329,6 +329,8 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
     stage.style.height = `${STAGE_H}px`
     stage.style.transform = `scale(${stageScale})`
     stage.style.transformOrigin = "top left"
+    // căn giữa stage khi khung rộng hơn mức phóng tối đa
+    stage.style.left = `${Math.max(0, (w - STAGE_W * stageScale) / 2)}px`
     stageWrap.style.height = `${STAGE_H * stageScale + 8}px`
   }
   const ro = new ResizeObserver(() => resize())
