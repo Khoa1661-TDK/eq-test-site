@@ -1,0 +1,323 @@
+{
+  "url": "http://127.0.0.1:8787",
+  "at": "2026-10-06T12:42:45.088Z",
+  "passed": 59,
+  "failed": 0,
+  "failures": [],
+  "journal": [
+    {
+      "name": "trang chủ hiển thị tiêu đề",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "bảng xếp hạng có 25 kiểu thường",
+      "ok": true,
+      "detail": "25 dòng"
+    },
+    {
+      "name": "không tràn ngang (trang chủ)",
+      "ok": true,
+      "detail": "1440/1440"
+    },
+    {
+      "name": "màn mở đầu không lộ khung thoại rỗng",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "công tắc âm thanh tắt được và ghi nhớ",
+      "ok": true,
+      "detail": "on→off/off"
+    },
+    {
+      "name": "công tắc âm thanh có aria-pressed đúng",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "bật lại âm thanh được",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "câu hỏi tải và bắt đầu gõ chữ",
+      "ok": true,
+      "detail": "state=DIALOGUE_TYPING"
+    },
+    {
+      "name": "chữ đang hiện dần (chưa đủ)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "bấm khi đang gõ → hiện hết chữ ngay",
+      "ok": true,
+      "detail": "16 → 89"
+    },
+    {
+      "name": "bấm khi đang gõ → KHÔNG nhảy sang đoạn kế",
+      "ok": true,
+      "detail": "state=DIALOGUE_READY/DIALOGUE_READY"
+    },
+    {
+      "name": "dấu nhắc tiếp tục hiện đúng lúc",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "đoạn thoại khớp dữ liệu gốc (không bịa chữ)",
+      "ok": true,
+      "detail": "q29"
+    },
+    {
+      "name": "bấm sau khi gõ xong → sang đoạn kế",
+      "ok": true,
+      "detail": "state=QUESTION_PROMPT"
+    },
+    {
+      "name": "câu hỏi chính và các lựa chọn hiện ra",
+      "ok": true,
+      "detail": "3 lựa chọn, state=CHOOSING"
+    },
+    {
+      "name": "lựa chọn khớp đúng câu hỏi đang xem",
+      "ok": true,
+      "detail": "q29 / 3"
+    },
+    {
+      "name": "khung thoại lớn dần khi hiện lựa chọn (không chờ sẵn khoảng trống)",
+      "ok": true,
+      "detail": "180px → 352px"
+    },
+    {
+      "name": "phím ↓ đổi lựa chọn đang trỏ",
+      "ok": true,
+      "detail": "0 → 1"
+    },
+    {
+      "name": "phím ↑ quay lại lựa chọn trước",
+      "ok": true,
+      "detail": "1 → 0"
+    },
+    {
+      "name": "Enter chọn được lựa chọn đang trỏ",
+      "ok": true,
+      "detail": "q29_1 vs q29_1"
+    },
+    {
+      "name": "có phản hồi chọn ngay lập tức",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "đáp án được lưu đúng một lần",
+      "ok": true,
+      "detail": "0 → 1"
+    },
+    {
+      "name": "bấm loạn sau khi chọn → không ghi trùng",
+      "ok": true,
+      "detail": "1"
+    },
+    {
+      "name": "câu kế tiếp xuất hiện",
+      "ok": true,
+      "detail": "Câu 2"
+    },
+    {
+      "name": "trạng thái câu trước không rò sang câu mới",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "lựa chọn câu trước không còn trong khung nhìn",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "đi hết được tới màn kết quả",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "kết quả có mã DNA 16 ký tự",
+      "ok": true,
+      "detail": "2222224222222430"
+    },
+    {
+      "name": "mã DNA khớp phép tính độc lập từ 30 đáp án",
+      "ok": true,
+      "detail": "tính lại 2222224222222430 vs 2222224222222430"
+    },
+    {
+      "name": "đủ 30 câu + câu cổng",
+      "ok": true,
+      "detail": "31 câu"
+    },
+    {
+      "name": "màn kết quả hiện kiểu tính cách",
+      "ok": true,
+      "detail": "DEAD"
+    },
+    {
+      "name": "hồ sơ 15 chiều hướng hiện ra",
+      "ok": true,
+      "detail": "15 chiều"
+    },
+    {
+      "name": "không tràn ngang (kết quả)",
+      "ok": true,
+      "detail": "1440/1440"
+    },
+    {
+      "name": "có ghi nhận thống kê lượt hoàn thành",
+      "ok": true,
+      "detail": "{\"CTRL\":1,\"DEAD\":18}"
+    },
+    {
+      "name": "trang 27 kiểu hiển thị đủ thẻ",
+      "ok": true,
+      "detail": "27"
+    },
+    {
+      "name": "trang chi tiết kiểu mở được",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "tải lại giữa bài → về màn mở đầu (giống bản gốc)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "không có lỗi console ở desktop",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "ô lựa chọn đủ lớn để chạm (≥44px)",
+      "ok": true,
+      "detail": "71px"
+    },
+    {
+      "name": "không tràn ngang (mobile)",
+      "ok": true,
+      "detail": "390/390"
+    },
+    {
+      "name": "chạm được lựa chọn trên mobile",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "đáp án trên mobile lưu đúng một lần",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "không tràn ngang (320px)",
+      "ok": true,
+      "detail": "320/320"
+    },
+    {
+      "name": "chữ trong khung thoại không bị cắt (320px)",
+      "ok": true,
+      "detail": "{\"overflowY\":false,\"h\":102,\"sh\":102}"
+    },
+    {
+      "name": "chữ trong lựa chọn không tràn (320px)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "giọng thoại: mỗi ký tự hiện ra có tiếng blip riêng",
+      "ok": true,
+      "detail": "32 blip / 40 ký tự"
+    },
+    {
+      "name": "giọng thoại: nhịp blip được hãm, không rè liên hồi",
+      "ok": true,
+      "detail": "gap nhỏ nhất 49.8ms"
+    },
+    {
+      "name": "giọng thoại: KHÔNG trượt cao độ trong từng tiếng (hết kiểu 'vỗ cánh')",
+      "ok": true,
+      "detail": "0/34 tiếng có trượt"
+    },
+    {
+      "name": "giọng thoại: hai xung lệch nhau tạo độ gắt kiểu chip",
+      "ok": true,
+      "detail": "2.00 xung / tiếng"
+    },
+    {
+      "name": "giọng thoại: blip rất ngắn và rất khẽ (không chói)",
+      "ok": true,
+      "detail": "đỉnh 0.018 · dài 31ms"
+    },
+    {
+      "name": "giọng thoại: cao độ trôi, không phải tiếng bíp cố định",
+      "ok": true,
+      "detail": "18 cao độ, 138–157Hz"
+    },
+    {
+      "name": "giọng thoại: chữ hiện xong thì im",
+      "ok": true,
+      "detail": "34 blip"
+    },
+    {
+      "name": "giọng thoại: biểu cảm khác nhau thì giọng khác nhau",
+      "ok": true,
+      "detail": "lo lắng 145Hz vs vui 211Hz"
+    },
+    {
+      "name": "giọng thoại: tắt âm thanh thì không phát gì",
+      "ok": true,
+      "detail": "0 blip"
+    },
+    {
+      "name": "giọng thoại: không lỗi console",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "giảm chuyển động: chữ hiện ngay, không gõ từng ký tự",
+      "ok": true,
+      "detail": "state=DIALOGUE_READY len=60"
+    },
+    {
+      "name": "giảm chuyển động: vẫn đi tiếp được tới phần lựa chọn",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "giảm chuyển động: chọn được đáp án",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "không có lỗi console trên mọi ngữ cảnh",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "screenshots": [
+    "/home/khoa1661/SBTI/reports/01-landing-1440.png",
+    "/home/khoa1661/SBTI/reports/02-quiz-intro.png",
+    "/home/khoa1661/SBTI/reports/03-dialogue-typing.png",
+    "/home/khoa1661/SBTI/reports/04-dialogue-mid.png",
+    "/home/khoa1661/SBTI/reports/05-dialogue-done.png",
+    "/home/khoa1661/SBTI/reports/06-choices.png",
+    "/home/khoa1661/SBTI/reports/07-choice-active.png",
+    "/home/khoa1661/SBTI/reports/08-choice-confirmed.png",
+    "/home/khoa1661/SBTI/reports/09-next-question.png",
+    "/home/khoa1661/SBTI/reports/10-result.png",
+    "/home/khoa1661/SBTI/reports/11-types-1440.png",
+    "/home/khoa1661/SBTI/reports/12-type-detail.png",
+    "/home/khoa1661/SBTI/reports/13-mobile-dialogue.png",
+    "/home/khoa1661/SBTI/reports/14-mobile-choices.png",
+    "/home/khoa1661/SBTI/reports/15-mobile-confirmed.png",
+    "/home/khoa1661/SBTI/reports/16-narrow-choices.png",
+    "/home/khoa1661/SBTI/reports/17-reduced-motion.png"
+  ]
+}

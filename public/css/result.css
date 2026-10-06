@@ -1,0 +1,658 @@
+/* ============================================================================
+   result.css — hồ sơ EQ (/result): điểm tổng, năm kỹ năng, mạnh/cần luyện,
+   bài tập và cách chấm.
+   Nguyên tắc chữ: chữ pixel chỉ dùng cho mã, tên, số và nhãn; mọi đoạn văn
+   tiếng Việt dài dùng --font-text (đủ dấu, hàng thoáng, KHÔNG giãn chữ).
+   ========================================================================== */
+
+/* --------------------------------------------------------- khung trang ----- */
+.result {
+  padding: var(--gap-6) 0 var(--gap-7);
+}
+
+/* Mỗi mục con tự lấy lề ngang bằng một công thức duy nhất: tối thiểu 22px trên
+   máy hẹp, và đúng --shell khi màn đủ rộng. Nhờ vậy dải mực (.band) vẫn tràn
+   viền mà chữ bên trong luôn canh thẳng cột với phần còn lại của trang — kể cả
+   khi có thêm một .shell bọc ngoài (khi đó công thức tự thu về 22px). */
+.result > * {
+  padding-inline: max(22px, calc((100% - var(--shell)) / 2));
+}
+
+/* Khung "chưa có hồ sơ" tự giới hạn bề ngang nên nhận lề cố định: nếu dùng
+   công thức trên, lề sẽ ăn hết phần max-width ở màn rộng. */
+.result > .result__empty {
+  max-width: 660px;
+  margin: var(--gap-6) auto;
+  padding-inline: 22px;
+}
+
+/* Nhịp dọc giữa các khối: chừa một khe giấy để hai dải cùng tông không dính
+   vào nhau thành một khối lớn. */
+.result__block + .result__block {
+  margin-top: var(--gap-5);
+}
+
+/* ------------------------------------------------------------- đường dẫn --- */
+.crumbs {
+  font-size: 13px;
+  color: var(--ink-3);
+  margin-bottom: var(--gap-4);
+}
+
+.crumbs a {
+  color: var(--ink-3);
+  text-decoration: none;
+}
+
+.crumbs a:hover {
+  color: var(--ink);
+}
+
+.crumbs__sep {
+  margin: 0 7px;
+  color: var(--ink-3);
+  opacity: 0.6;
+}
+
+/* ------------------------------------------------------------ phán quyết --- */
+.verdict {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.65fr);
+  gap: var(--gap-6);
+  align-items: center;
+  padding-block: var(--gap-6);
+  border-bottom: 3px solid var(--ink);
+}
+
+.verdict__body {
+  min-width: 0;
+}
+
+/* Nhãn nhỏ phía trên tiêu đề. Chỉ áp trong .verdict: ở trang chủ lớp này còn
+   được dùng làm khung chip, đổi cỡ chữ ở đó sẽ làm chip méo. */
+.verdict .hero__eyebrow {
+  font-family: var(--font-pixel);
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--olive);
+  margin-bottom: var(--gap-3);
+}
+
+.verdict__name {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: clamp(26px, 3.4vw, 42px);
+  line-height: 1;
+  color: var(--ink);
+  margin-bottom: var(--gap-3);
+}
+
+/* Đọc hiểu tổng quan là văn xuôi dài → chữ hệ thống, hàng thoáng. */
+.verdict__quote {
+  font-family: var(--font-text);
+  font-size: 17px;
+  line-height: 1.7;
+  color: var(--ink-2);
+  max-width: 64ch;
+}
+
+.verdict__meta {
+  margin-top: var(--gap-4);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-3);
+}
+
+.verdict__side {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  column-gap: var(--gap-2);
+  row-gap: var(--gap-4);
+  border-left: 3px solid var(--paper-3);
+  padding-left: var(--gap-5);
+}
+
+.verdict__score {
+  grid-column: 1;
+  font-family: var(--font-pixel);
+  font-weight: 800;
+  font-size: clamp(58px, 8.4vw, 108px);
+  line-height: 0.86;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.verdict__outof {
+  grid-column: 2;
+  font-family: var(--font-pixel);
+  font-weight: 600;
+  font-size: clamp(20px, 2.4vw, 30px);
+  line-height: 1;
+  color: var(--ink-3);
+}
+
+.verdict__side > .chip {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+
+/* ------------------------------------------------------- mạnh / cần luyện --- */
+.pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--gap-5);
+}
+
+/* Hai cột này nằm trên dải mực, nên mỗi cột là một tấm giấy vuông vắn: viền
+   2px phẳng, không bo góc, không đổ bóng mềm. */
+.pair__col {
+  display: grid;
+  align-content: start;
+  gap: var(--gap-3);
+  padding: var(--gap-4) var(--gap-4) var(--gap-5);
+  background: var(--paper);
+  border: 3px solid var(--paper-3);
+  color: var(--ink);
+}
+
+.pair__col--focus {
+  border-color: var(--amber);
+}
+
+.pair__title {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.pair__col--focus .pair__title {
+  color: var(--olive);
+}
+
+.pair__name {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 1.05;
+  color: var(--ink);
+}
+
+.pair__score {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 30px;
+  line-height: 1;
+  color: var(--olive);
+  font-variant-numeric: tabular-nums;
+}
+
+.pair__example {
+  font-family: var(--font-text);
+  font-size: 15.5px;
+  line-height: 1.65;
+  color: var(--ink-2);
+  border-left: 3px solid var(--amber);
+  padding-left: var(--gap-3);
+}
+
+.pair__cta {
+  margin-top: var(--gap-3);
+}
+
+/* ------------------------------------------------------ hồ sơ kỹ năng ----- */
+.dims {
+  display: grid;
+}
+
+/* Giữ lại: chỉ là giới hạn bề ngang cho một đoạn dẫn, không gắn với SBTI. */
+.dims__lead {
+  max-width: 62ch;
+  margin-bottom: var(--gap-5);
+}
+
+/* Mỗi kỹ năng là một <details>: hàng đầu là <summary> bấm được, phần thân chỉ
+   hiện khi mở. */
+.dim {
+  background: transparent;
+  border-bottom: 3px solid var(--paper-3);
+  border-left: 4px solid transparent;
+}
+
+/* Dấu hiệu "đang mở" không hét to: một vệt hổ phách bên trái + nền giấy sáng
+   hơn nền dải một chút. */
+.dim[open] {
+  background: var(--paper);
+  border-left-color: var(--amber);
+}
+
+.dim__head {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto minmax(84px, 132px) 26px;
+  gap: var(--gap-3);
+  align-items: center;
+  padding: var(--gap-4) var(--gap-4) var(--gap-4) var(--gap-3);
+  cursor: pointer;
+  /* Bỏ hoàn toàn dấu mở/đóng mặc định của trình duyệt: trạng thái do .dim__sign
+     đảm nhiệm, nên <summary> không còn là thứ chỉ dùng được bằng chuột. */
+  list-style: none;
+}
+
+.dim__head::-webkit-details-marker {
+  display: none;
+}
+
+.dim__head:focus-visible {
+  outline: 3px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.dim__code {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1;
+  text-align: center;
+  color: var(--ink);
+  background: var(--paper-3);
+  padding: 5px 0 3px;
+}
+
+.dim__name {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 21px;
+  line-height: 1.05;
+  color: var(--ink);
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.dim__val {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--ink);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.dim__meter {
+  min-width: 0;
+}
+
+.dim__sign {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1;
+  text-align: center;
+  color: var(--ink-3);
+  transition: transform 160ms steps(3, end), color 160ms steps(3, end);
+}
+
+.dim[open] .dim__sign {
+  transform: rotate(45deg);
+  color: var(--olive);
+}
+
+.dim__body {
+  display: grid;
+  gap: var(--gap-3);
+  max-width: 76ch;
+  padding: var(--gap-4) var(--gap-4) var(--gap-5);
+  border-top: 2px solid var(--paper-3);
+}
+
+.dim__band {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 19px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--olive);
+}
+
+.dim__meaning {
+  font-family: var(--font-text);
+  font-size: 16.5px;
+  line-height: 1.7;
+  color: var(--ink-2);
+}
+
+/* Ô vuông hổ phách nhỏ làm dấu đầu dòng — cùng ngôn ngữ với thang đo pixel. */
+.dim__examples {
+  display: grid;
+  gap: var(--gap-2);
+}
+
+.dim__examples li {
+  position: relative;
+  font-family: var(--font-text);
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--ink-2);
+  padding-left: 22px;
+}
+
+.dim__examples li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 9px;
+  height: 9px;
+  background: var(--amber);
+}
+
+.dim__exact {
+  font-family: var(--font-text);
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+  border-top: 2px solid var(--paper-3);
+  padding-top: var(--gap-3);
+}
+
+.dim__link {
+  justify-self: start;
+  font-family: var(--font-pixel);
+  font-weight: 600;
+  font-size: 18px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--olive);
+  text-decoration: none;
+  border-bottom: 3px solid var(--amber);
+  padding-bottom: 2px;
+}
+
+.dim__link:hover {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+}
+
+.dim__exlist-head {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-top: var(--gap-2);
+}
+
+/* ----------------------------------------------------------- bài tập luyện -- */
+.exlist {
+  display: grid;
+  gap: var(--gap-3);
+}
+
+.ex {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: var(--gap-3);
+  align-items: start;
+  padding-top: var(--gap-3);
+  border-top: 2px solid var(--paper-3);
+}
+
+.ex__n {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1;
+  text-align: center;
+  color: var(--ink);
+  background: var(--paper-3);
+  padding: 6px 0 4px;
+}
+
+.ex__main {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.ex__name {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 19px;
+  line-height: 1.1;
+  color: var(--ink);
+}
+
+.ex__how {
+  font-family: var(--font-text);
+  font-size: 16px;
+  line-height: 1.68;
+  color: var(--ink-2);
+}
+
+.ex__why {
+  font-family: var(--font-text);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-3);
+  border-left: 3px solid var(--amber);
+  padding-left: var(--gap-3);
+}
+
+/* ------------------------------------------------------------ cách chấm --- */
+/* .ledger gốc được thiết kế cho dải mực tối; ở đây nó nằm trên dải sáng nên
+   phải đổi lại màu chữ, và các giá trị là văn xuôi dài nên dùng chữ hệ thống. */
+.method {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--gap-4) var(--gap-5);
+}
+
+.method .ledger__k {
+  color: var(--ink);
+}
+
+.method .ledger__v {
+  font-family: var(--font-text);
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--ink-2);
+}
+
+/* ------------------------------------------------------------- hành động --- */
+.actions {
+  margin-top: var(--gap-7);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-3);
+  align-items: center;
+}
+
+.actions__note {
+  font-size: 13px;
+  color: var(--ink-3);
+  flex-basis: 100%;
+}
+
+.result__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-3);
+  align-items: center;
+  margin-top: var(--gap-5);
+}
+
+/* --------------------------------------------------------- khung rỗng ------ */
+.result__empty {
+  display: block;
+}
+
+.empty {
+  display: grid;
+  justify-items: start;
+  gap: var(--gap-3);
+  padding: var(--gap-5) var(--gap-5) var(--gap-4);
+}
+
+.empty .actions {
+  margin-top: var(--gap-3);
+}
+
+/* --------------------------------------------------------- thang đo pixel --- */
+/* Cùng ngôn ngữ với .facts__meter ở app.css: hàng ô nhỏ, ô sáng = phần đạt. */
+.meter {
+  display: grid;
+  gap: 6px;
+}
+
+/* Khối "nhãn + số + thang đo" giữ lại nguyên trạng: không có gì thuộc SBTI
+   trong đó, và vẫn là một mảnh ghép hợp lệ cho bất kỳ màn nào cần thang đo. */
+.meter__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--gap-3);
+}
+
+.meter__label {
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+.meter__val {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 30px;
+  line-height: 1;
+}
+
+.meter__val small {
+  font-size: 15px;
+  color: var(--ink-3);
+  margin-left: 3px;
+}
+
+.meter__cells {
+  display: flex;
+  gap: 3px;
+  height: 9px;
+}
+
+.meter__cells i {
+  flex: 1 1 0;
+  min-width: 0;
+  background: var(--paper-3);
+}
+
+.meter__cells i.on {
+  background: var(--amber);
+}
+
+/* ------------------------------------------------------------ thu gọn ----- */
+@media (max-width: 860px) {
+  .verdict {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--gap-4);
+    padding-block: var(--gap-5);
+  }
+
+  .verdict__side {
+    border-left: 0;
+    border-top: 3px solid var(--paper-3);
+    padding-left: 0;
+    padding-top: var(--gap-4);
+  }
+
+  /* Hai cột "mạnh nhất / cần luyện tiếp" xếp lại thành một cột. */
+  .pair {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 760px) {
+  .method {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Dưới 560px bỏ hẳn thang đo khỏi hàng đầu: giữ nguyên cỡ chữ của tên kỹ năng
+   và con số, thay vì để thanh pixel chèn ép chúng. */
+@media (max-width: 560px) {
+  .dim__head {
+    grid-template-columns: 34px minmax(0, 1fr) auto 24px;
+    gap: var(--gap-2);
+    padding: var(--gap-3);
+  }
+
+  .dim__meter {
+    display: none;
+  }
+
+  .dim__name {
+    font-size: 19px;
+  }
+
+  .dim__val {
+    font-size: 20px;
+  }
+
+  .dim__body {
+    padding: var(--gap-3) var(--gap-3) var(--gap-4);
+  }
+
+  .pair__col {
+    padding: var(--gap-3) var(--gap-3) var(--gap-4);
+  }
+}
+
+@media (max-width: 620px) {
+  .actions .btn,
+  .result__actions .btn {
+    width: 100%;
+  }
+
+  .verdict__quote {
+    font-size: 16px;
+  }
+
+  .ex {
+    grid-template-columns: 26px minmax(0, 1fr);
+    gap: var(--gap-2);
+  }
+}
+
+/* Màn 320px: thu tiếp cột mã và dấu, nới chỗ cho tên kỹ năng. */
+@media (max-width: 380px) {
+  .dim__head {
+    grid-template-columns: 30px minmax(0, 1fr) auto 22px;
+    gap: 6px;
+    padding: var(--gap-2);
+  }
+
+  .dim__code {
+    font-size: 16px;
+  }
+
+  .dim__name {
+    font-size: 18px;
+  }
+
+  .verdict__score {
+    font-size: 58px;
+  }
+
+  .pair__name {
+    font-size: 21px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dim__sign {
+    transition: none;
+  }
+}

@@ -1,0 +1,599 @@
+/* ============================================================================
+   quiz.css — màn chơi câu hỏi: HUD, sân khấu, bảng hội thoại, danh sách lựa chọn
+   ========================================================================== */
+
+.quiz-wrap {
+  display: block;
+  padding-bottom: var(--gap-7);
+}
+
+/* ------------------------------------------------------------------ HUD */
+.hud {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: var(--paper);
+  border-bottom: 3px solid var(--ink);
+}
+
+.hud__row {
+  max-width: var(--scene);
+  margin: 0 auto;
+  padding: 10px 18px;
+  display: flex;
+  align-items: center;
+  gap: var(--gap-3);
+}
+
+.hud__count {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 19px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Nhãn nhỏ đứng trước số đếm trong HUD (chỉ màn luyện tập có). Nó phải chịu co
+   lại chứ không được đẩy .hud__count hay .hud__progress: cho phép co tới 0
+   (min-width: 0) và cắt bằng dấu ba chấm, nên hai phần kia giữ nguyên chỗ. */
+.hud__tag {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 46ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-pixel);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  background: var(--paper-2);
+  border: 2px solid var(--paper-3);
+  padding: 4px 8px 2px;
+}
+
+.hud__spacer {
+  flex: 1;
+}
+
+.hud__progress {
+  font-size: 15px;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+.hud__bar {
+  max-width: var(--scene);
+  margin: 0 auto 8px;
+  padding: 0 18px;
+}
+
+.hud__bar .bar {
+  margin: 0;
+}
+
+.hud__actions {
+  max-width: var(--scene);
+  margin: 0 auto;
+  padding: 0 18px 10px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.sound-toggle > .pxf-in {
+  gap: 7px;
+}
+
+.sound-toggle__dot {
+  width: 8px;
+  height: 8px;
+  background: var(--crimson);
+  flex: none;
+}
+
+.sound-toggle[data-sound="on"] .sound-toggle__dot {
+  background: var(--olive-2);
+}
+
+/* -------------------------------------------------------------- sân khấu */
+.scene {
+  max-width: var(--scene);
+  margin: var(--gap-6) auto 0;
+  padding: 0 18px;
+  display: grid;
+  grid-template-columns: 128px minmax(0, 1fr);
+  gap: var(--gap-5);
+  align-items: end;
+}
+
+.figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding-bottom: 2px;
+}
+
+.figure__sprite {
+  position: relative;
+  width: 96px;
+  height: 120px;
+}
+
+.figure__sprite svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  shape-rendering: crispEdges;
+}
+
+.sprite__frame {
+  opacity: 0;
+  transition: none;
+}
+
+.sprite__frame.is-on {
+  opacity: 1;
+}
+
+.figure__ground {
+  width: 84px;
+  height: 6px;
+  background: rgba(22, 24, 28, 0.16);
+}
+
+.figure.is-talk .figure__sprite {
+  animation: px-bob 0.9s steps(1, end) infinite;
+}
+
+/* ------------------------------------------------------------ khung thoại */
+.console {
+  /* Bảng hội thoại là vùng tối duy nhất trên trang: mọi chữ bên trong dùng
+     tông sáng, nên phần "ruột" của khung phải là mực đậm chứ không phải giấy. */
+  --fill: var(--console-bg);
+  --frame: var(--ink);
+  --sh-color: rgba(22, 24, 28, 0.28);
+}
+
+.console__in {
+  padding: 18px 20px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: var(--console-text);
+}
+
+.console__top {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-2);
+  min-height: 24px;
+}
+
+.console__page {
+  font-size: 13px;
+  color: var(--console-dim);
+  letter-spacing: 0.14em;
+}
+
+.console__text {
+  font-family: var(--font-term);
+  font-size: 22px;
+  line-height: 1.42;
+  color: var(--console-text);
+  /* Sàn 2 dòng: khung chỉ cao vừa đủ; đoạn dài hơn sẽ tự nới chiều cao. */
+  min-height: calc(22px * 1.42 * 2);
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.console__text em {
+  color: var(--amber);
+  font-style: normal;
+}
+
+.console__cue {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 9px;
+  min-height: 20px;
+  color: var(--amber);
+  opacity: 0;
+  transition: opacity 120ms steps(2, end);
+}
+
+.console[data-cue="on"] .console__cue {
+  opacity: 1;
+}
+
+.console__hint {
+  font-size: 13px;
+  color: var(--console-dim);
+  letter-spacing: 0.12em;
+}
+
+.console[data-hint="off"] .console__hint {
+  display: none;
+}
+
+/* ------------------------------------------------------------- lựa chọn */
+/* Khe chứa lựa chọn: cao 0 lúc kể chuyện rồi tự giãn ra khi tới phần trả lời.
+   Nhờ vậy khung thoại chỉ cao vừa đủ trong lúc gõ chữ, và "lớn dần" khi hiện
+   lựa chọn — chuyển động có chủ đích thay vì một khung trống chờ sẵn. */
+.choices-slot {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 220ms steps(4, end);
+}
+
+.choices-slot.is-open {
+  grid-template-rows: 1fr;
+}
+
+.choices-slot.is-instant {
+  transition: none;
+}
+
+.choices {
+  display: grid;
+  gap: 8px;
+  overflow: hidden;
+  min-height: 0;
+  /* Danh sách đã dựng sẵn từ đầu câu để đo chiều cao, nhưng phải ẩn hẳn khỏi
+     mắt và khỏi trình đọc màn hình cho tới lúc thật sự tới phần trả lời. */
+  visibility: hidden;
+}
+
+.choices.is-open {
+  visibility: visible;
+}
+
+.choice {
+  display: grid;
+  grid-template-columns: 18px 30px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 13px;
+  text-align: left;
+  border: 2px solid rgba(243, 240, 231, 0.22);
+  background: rgba(243, 240, 231, 0.04);
+  color: var(--console-text);
+  font-family: var(--font-term);
+  font-size: 19px;
+  line-height: 1.32;
+  transition: none;
+  opacity: 0;
+  transform: translateY(5px);
+}
+
+.choice.is-in {
+  animation: choice-in 140ms steps(3, end) forwards;
+}
+
+@keyframes choice-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.choice__cursor {
+  color: var(--amber);
+  visibility: hidden;
+  padding-top: 3px;
+}
+
+.choice__code {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 19px;
+  line-height: 1.25;
+  text-align: center;
+  background: rgba(243, 240, 231, 0.14);
+  padding: 2px 0 0;
+}
+
+.choice__text {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* trạng thái được trỏ tới (chuột hoặc bàn phím) */
+.choice.is-active {
+  border-color: var(--amber);
+  background: var(--amber);
+  color: var(--ink);
+}
+.choice.is-active .choice__cursor {
+  visibility: visible;
+  color: var(--ink);
+}
+.choice.is-active .choice__code {
+  background: var(--ink);
+  color: var(--amber);
+}
+
+.choice:focus-visible {
+  outline: 3px solid var(--console-line);
+  outline-offset: 3px;
+}
+
+@media (hover: hover) {
+  .choice:hover {
+    border-color: var(--amber);
+    background: var(--amber);
+    color: var(--ink);
+  }
+  .choice:hover .choice__cursor {
+    visibility: visible;
+    color: var(--ink);
+  }
+  .choice:hover .choice__code {
+    background: var(--ink);
+    color: var(--amber);
+  }
+}
+
+/* xác nhận */
+.choice.is-confirmed {
+  background: var(--paper);
+  border-color: var(--paper);
+  color: var(--ink);
+  /* Hiện thân của .is-in là hoạt ảnh choice-in; khi bị thay bằng hoạt ảnh nhấp sáng
+     thì phải tự khai báo lại độ hiện, nếu không hàng vừa chọn sẽ tàng hình. */
+  opacity: 1;
+  transform: none;
+  animation: choice-flash 160ms steps(2, end) 1;
+}
+.choice.is-confirmed .choice__code {
+  background: var(--ink);
+  color: var(--amber);
+}
+.choice.is-confirmed .choice__cursor {
+  visibility: hidden;
+}
+
+/* Nhấp sáng rồi dịu xuống nền giấy: cả hai chặng đều là nền SÁNG nên chữ mực
+   luôn đọc được (trước đây chặng giữa dùng nền tối làm chữ biến mất). */
+@keyframes choice-flash {
+  0% {
+    background: var(--amber);
+  }
+  50%,
+  100% {
+    background: var(--paper);
+  }
+}
+
+.choices.is-locked .choice {
+  pointer-events: none;
+}
+
+.choices.is-locked .choice:not(.is-confirmed) {
+  opacity: 0.4;
+}
+
+/* ------------------------------------------------- chuyển câu (stepped) */
+.scene[data-dir="next"] .console,
+.scene[data-dir="next"] .figure {
+  animation: scene-in-next 260ms steps(4, end) both;
+}
+.scene[data-dir="back"] .console,
+.scene[data-dir="back"] .figure {
+  animation: scene-in-back 260ms steps(4, end) both;
+}
+
+@keyframes scene-in-next {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scene-in-back {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.scene.is-leaving .console,
+.scene.is-leaving .figure {
+  animation: scene-out 150ms steps(3, end) both;
+}
+
+@keyframes scene-out {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+}
+
+/* ----------------------------------------------------- màn mở đầu / kết */
+.quiz-intro {
+  max-width: 660px;
+  margin: var(--gap-7) auto 0;
+  padding: 0 18px;
+}
+
+.quiz-intro__in {
+  padding: 26px 26px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-4);
+}
+
+.quiz-intro h2 {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: clamp(30px, 5vw, 46px);
+}
+
+.quiz-intro__note {
+  display: grid;
+  gap: 6px;
+  border-left: 4px solid var(--amber);
+  padding-left: 12px;
+}
+
+.quiz-intro__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-3);
+}
+
+/* ------------------------------------------------------------ điện thoại */
+@media (max-width: 820px) {
+  .scene {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--gap-4);
+    margin-top: var(--gap-5);
+    justify-items: center;
+  }
+
+  .figure {
+    width: 100%;
+  }
+
+  .figure__sprite {
+    width: 76px;
+    height: 95px;
+  }
+
+  .figure__ground {
+    width: 64px;
+  }
+
+  .console {
+    width: 100%;
+  }
+
+  .console__text {
+    font-size: 19px;
+    min-height: calc(19px * 1.44 * 2);
+  }
+}
+
+@media (max-width: 600px) {
+  .hud__row {
+    padding: 9px 12px;
+    gap: var(--gap-2);
+  }
+
+  .hud__bar {
+    padding: 0 12px;
+  }
+
+  .hud__actions {
+    padding: 0 12px 9px;
+  }
+
+  .hud__count {
+    font-size: 17px;
+  }
+
+  .hud__progress {
+    font-size: 14px;
+  }
+
+  .scene {
+    padding: 0 12px;
+    margin-top: var(--gap-4);
+  }
+
+  .console {
+    min-height: 0;
+  }
+
+  .console__in {
+    padding: 14px 13px 12px;
+    gap: 8px;
+  }
+
+  .console__text {
+    font-size: 18px;
+    line-height: 1.45;
+    min-height: calc(18px * 1.45 * 2);
+  }
+
+  .choice {
+    grid-template-columns: 16px 26px minmax(0, 1fr);
+    gap: 9px;
+    min-height: 52px;
+    padding: 11px 11px;
+    font-size: 17px;
+  }
+
+  .choice__code {
+    font-size: 17px;
+  }
+
+  .choices {
+    gap: 7px;
+  }
+}
+
+/* Điện thoại: nhãn nhỏ lại và bị cắt ngắn trước, nhường chỗ cho số đếm. */
+@media (max-width: 430px) {
+  .hud__tag {
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    padding: 3px 6px 1px;
+    max-width: 34vw;
+  }
+}
+
+@media (max-width: 380px) {
+  .console__text {
+    font-size: 17px;
+  }
+
+  .choice {
+    font-size: 16px;
+    padding: 10px 9px;
+  }
+
+  .hud__progress {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene[data-dir] .console,
+  .scene[data-dir] .figure,
+  .scene.is-leaving .console,
+  .scene.is-leaving .figure,
+  .choice,
+  .choice.is-in {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
+  .console__text {
+    min-height: 0;
+  }
+  .choices-slot {
+    transition: none;
+  }
+}

@@ -1,0 +1,313 @@
+/* ============================================================================
+   pixel.css — khung pixel, nút, chip, thanh tiến độ, con trỏ
+   Khung dùng clip-path hai lớp: lớp ngoài là màu viền, lớp trong là màu nền.
+   Nhờ vậy góc bị "khoét" theo bậc 3–4px, đúng ngôn ngữ pixel, không bo tròn.
+   ========================================================================== */
+
+.pxf {
+  --n-out: 8px;
+  --bw: 3px;
+  --frame: var(--ink);
+  --fill: var(--paper);
+  --sh: 6px;
+  --sh-color: rgba(22, 24, 28, 0.2);
+  position: relative;
+  display: block;
+  padding: var(--bw);
+  background: var(--frame);
+  filter: drop-shadow(var(--sh) var(--sh) 0 var(--sh-color));
+  clip-path: polygon(
+    0 var(--n-out),
+    var(--n-out) var(--n-out),
+    var(--n-out) 0,
+    calc(100% - var(--n-out)) 0,
+    calc(100% - var(--n-out)) var(--n-out),
+    100% var(--n-out),
+    100% calc(100% - var(--n-out)),
+    calc(100% - var(--n-out)) calc(100% - var(--n-out)),
+    calc(100% - var(--n-out)) 100%,
+    var(--n-out) 100%,
+    var(--n-out) calc(100% - var(--n-out)),
+    0 calc(100% - var(--n-out))
+  );
+}
+
+.pxf-in {
+  --n: calc(var(--n-out) - var(--bw));
+  display: block;
+  background: var(--fill);
+  clip-path: polygon(
+    0 var(--n),
+    var(--n) var(--n),
+    var(--n) 0,
+    calc(100% - var(--n)) 0,
+    calc(100% - var(--n)) var(--n),
+    100% var(--n),
+    100% calc(100% - var(--n)),
+    calc(100% - var(--n)) calc(100% - var(--n)),
+    calc(100% - var(--n)) 100%,
+    var(--n) 100%,
+    var(--n) calc(100% - var(--n)),
+    0 calc(100% - var(--n))
+  );
+}
+
+.pxf--lg {
+  --n-out: 11px;
+  --bw: 4px;
+  --sh: 9px;
+}
+.pxf--lg > .pxf-in {
+  --n: 7px;
+}
+
+.pxf--sm {
+  --n-out: 6px;
+  --bw: 2px;
+  --sh: 3px;
+}
+.pxf--sm > .pxf-in {
+  --n: 4px;
+}
+
+.pxf--flat {
+  --sh: 0px;
+}
+
+/* ------------------------------------------------------------------- nút */
+.btn {
+  --frame: var(--ink);
+  --fill: var(--paper);
+  font-family: var(--font-pixel);
+  font-weight: 600;
+  font-size: 17px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  text-align: center;
+  transition: none;
+}
+
+.btn > .pxf-in {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 11px 20px 9px;
+  min-height: 46px;
+  color: var(--ink);
+}
+
+@media (hover: hover) {
+  .btn:hover {
+    --fill: var(--amber);
+  }
+}
+
+.btn:active {
+  --sh: 1px;
+  transform: translate(5px, 5px);
+}
+
+.btn--primary {
+  --fill: var(--ink);
+}
+.btn--primary > .pxf-in {
+  color: var(--paper);
+}
+@media (hover: hover) {
+  .btn--primary:hover {
+    --fill: var(--olive);
+  }
+}
+
+.btn--accent {
+  --fill: var(--olive);
+}
+.btn--accent > .pxf-in {
+  color: var(--paper);
+}
+@media (hover: hover) {
+  .btn--accent:hover {
+    --fill: var(--amber);
+  }
+  .btn--accent:hover > .pxf-in {
+    color: var(--ink);
+  }
+}
+
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  --fill: var(--paper-2);
+  --sh: 0px;
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+.btn:disabled > .pxf-in {
+  color: var(--ink-3);
+}
+
+.btn--ghost {
+  --fill: var(--paper);
+}
+.btn--ghost > .pxf-in {
+  color: var(--ink);
+  font-size: 15px;
+  padding: 8px 14px 6px;
+  min-height: 38px;
+}
+
+/* ------------------------------------------------------------------ chip */
+.chip {
+  --fill: var(--paper-2);
+  --frame: var(--ink);
+  --sh: 0px;
+  display: inline-block;
+  font-family: var(--font-pixel);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.chip > .pxf-in {
+  padding: 5px 11px 3px;
+  color: var(--ink);
+}
+.chip--olive {
+  --fill: var(--olive);
+}
+.chip--olive > .pxf-in {
+  color: var(--paper);
+}
+.chip--amber {
+  --fill: var(--amber);
+}
+.chip--ink {
+  --fill: var(--ink);
+}
+.chip--ink > .pxf-in {
+  color: var(--paper);
+}
+
+/* ----------------------------------------------------- thanh tiến độ pixel */
+.bar {
+  position: relative;
+  height: 16px;
+  border: 3px solid var(--ink);
+  background: var(--paper-2);
+  overflow: hidden;
+}
+
+.bar__fill {
+  height: 100%;
+  width: 0%;
+  background: var(--olive);
+  transition: width 260ms steps(6, end);
+}
+
+.bar__fill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    to right,
+    rgba(243, 240, 231, 0.16) 0 1px,
+    rgba(243, 240, 231, 0) 1px 6px
+  );
+  pointer-events: none;
+}
+
+.bar__edge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -5px;
+  width: 5px;
+  background: var(--amber);
+  transition: left 260ms steps(6, end);
+  pointer-events: none;
+}
+
+/* ---------------------------------------------------------------- con trỏ */
+.cursor {
+  width: 11px;
+  height: 13px;
+  background: currentColor;
+  clip-path: polygon(0 0, 100% 50%, 0 100%, 0 68%, 52% 50%, 0 32%);
+  flex: none;
+}
+
+.cursor--down {
+  clip-path: polygon(0 0, 100% 0, 100% 32%, 52% 32%, 52% 100%, 44% 32%, 0 32%);
+  width: 14px;
+  height: 11px;
+}
+
+/* nhấp nháy kiểu game: hai nhịp, không mượt */
+.blink {
+  animation: px-blink 1.05s var(--step-2, steps(2, end)) infinite;
+}
+@keyframes px-blink {
+  0%,
+  74% {
+    opacity: 1;
+  }
+  75%,
+  100% {
+    opacity: 0.05;
+  }
+}
+
+.bob {
+  animation: px-bob 1.6s steps(1, end) infinite;
+}
+@keyframes px-bob {
+  0%,
+  60% {
+    transform: translateY(0);
+  }
+  61%,
+  100% {
+    transform: translateY(-2px);
+  }
+}
+
+/* --------------------------------------------------------------- tiện ích */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.box {
+  border: 3px solid var(--ink);
+  background: var(--paper);
+}
+
+.box--shadow {
+  box-shadow: 7px 7px 0 rgba(22, 24, 28, 0.18);
+}
+
+.rule {
+  height: 3px;
+  background: var(--ink);
+  border: 0;
+  margin: 0;
+}
+
+.rule--soft {
+  height: 2px;
+  background: var(--paper-3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blink,
+  .bob {
+    animation: none !important;
+  }
+}
