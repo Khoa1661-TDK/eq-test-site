@@ -362,17 +362,29 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
     advanceDialogue()
   }
   stage.addEventListener("click", onStageClick)
+  // Bấm vào khung thoại (không phải vào một lựa chọn) cũng đi tiếp.
+  function onBoardClick(e) {
+    if (e.target.closest?.(".choice, button, a")) return
+    advanceDialogue()
+  }
+  consoleApi.el.addEventListener("click", onBoardClick)
 
   /* keyboard: Enter/Space tiến hội thoại, mũi tên điều hướng lựa chọn */
   function onKeydown(e) {
-    if (e.key === "Enter" || e.key === " ") {
+    if (e.defaultPrevented || e.repeat) return
+    const tag = e.target?.tagName
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || e.target?.isContentEditable) return
+    // Enter trên một nút/lựa chọn đang được focus là việc của nút đó.
+    if (e.key === "Enter" && e.target?.closest?.("button, a, .choice")) return
+    if (e.key === "Enter" || e.key === " " || e.code === "Space") {
       if (dialogueState !== "idle" && !choicesShown) {
         e.preventDefault()
         advanceDialogue()
       }
     }
   }
-  mount.addEventListener("keydown", onKeydown)
+  // Lắng nghe trên cả trang: Space/Enter đi tiếp dù focus đang ở đâu (không cần bấm vào cảnh trước).
+  document.addEventListener("keydown", onKeydown)
 
   /* ------------------------------------------------------------- điểm quyết định + lựa chọn */
   function playerCtrl() {
@@ -646,7 +658,8 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
       ro.disconnect()
       offMotion && offMotion()
       stage.removeEventListener("click", onStageClick)
-      mount.removeEventListener("keydown", onKeydown)
+      document.removeEventListener("keydown", onKeydown)
+      consoleApi.el.removeEventListener("click", onBoardClick)
       for (const t of timers) clearTimeout(t)
       consoleApi.typewriter.destroy && consoleApi.typewriter.destroy()
       choices.clear()

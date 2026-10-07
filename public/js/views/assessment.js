@@ -115,10 +115,10 @@ export function renderAssessment(mount, { navigate }) {
   const notes = [
     el("p", {
       class: "prose",
-      text: `${total} tình huống thật của đời sống học sinh — có cả những cảnh động, nơi nhân vật diễn lại điều xảy ra sau lựa chọn của bạn.`,
+      text: `${total} tình huống rất đời thường của học sinh, trong đó có cả cảnh động: nhân vật sẽ diễn lại chuyện xảy ra sau lựa chọn của bạn.`,
     }),
-    el("p", { class: "prose", text: "Cách nào cũng có lý. Chọn cách gần với điều bạn thật sự sẽ làm — không phải cách bạn nghĩ là đúng." }),
-    el("p", { class: "prose", text: "Trong lúc làm, bạn sẽ không thấy điểm. Cuối bài là sáu kỹ năng, kèm những tình huống cho thấy vì sao, và cách luyện kỹ năng cần luyện nhất." }),
+    el("p", { class: "prose", text: "Cách nào cũng có lý. Hãy chọn cách gần với điều bạn thật sự sẽ làm, đừng chọn cách bạn nghĩ là “đúng”." }),
+    el("p", { class: "prose", text: "Trong lúc làm, bạn sẽ không thấy điểm. Cuối bài, bạn sẽ thấy sáu kỹ năng kèm những tình huống giải thích vì sao, và cách luyện kỹ năng cần luyện nhất." }),
   ]
   if (isRetake) {
     const days = Math.floor((Date.now() - (last.finishedAt || 0)) / DAY)
@@ -126,7 +126,7 @@ export function renderAssessment(mount, { navigate }) {
     notes.push(
       el("p", {
         class: "prose",
-        text: `Lần này dùng bộ tình huống khác (đề ${saved.form}) để đo kỹ năng chứ không đo trí nhớ. Cuối bài bạn sẽ thấy từng kỹ năng thay đổi thế nào so với lần trước.`,
+        text: `Lần này bạn làm bộ tình huống khác (đề ${saved.form}) để đo kỹ năng chứ không đo trí nhớ. Cuối bài, bạn sẽ thấy từng kỹ năng thay đổi ra sao so với lần trước.`,
       }),
     )
     if (days < RETAKE_WAIT_DAYS || reps < RETAKE_PRACTICE_REPS) {
@@ -139,7 +139,7 @@ export function renderAssessment(mount, { navigate }) {
     }
   }
   notes.push(
-    el("p", { class: "prose muted", text: "Mất khoảng 10–15 phút. Đây là công cụ học tập và tự phát triển, không phải một thang đo đã được kiểm định tâm lý và không dùng để chẩn đoán." }),
+    el("p", { class: "prose muted", text: "Mất khoảng 10–15 phút. Đây là công cụ học tập và tự rèn luyện, không phải thang đo tâm lý đã được kiểm định và không dùng để chẩn đoán." }),
   )
 
   const intro = frame(

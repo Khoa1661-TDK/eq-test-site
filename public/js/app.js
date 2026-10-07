@@ -13,7 +13,7 @@ const main = qs("#main")
 const SKILLS = EQ_DIMENSIONS.map((dim) => dim.key)
 
 const TITLES = {
-  "/": "EQ Học đường — Luyện 6 kỹ năng cảm xúc, 20 tình huống mỗi lần",
+  "/": "MoodQuest — Luyện 6 kỹ năng cảm xúc qua từng tình huống",
   "/assessment": "Đánh giá EQ",
   "/result": "Hồ sơ EQ",
   "/practice": "Luyện EQ",

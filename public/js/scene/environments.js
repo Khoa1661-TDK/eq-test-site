@@ -4,6 +4,7 @@
    khói, đồng hồ, lá cây) chạy bằng CSS animation theo class scn-*. */
 
 import { canteenSVG, corridorSVG, bedroomSVG, librarySVG } from "./environmentsMore.js"
+import { homeSVG, streetSVG, parkSVG, cafeSVG } from "./environmentsOutside.js"
 
 function officeSVG({ STAGE_W, STAGE_H, GROUND_Y }) {
   /* Phòng họp: tường giấy, cửa sổ mưa nhẹ, bảng trắng, bàn họp, ghế, cây,
@@ -262,6 +263,10 @@ const ENVIRONMENTS = {
   library: librarySVG,
   classroom: classroomSVG,
   schoolyard: schoolyardSVG,
+  home: homeSVG,
+  street: streetSVG,
+  park: parkSVG,
+  cafe: cafeSVG,
 }
 
 export function environmentSVG(name, dims) {
@@ -306,6 +311,26 @@ export const ENV_AMBIENT = {
   ],
   bedroom: [
     { kind: "cat", x: 250, y: 172 },
+  ],
+  home: [
+    { kind: "cat", x: 120, y: 185 },
+  ],
+  street: [
+    { kind: "walk", y: 179, from: -30, to: 350, dur: 17, delay: 0, variant: 1 },
+    { kind: "walk", y: 177, from: 350, to: -30, dur: 21, delay: 6, variant: 2 },
+    { kind: "walk", y: 180, from: -30, to: 350, dur: 25, delay: 11, variant: 0 },
+    { kind: "stand", x: 128, y: 178, variant: 0 },
+  ],
+  park: [
+    { kind: "walk", y: 179, from: -30, to: 350, dur: 22, delay: 1, variant: 0 },
+    { kind: "walk", y: 177, from: 350, to: -30, dur: 18, delay: 8, variant: 1 },
+    { kind: "walk", y: 180, from: -30, to: 350, dur: 28, delay: 14, variant: 2 },
+    { kind: "chat", x: 150, y: 178, variant: 2 },
+  ],
+  cafe: [
+    { kind: "sit", x: 176, y: 179, variant: 1 },
+    { kind: "sit", x: 212, y: 179, variant: 2 },
+    { kind: "stand", x: 90, y: 178, variant: 0 },
   ],
   office: [
     { kind: "walk", y: 179, from: -30, to: 350, dur: 20, delay: 2, variant: 2 },

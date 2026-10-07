@@ -73,11 +73,11 @@ export function renderSceneView(mount, { navigate } = {}) {
       el("h1", { class: "story-title", text: "Một tuần ở lớp" }),
       el("p", {
         class: "prose",
-        text: `Tuần này có ${total} tình huống khó ở trường. Mỗi tình huống, bạn chọn một cách phản ứng rồi xem điều gì xảy ra tiếp theo — các nhân vật sẽ diễn lại hậu quả.`,
+        text: `Tuần này có ${total} tình huống khó ở trường. Ở mỗi tình huống, bạn chọn một cách phản ứng rồi xem chuyện gì xảy ra tiếp theo: các nhân vật sẽ diễn lại hậu quả cho bạn xem.`,
       }),
       el("p", {
         class: "prose",
-        text: "Sau mỗi cảnh, bạn thấy cách mình vừa chọn dẫn tới đâu và cách nào mạnh hơn. Đây là phần luyện tập: không chấm điểm, chỉ ghi lại bạn đã luyện kỹ năng nào để so sánh ở lần đánh giá sau.",
+        text: "Sau mỗi cảnh, bạn sẽ thấy lựa chọn của mình dẫn tới đâu và đâu là cách mạnh hơn. Phần này chỉ để luyện: không chấm điểm, chỉ ghi lại bạn đã luyện kỹ năng nào để so sánh ở lần đánh giá sau.",
       }),
       el("p", { class: "story-actions" }, button("Bắt đầu", { primary: true, onClick: () => loadScenario(0) })),
     )
@@ -174,7 +174,7 @@ export function renderSceneView(mount, { navigate } = {}) {
       el("h1", { class: "story-title", text: `Bạn chọn cách mạnh nhất ở ${strongest}/${total} cảnh` }),
       el("p", {
         class: "prose",
-        text: "Đây là phần luyện tập nên không có điểm. Muốn biết sáu kỹ năng của mình đang ở đâu và đã tiến bộ ra sao, hãy làm bài đánh giá — trong đó cũng có cảnh động.",
+        text: "Phần này chỉ để luyện nên không có điểm. Muốn biết sáu kỹ năng của mình đang ở đâu và tiến bộ tới đâu, hãy làm bài đánh giá, trong đó cũng có cảnh động.",
       }),
       frame(el("div", { class: "story-skills-wrap" }, el("h2", { class: "story-card__title", text: "Từng cảnh" }), el("ul", { class: "story-skills" }, rows)), { size: "lg" }),
       el(

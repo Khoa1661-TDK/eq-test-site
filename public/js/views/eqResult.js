@@ -75,7 +75,7 @@ export function renderEqResult(mount, { navigate }) {
           "div",
           { class: "empty" },
           el("h1", { class: "band__title", text: "Chưa có hồ sơ kỹ năng" }),
-          el("p", { class: "prose", text: "Bạn chưa hoàn thành lần đánh giá nào trên máy này, nên chưa có gì để tổng hợp." }),
+          el("p", { class: "prose", text: "Bạn chưa hoàn thành lần đánh giá nào trên máy này nên chưa có gì để tổng hợp." }),
           el("p", { class: "actions" }, link("/assessment", "Bắt đầu đánh giá", "btn btn--accent btn--lg")),
         ),
         { size: "lg", cls: "result__empty" },
@@ -97,10 +97,10 @@ export function renderEqResult(mount, { navigate }) {
         "div",
         { class: "verdict__body" },
         el("p", { class: "hero__eyebrow", text: `HỒ SƠ SÁU KỸ NĂNG · LẦN ${all.length}` }),
-        el("h1", { class: "verdict__name", text: "Bạn đang xử lý cảm xúc và tình huống xã hội tới đâu" }),
+        el("h1", { class: "verdict__name", text: "Bạn xử lý cảm xúc và các tình huống với người khác tới đâu" }),
         el("p", {
           class: "verdict__quote",
-          text: "Mỗi con số dưới đây đến từ các lựa chọn của bạn trong bài vừa làm. Nó cho biết cách phản ứng nào đang hiệu quả, chỗ nào còn hụt, và nên luyện gì tiếp.",
+          text: "Mỗi con số dưới đây được tính từ những lựa chọn của bạn trong bài vừa làm. Nó cho thấy cách phản ứng nào đang hiệu quả, chỗ nào còn yếu, và nên luyện gì tiếp.",
         }),
         el("p", {
           class: "verdict__meta",
@@ -111,7 +111,7 @@ export function renderEqResult(mount, { navigate }) {
         "div",
         { class: "verdict__side" },
         el("div", { class: "verdict__score", text: String(result.overall) }),
-        el("div", { class: "verdict__outof", text: "trung bình sáu kỹ năng /100" }),
+        el("div", { class: "verdict__outof", text: "trung bình sáu kỹ năng, trên thang 100" }),
       ),
     ),
   )
@@ -146,7 +146,7 @@ export function renderEqResult(mount, { navigate }) {
         el("h2", { class: "band__title", text: "So với lần trước" }),
         el("p", {
           class: "band__lead",
-          text: `Lần trước bạn làm đề ${previous.form} (${dateText(previous.finishedAt)}). Chỉ gọi là tiến bộ hay giảm khi lệch từ ${CHANGE_THRESHOLD} điểm trở lên; ít hơn thế là dao động bình thường.`,
+          text: `Lần trước bạn làm đề ${previous.form} (${dateText(previous.finishedAt)}). Chỉ tính là tiến bộ hoặc giảm khi điểm chênh từ ${CHANGE_THRESHOLD} trở lên; chênh ít hơn là dao động bình thường.`,
         }),
         el("ul", { class: "changes" }, rows),
       ),
@@ -183,7 +183,7 @@ export function renderEqResult(mount, { navigate }) {
         el("p", { class: "pair__name", text: `${d.name} · ${d.score}/100` }),
         el("p", { class: "prose", text: d.band?.meaning ?? "" }),
         d.evidence.missed.length ? el("ul", { class: "evidence" }, d.evidence.missed.map((m) => moment(m))) : null,
-        el("div", { class: "dim__exlist-head", text: "Hai bài tập bắt đầu ngay tuần này" }),
+        el("div", { class: "dim__exlist-head", text: "Hai bài tập để bắt đầu ngay tuần này" }),
         exerciseList(detail, { limit: 2 }),
         el("p", { class: "pair__cta" }, link(`/practice?skill=${d.key}`, `Luyện ${count} tình huống về ${d.name.toLowerCase()}`, "btn btn--accent")),
       )
@@ -218,7 +218,7 @@ export function renderEqResult(mount, { navigate }) {
   const dims = el("section", { class: "band band--soft result__block" })
   dims.append(
     el("h2", { class: "band__title", text: "Sáu kỹ năng" }),
-    el("p", { class: "band__lead", text: "Bấm vào từng kỹ năng để xem điểm này nghĩa là gì, kèm ví dụ và bài tập luyện." }),
+    el("p", { class: "band__lead", text: "Bấm vào từng kỹ năng để xem điểm đó nghĩa là gì, kèm ví dụ và bài tập." }),
   )
   const dimList = el("div", { class: "dims" })
   for (const dim of result.dimensions) {
@@ -240,19 +240,19 @@ export function renderEqResult(mount, { navigate }) {
       el(
         "div",
         { class: "ledger method" },
-        ledger("Từng tình huống", "Mỗi tình huống đo một kỹ năng chính (trọng số 1) và một đến hai kỹ năng phụ (trọng số 0,5). Mỗi lựa chọn có 0–3 điểm hiệu quả cho từng kỹ năng đó."),
-        ledger("Từng kỹ năng", "Điểm bạn đạt chia cho điểm của lựa chọn mạnh nhất ở cùng các tình huống, quy về thang 100. Chọn cách mạnh nhất ở mọi tình huống thì được đúng 100."),
-        ledger("Chưa đủ dữ liệu", "Một kỹ năng cần ít nhất 3 tình huống chính đã trả lời mới có điểm, để một lần bấm không quyết định cả kết quả."),
-        ledger("Số trung bình", "Trung bình cộng sáu kỹ năng, chỉ để theo dõi tiến độ. Hồ sơ thật là sáu kỹ năng và những tình huống đứng sau chúng."),
-        ledger("Giới hạn", "Đây là công cụ học tập, không phải thang đo tâm lý đã được kiểm định và không dùng để chẩn đoán. Điểm đổi theo ngày, theo tâm trạng và theo luyện tập — điều đó là bình thường."),
+        ledger("Từng tình huống", "Mỗi tình huống đo một kỹ năng chính (trọng số 1) và một hoặc hai kỹ năng phụ (trọng số 0,5). Mỗi lựa chọn được 0–3 điểm cho từng kỹ năng được đo."),
+        ledger("Từng kỹ năng", "Lấy điểm bạn đạt chia cho điểm tối đa có thể đạt ở đúng những tình huống đó, rồi quy về thang 100. Chọn cách mạnh nhất ở mọi tình huống thì được đúng 100."),
+        ledger("Chưa đủ dữ liệu", "Một kỹ năng phải có ít nhất 3 tình huống chính đã trả lời thì mới có điểm, để một lần bấm nhầm không làm lệch cả kết quả."),
+        ledger("Số trung bình", "Là trung bình cộng của sáu kỹ năng, chỉ để theo dõi tiến độ. Điều đáng xem là từng kỹ năng và những tình huống đứng sau nó."),
+        ledger("Giới hạn", "Đây là công cụ học tập, không phải thang đo tâm lý đã được kiểm định và không dùng để chẩn đoán. Điểm có thể đổi theo ngày, theo tâm trạng và theo việc bạn luyện tập, và điều đó là bình thường."),
       ),
     ),
   )
 
   /* -------------------------------------------------------------- hành động */
-  const wipe = el("button", { class: "btn btn--ghost", attrs: { type: "button" } }, el("span", { class: "pxf-in", text: "Xoá dữ liệu trên máy này" }))
+  const wipe = el("button", { class: "btn btn--ghost", attrs: { type: "button" } }, el("span", { class: "pxf-in", text: "Xóa dữ liệu trên máy này" }))
   wipe.addEventListener("click", () => {
-    if (!window.confirm("Xoá mọi lần đánh giá và lượt luyện đã lưu trên trình duyệt này? Không thể hoàn tác.")) return
+    if (!window.confirm("Xóa mọi lần đánh giá và lượt luyện đã lưu trên trình duyệt này? Không thể hoàn tác.")) return
     clearAllData()
     navigate("/")
   })
@@ -266,7 +266,7 @@ export function renderEqResult(mount, { navigate }) {
       wipe,
       el("p", {
         class: "actions__note",
-        text: "Kết quả chỉ được lưu trên trình duyệt này để bạn so sánh lần sau — không có tài khoản, không gửi câu trả lời lên máy chủ.",
+        text: "Kết quả chỉ được lưu trên trình duyệt này để bạn so sánh ở lần sau. Không có tài khoản, và câu trả lời của bạn không được gửi lên máy chủ.",
       }),
     ),
   )

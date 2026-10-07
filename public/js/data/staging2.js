@@ -1,13 +1,13 @@
 /* staging2.js — dàn dựng cảnh cho EU_03 · EU_04 · EU_05 · ER_01 · ER_02 · ER_03 · ER_04 · ER_05 (xem data/staging.js). */
 export const STAGING_2 = {
   EU_03: {
-    environment: "bedroom",
-    label: "TỐI · TIN NHẮN CHƯA TRẢ LỜI",
-    place: "ĐIỆN THOẠI",
+    environment: "street",
+    label: "CHIỀU · TRẠM XE BUÝT",
+    place: "TRẠM XE BUÝT",
     chatTitle: "Thảo",
     cast: [
       { id: "player", x: 95, mood: "neutral", name: "Bạn" },
-      { id: "kid", x: 175, mood: "neutral", name: "Bin" },
+      { id: "classmate", x: 180, mood: "neutral", name: "Minh" },
     ],
     speakers: ["narrator", "narrator", "narrator"],
     timeline: [
@@ -15,8 +15,8 @@ export const STAGING_2 = {
       { at: 300, do: "chat", from: "Bạn", me: true, text: "Thảo ơi, cậu rảnh chưa? Tớ có chuyện muốn kể." },
       { at: 1400, do: "chat", from: "Bạn", me: true, text: "Cậu ơi? Có đó không?" },
       { at: 2400, char: "player", do: "emote", kind: "ellipsis" },
-      { at: 3000, char: "player", do: "think", text: "Thảo vẫn đang online ở nhóm khác mà…" },
-      { at: 3800, char: "kid", do: "say", text: "Mẹ gọi xuống ăn cơm kìa!" },
+      { at: 3000, char: "player", do: "think", text: "Thảo vẫn online ở nhóm khác mà…" },
+      { at: 3800, char: "classmate", do: "say", text: "Ê, xe buýt tới rồi kìa!" },
       { at: 4500, char: "player", do: "emote", kind: "sweat" },
       { at: 4800, do: "zoom", target: "player", scale: 1.25 },
       { at: 5000, char: "player", do: "shiver" },
@@ -33,7 +33,7 @@ export const STAGING_2 = {
         { at: 3800, char: "player", do: "emote", kind: "sweat" },
       ],
       B: [
-        { at: 100, char: "player", do: "think", text: "Thảo có việc riêng. Cái 'mình làm gì rồi' là do mình lo." },
+        { at: 100, char: "player", do: "think", text: "Thảo có việc riêng. Ý nghĩ “mình làm gì sai” là do mình lo." },
         { at: 1400, char: "player", do: "idle", mood: "neutral" },
         { at: 1700, do: "chat", from: "Bạn", me: true, text: "Khi nào rảnh thì nhắn tớ nhé, không gấp đâu!" },
         { at: 2800, do: "chat", from: "Thảo", text: "Ôi xin lỗi, nay tớ bận ôn bài! Tối tớ gọi cậu nha." },
@@ -44,7 +44,7 @@ export const STAGING_2 = {
         { at: 100, char: "player", do: "think", text: "Không có gì. Bận thì bận." },
         { at: 1100, char: "player", do: "idle", mood: "neutral" },
         { at: 1500, do: "chatClose" },
-        { at: 2000, char: "kid", do: "say", text: "Ê, xuống ăn cơm đi chứ!" },
+        { at: 2000, char: "classmate", do: "say", text: "Ê, lên xe đi chứ, sắp chạy rồi!" },
         { at: 2800, char: "player", do: "nodYes" },
         { at: 3200, char: "player", do: "emote", kind: "ellipsis" },
         { at: 3600, char: "player", do: "emote", kind: "gloom" },
@@ -61,9 +61,9 @@ export const STAGING_2 = {
   },
 
   EU_04: {
-    environment: "corridor",
-    label: "RA CHƠI · NHÓM LỚP",
-    place: "NHÓM LỚP",
+    environment: "street",
+    label: "TAN HỌC · VỈA HÈ CỔNG TRƯỜNG",
+    place: "NGOÀI CỔNG TRƯỜNG",
     chatTitle: "Nhóm lớp 11A2",
     cast: [
       { id: "player", x: 95, mood: "neutral", name: "Bạn" },
@@ -90,7 +90,7 @@ export const STAGING_2 = {
       A: [
         { at: 100, char: "player", do: "think", text: "Phải trả lời ngay, càng nhanh càng tốt!" },
         { at: 1000, char: "player", do: "angry" },
-        { at: 1200, do: "chat", from: "Bạn", me: true, text: "Ai đăng vậy?! Buồn cười lắm hả? Mấy người ác thật!" },
+        { at: 1200, do: "chat", from: "Bạn", me: true, text: "Ai đăng vậy?! Vui lắm hả? Ác vừa thôi!" },
         { at: 2300, do: "chat", from: "Phúc", text: "Ơ bình tĩnh, đùa thôi mà." },
         { at: 3000, char: "friend", do: "say", text: "Khoan… cậu gửi luôn rồi hả?" },
         { at: 3800, char: "player", do: "emote", kind: "sweat" },
@@ -171,7 +171,7 @@ export const STAGING_2 = {
         { at: 3500, char: "friend", do: "emote", kind: "sparkle" },
       ],
       C: [
-        { at: 100, char: "player", do: "think", text: "Quên được thì tốt hơn. Coi như không có gì." },
+        { at: 100, char: "player", do: "think", text: "Quên đi cho nhẹ. Coi như không có gì." },
         { at: 1200, char: "player", do: "happy" },
         { at: 1500, char: "friend2", do: "emote", kind: "question" },
         { at: 2000, char: "friend", do: "lookAt", target: "player" },
@@ -192,9 +192,9 @@ export const STAGING_2 = {
   },
 
   ER_01: {
-    environment: "classroom",
-    label: "SAU GIỜ HỌC · NHÓM THUYẾT TRÌNH",
-    place: "LỚP 11A2",
+    environment: "cafe",
+    label: "SAU GIỜ HỌC · QUÁN TRÀ SỮA",
+    place: "QUÁN TRÀ SỮA",
     chatTitle: "Hùng",
     cast: [
       { id: "player", x: 70, mood: "neutral", name: "Bạn" },
@@ -204,11 +204,12 @@ export const STAGING_2 = {
     speakers: ["narrator", "narrator", "narrator", "narrator"],
     timeline: [
       { at: 0, char: "classmate", do: "idle", mood: "neutral" },
+      { at: 0, do: "tint", tone: "warm" },
       { at: 300, char: "player", do: "say", text: "Hùng ơi, mai thuyết trình rồi, phần cậu xong chưa?" },
       { at: 1600, char: "classmate", do: "annoyed" },
       { at: 1800, char: "classmate", do: "say", text: "Đừng hối nữa, lát tôi làm." },
       { at: 2700, char: "friend", do: "lookAt", target: "classmate" },
-      { at: 2900, char: "friend", do: "say", text: "Mai thuyết trình rồi mà, Hùng ơi…" },
+      { at: 2900, char: "friend", do: "say", text: "Mai thuyết trình rồi mà Hùng ơi…" },
       { at: 3700, char: "player", do: "emote", kind: "anger" },
       { at: 3900, char: "player", do: "annoyed" },
       { at: 4200, do: "zoom", target: "player", scale: 1.3 },
@@ -298,7 +299,7 @@ export const STAGING_2 = {
         { at: 3300, char: "player", do: "emote", kind: "sparkle" },
       ],
       C: [
-        { at: 100, char: "player", do: "think", text: "Học kỹ vậy mà vẫn thế… chắc mình không có năng khiếu." },
+        { at: 100, char: "player", do: "think", text: "Học kỹ vậy mà vẫn thế… chắc mình không có khiếu." },
         { at: 1300, char: "player", do: "slump" },
         { at: 1500, char: "player", do: "emote", kind: "gloom" },
         { at: 2000, char: "friend", do: "say", text: "Đừng nghĩ vậy, mới một bài thôi mà." },
@@ -319,7 +320,7 @@ export const STAGING_2 = {
   ER_03: {
     environment: "classroom",
     label: "BUỔI SINH HOẠT · CÂU LẠC BỘ",
-    place: "BUỔI SINH HOẠT",
+    place: "CÂU LẠC BỘ",
     cast: [
       { id: "player", x: 110, mood: "neutral", name: "Bạn" },
       { id: "friend", x: 190, mood: "neutral", name: "Vy" },
@@ -328,7 +329,7 @@ export const STAGING_2 = {
     speakers: ["narrator", "narrator", "narrator"],
     timeline: [
       { at: 0, char: "classmate2", do: "face", dir: "left" },
-      { at: 300, char: "classmate2", do: "say", text: "Phần banner hỏng hết rồi, em làm gì mà ra thế này?" },
+      { at: 300, char: "classmate2", do: "say", text: "Banner hỏng hết rồi, em làm kiểu gì vậy?" },
       { at: 1300, char: "classmate2", do: "emote", kind: "anger" },
       { at: 1500, char: "player", do: "surprised" },
       { at: 1700, char: "player", do: "emote", kind: "exclaim" },
@@ -337,7 +338,7 @@ export const STAGING_2 = {
       { at: 2800, char: "player", do: "nervous" },
       { at: 3000, char: "player", do: "emote", kind: "sweat" },
       { at: 3400, do: "zoom", target: "player", scale: 1.3 },
-      { at: 3700, char: "player", do: "think", text: "Cổ nghẹn lại… cả buổi đang nhìn mình." },
+      { at: 3700, char: "player", do: "think", text: "Cổ nghẹn lại… cả nhóm đang nhìn mình." },
       { at: 4400, do: "tint", tone: "tense" },
       { at: 4700, char: "player", do: "shiver" },
       { at: 5400, do: "decisionPoint" },
@@ -346,7 +347,7 @@ export const STAGING_2 = {
       A: [
         { at: 100, char: "player", do: "say", text: "Phần đó không phải em làm ạ." },
         { at: 1200, char: "classmate2", do: "emote", kind: "anger" },
-        { at: 1500, char: "classmate2", do: "say", text: "Em cãi lại anh trước mọi người à?" },
+        { at: 1500, char: "classmate2", do: "say", text: "Em cãi anh trước mặt mọi người à?" },
         { at: 2500, char: "friend", do: "emote", kind: "sweat" },
         { at: 2800, char: "friend", do: "stepBack", target: "classmate2" },
         { at: 3100, do: "tint", tone: "tense" },
@@ -365,7 +366,7 @@ export const STAGING_2 = {
         { at: 100, char: "player", do: "say", text: "Phần đó không phải em làm ạ. Sau buổi em xin nói riêng." },
         { at: 1700, char: "classmate2", do: "emote", kind: "ellipsis" },
         { at: 2100, char: "classmate2", do: "nodYes" },
-        { at: 2400, char: "classmate2", do: "say", text: "Ừ. Hết buổi anh em mình nói nhé." },
+        { at: 2400, char: "classmate2", do: "say", text: "Ừ. Hết buổi anh em mình nói chuyện nhé." },
         { at: 3400, do: "tint", tone: "warm" },
         { at: 3500, char: "friend", do: "emote", kind: "sparkle" },
         { at: 3600, char: "player", do: "idle", mood: "neutral" },
@@ -394,7 +395,7 @@ export const STAGING_2 = {
       { at: 0, char: "player", do: "idle", mood: "happy" },
       { at: 200, char: "player", do: "say", text: "Cuối tuần này đi xem phim với tớ không?" },
       { at: 1300, char: "player", do: "emote", kind: "sparkle" },
-      { at: 1700, char: "friend", do: "say", text: "Thôi, chắc mình không đi được." },
+      { at: 1700, char: "friend", do: "say", text: "Thôi, chắc tớ không đi được." },
       { at: 2500, char: "friend", do: "nervous" },
       { at: 2700, char: "friend", do: "emote", kind: "ellipsis" },
       { at: 3100, char: "player", do: "idle", mood: "neutral" },
@@ -416,9 +417,9 @@ export const STAGING_2 = {
         { at: 3200, do: "tint", tone: "dim" },
       ],
       B: [
-        { at: 100, char: "player", do: "say", text: "Cậu vướng việc hay không thích đi xem phim?" },
+        { at: 100, char: "player", do: "say", text: "Cậu bận thật hay không thích xem phim?" },
         { at: 1200, char: "friend", do: "emote", kind: "exclaim" },
-        { at: 1400, char: "friend", do: "say", text: "Mình phải về quê thăm bà, vướng thật mà!" },
+        { at: 1400, char: "friend", do: "say", text: "Tớ phải về quê thăm bà, vướng thật mà!" },
         { at: 2500, char: "player", do: "nodYes" },
         { at: 2700, char: "player", do: "happy" },
         { at: 2900, do: "tint", tone: "warm" },
@@ -445,9 +446,9 @@ export const STAGING_2 = {
   },
 
   ER_05: {
-    environment: "bedroom",
-    label: "TỐI · TUẦN DEADLINE",
-    place: "PHÒNG BẠN",
+    environment: "home",
+    label: "TỐI · TUẦN DEADLINE · PHÒNG KHÁCH",
+    place: "NHÀ BẠN",
     chatTitle: "Cô Hạnh",
     cast: [
       { id: "player", x: 95, mood: "concerned", name: "Bạn" },
@@ -456,11 +457,12 @@ export const STAGING_2 = {
     speakers: ["narrator", "narrator", "narrator"],
     timeline: [
       { at: 0, char: "player", do: "idle", mood: "concerned" },
+      { at: 0, do: "tint", tone: "warm" },
       { at: 300, char: "player", do: "emote", kind: "ellipsis" },
-      { at: 900, char: "player", do: "think", text: "Bốn bài cùng hạn… nhìn danh sách mà chẳng làm được gì." },
+      { at: 900, char: "player", do: "think", text: "Bốn bài cùng hạn… nhìn danh sách mà đầu trống rỗng." },
       { at: 2200, char: "player", do: "emote", kind: "zzz" },
       { at: 2800, char: "player", do: "slump" },
-      { at: 3200, char: "mom", do: "say", text: "Khuya rồi con, mẹ để ly sữa ở đây nhé." },
+      { at: 3200, char: "mom", do: "say", text: "Khuya rồi con. Mẹ để ly sữa ở đây nhé." },
       { at: 4100, char: "mom", do: "lookAt", target: "player" },
       { at: 4300, char: "player", do: "emote", kind: "sweat" },
       { at: 4700, do: "zoom", target: "player", scale: 1.3 },
@@ -472,14 +474,14 @@ export const STAGING_2 = {
       A: [
         { at: 100, char: "player", do: "think", text: "Thức tới sáng làm cho xong hết. Kịp hạn là được." },
         { at: 1200, char: "player", do: "nodYes" },
-        { at: 1500, char: "mom", do: "say", text: "Con đừng thức hoài như vậy…" },
+        { at: 1500, char: "mom", do: "say", text: "Con đừng thức khuya hoài thế…" },
         { at: 2400, char: "player", do: "emote", kind: "zzz" },
         { at: 2800, char: "player", do: "slump" },
         { at: 3200, do: "tint", tone: "dim" },
       ],
       B: [
-        { at: 100, char: "player", do: "think", text: "Quá tải rồi. Xin giãn hạn hai bài rồi đi ngủ đã." },
-        { at: 1100, do: "chat", from: "Bạn", me: true, text: "Cô ơi, em xin giãn hạn hai bài được không ạ? Em cảm ơn cô." },
+        { at: 100, char: "player", do: "think", text: "Quá tải rồi. Xin gia hạn hai bài rồi đi ngủ đã." },
+        { at: 1100, do: "chat", from: "Bạn", me: true, text: "Cô ơi, em xin gia hạn hai bài được không ạ? Em cảm ơn cô." },
         { at: 2300, char: "player", do: "idle", mood: "neutral" },
         { at: 2600, char: "player", do: "emote", kind: "zzz" },
         { at: 3200, char: "player", do: "emote", kind: "question" },
@@ -487,7 +489,7 @@ export const STAGING_2 = {
       C: [
         { at: 100, char: "player", do: "think", text: "Dừng mười phút. Chọn đúng một bài quan trọng nhất." },
         { at: 1200, char: "player", do: "nodYes" },
-        { at: 1600, do: "chat", from: "Bạn", me: true, text: "Cô ơi, em xin giãn hạn mấy bài còn lại, em làm xong bài quan trọng trước ạ." },
+        { at: 1600, do: "chat", from: "Bạn", me: true, text: "Cô ơi, em xin gia hạn mấy bài còn lại. Em làm xong bài quan trọng trước ạ." },
         { at: 2800, do: "tint", tone: "warm" },
         { at: 3000, char: "player", do: "emote", kind: "sparkle" },
         { at: 3200, char: "mom", do: "nodYes" },

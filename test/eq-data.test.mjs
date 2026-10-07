@@ -180,7 +180,7 @@ eq(Object.values(byDomain).reduce((a, b) => a + b, 0), SCENARIOS.length, "SCENAR
 console.log(`  tình huống chữ theo kỹ năng chính: ${SKILLS.map((k) => `${k} ${byDomain[k]}`).join(" · ")}`)
 
 /* ── 7. Dàn dựng cảnh cho tình huống chữ ──────────────────────────────── */
-const PLACES = ["classroom", "schoolyard", "canteen", "corridor", "bedroom", "library"]
+const PLACES = ["classroom", "schoolyard", "canteen", "corridor", "bedroom", "library", "home", "street", "park", "cafe"]
 const ACTIONS = new Set([
   "walkTo", "leave", "idle", "talk", "nod", "shakeHead", "point", "lookAt", "turn", "face", "happy", "sad",
   "angry", "annoyed", "surprised", "nervous", "thinking", "reaction", "screenShake", "cameraFocus", "fade",
@@ -222,7 +222,9 @@ for (const [id, st] of Object.entries(STAGING)) {
   const castIds = new Set(cast.map((c) => c.id))
   eq(castIds.size, cast.length, `${at} không lặp nhân vật`)
   ok(castIds.has("player"), `${at} có người chơi`)
-  ok(cast.length >= 2 && cast.length <= 4, `${at} 2–4 nhân vật`)
+  // Cảnh chỉ có người chơi cầm điện thoại (tin nhắn nhóm) được phép đứng một mình.
+  const phoneOnly = [...(st.timeline ?? []), ...Object.values(st.consequences ?? {}).flat()].some((e) => e.do === "chat")
+  ok(cast.length >= (phoneOnly ? 1 : 2) && cast.length <= 4, `${at} ${phoneOnly ? "1" : "2"}–4 nhân vật`)
   for (const c of cast) {
     ok(CHARACTERS[c.id], `${at} nhân vật "${c.id}" có sprite`)
     ok(c.x >= 20 && c.x <= 300, `${at} ${c.id} đứng trong khung`, `${c.x}`)

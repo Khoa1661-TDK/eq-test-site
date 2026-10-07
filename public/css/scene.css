@@ -546,9 +546,43 @@
   cursor: pointer;
 }
 
-/* danh sách lựa chọn trong cảnh: giữ min-height để chạm thoải mái */
+/* danh sách lựa chọn trong cảnh: nằm dưới khung thoại, trên nền giấy sáng của trang, nên mỗi
+   lựa chọn là một ô tối đặc (cùng màu khung thoại) để không bị chìm vào nền. */
 .scn-board .choice {
   min-height: 52px;
+  background: var(--console-bg);
+  border: 2px solid var(--ink);
+  color: var(--console-text);
+  box-shadow: 4px 4px 0 rgba(22, 24, 28, 0.18);
+}
+@media (hover: hover) {
+  .scn-board .choice:hover {
+    background: var(--amber);
+    border-color: var(--ink);
+    color: var(--ink);
+  }
+  .scn-board .choice:hover .choice__code {
+    background: var(--ink);
+    color: var(--amber);
+  }
+}
+.scn-board .choice.is-confirmed {
+  background: var(--paper);
+  border-color: var(--ink);
+  color: var(--ink);
+}
+.scn-board .choice__code {
+  background: var(--amber);
+  color: var(--ink);
+}
+.scn-board .choice.is-active {
+  background: var(--amber);
+  border-color: var(--ink);
+  color: var(--ink);
+}
+.scn-board .choice.is-active .choice__code {
+  background: var(--ink);
+  color: var(--amber);
 }
 
 /* ------------------------------------------------------------------ phản hồi học tập */

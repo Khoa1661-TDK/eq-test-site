@@ -45,8 +45,8 @@ export function renderPractice(mount, { navigate, skill = null }) {
         "section",
         { class: "band band--soft result__block" },
         el("h1", { class: "band__title", text: "Luyện EQ" }),
-        el("p", { class: "band__lead", text: "Chọn một kỹ năng, hoặc để hệ thống đưa bạn đi qua các tình huống ngẫu nhiên." }),
-        el("p", { class: "prose", text: "Ở đây không có điểm và không có xếp hạng. Sau mỗi lựa chọn, bạn sẽ thấy mình vừa dùng chiến lược gì, hệ quả thường thấy của nó, cách mạnh hơn, và một câu để nhớ." }),
+        el("p", { class: "band__lead", text: "Chọn một kỹ năng, hoặc làm lần lượt các tình huống ngẫu nhiên." }),
+        el("p", { class: "prose", text: "Ở đây không có điểm hay xếp hạng. Sau mỗi lựa chọn, bạn sẽ thấy cách mình vừa chọn, điều thường xảy ra sau đó, một cách mạnh hơn, và một câu để nhớ." }),
         growthKeys.length
           ? el("p", { class: "prose" }, el("strong", { text: "Gợi ý từ lần đánh giá gần nhất: " }), growthKeys.map((k) => EQ_BY_KEY[k].name.toLowerCase()).join(" và "), ".")
           : null,
