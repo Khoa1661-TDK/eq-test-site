@@ -13,6 +13,8 @@ import { EQ_PATTERNS, PATTERN_KEYS } from "../public/js/data/eqPatterns.js"
 import { SCENARIOS, SCENARIO_BY_ID, SCENARIOS_BY_DOMAIN, EQ_DOMAIN_ORDER } from "../public/js/data/scenarios.js"
 import { SCENE_SCENARIOS } from "../public/js/data/sceneScenarios.js"
 import { FORMS, FORM_ORDER, PRACTICE_IDS } from "../public/js/data/forms.js"
+import { STAGING } from "../public/js/data/staging.js"
+import { CHARACTERS } from "../public/js/scene/sprites.js"
 import {
   ITEMS,
   ITEM_BY_ID,
@@ -176,6 +178,66 @@ ok(PRACTICE_IDS.every((id) => ITEM_BY_ID[id]), "kho luyện chỉ chứa tình h
 const byDomain = Object.fromEntries(SKILLS.map((k) => [k, (SCENARIOS_BY_DOMAIN[k] ?? []).length]))
 eq(Object.values(byDomain).reduce((a, b) => a + b, 0), SCENARIOS.length, "SCENARIOS_BY_DOMAIN phủ đủ mọi tình huống chữ")
 console.log(`  tình huống chữ theo kỹ năng chính: ${SKILLS.map((k) => `${k} ${byDomain[k]}`).join(" · ")}`)
+
+/* ── 7. Dàn dựng cảnh cho tình huống chữ ──────────────────────────────── */
+const PLACES = ["classroom", "schoolyard", "canteen", "corridor", "bedroom", "library"]
+const ACTIONS = new Set([
+  "walkTo", "leave", "idle", "talk", "nod", "shakeHead", "point", "lookAt", "turn", "face", "happy", "sad",
+  "angry", "annoyed", "surprised", "nervous", "thinking", "reaction", "screenShake", "cameraFocus", "fade",
+  "say", "think", "emote", "hop", "shiver", "slump", "lean", "stepBack", "bounce", "nodYes", "shakeNo",
+  "zoom", "zoomReset", "pan", "tint", "chat", "typing", "chatClose", "decisionPoint",
+])
+const EMOTE_KINDS = new Set(["sweat", "anger", "heart", "sparkle", "question", "exclaim", "ellipsis", "tear", "music", "zzz", "gloom"])
+/** Bật khi mọi tình huống chữ đã có dàn dựng. */
+const STRICT_STAGING = SCENARIOS.every((s) => STAGING[s.id])
+
+function checkEvents(events, at, castIds, { needsDecision }) {
+  ok(Array.isArray(events) && events.length > 0, `${at} có sự kiện`)
+  if (!Array.isArray(events)) return
+  let last = -1
+  for (const ev of events) {
+    ok(ACTIONS.has(ev.do), `${at} hành động "${ev.do}" có thật`)
+    ok(Number.isFinite(ev.at) && ev.at >= last, `${at} mốc thời gian tăng dần`, `${ev.at}`)
+    last = ev.at ?? last
+    if (ev.char) ok(castIds.has(ev.char), `${at} nhân vật "${ev.char}" có trong cảnh`)
+    if (["walkTo"].includes(ev.do)) ok(ev.x >= 20 && ev.x <= 300, `${at} walkTo x trong 20..300`, `${ev.x}`)
+    if (ev.do === "say" || ev.do === "think") ok(typeof ev.text === "string" && ev.text.length > 0 && ev.text.length <= 70 && VIETNAMESE.test(ev.text), `${at} say ≤ 70 ký tự tiếng Việt`, ev.text)
+    if (ev.do === "emote") ok(EMOTE_KINDS.has(ev.kind), `${at} emote "${ev.kind}" có thật`)
+    if (ev.do === "chat") ok(typeof ev.text === "string" && ev.text.length <= 90, `${at} tin nhắn ≤ 90 ký tự`)
+    if (["lean", "stepBack", "lookAt", "zoom"].includes(ev.do) && typeof ev.target === "string") ok(castIds.has(ev.target), `${at} target "${ev.target}" có trong cảnh`)
+  }
+  if (needsDecision) eq(events.at(-1)?.do, "decisionPoint", `${at} kết thúc bằng decisionPoint`)
+  else ok(!events.some((e) => e.do === "decisionPoint"), `${at} hậu quả không có decisionPoint`)
+  const end = events.at(-1)?.at ?? 0
+  ok(end <= (needsDecision ? 8000 : 6000), `${at} không kéo quá dài`, `${end}ms`)
+}
+
+for (const [id, st] of Object.entries(STAGING)) {
+  const at = `[stage ${id}]`
+  const item = SCENARIO_BY_ID[id]
+  ok(item, `${at} là một tình huống chữ có thật`)
+  if (!item) continue
+  ok(PLACES.includes(st.environment), `${at} bối cảnh hợp lệ`, st.environment)
+  const cast = Array.isArray(st.cast) ? st.cast : []
+  const castIds = new Set(cast.map((c) => c.id))
+  eq(castIds.size, cast.length, `${at} không lặp nhân vật`)
+  ok(castIds.has("player"), `${at} có người chơi`)
+  ok(cast.length >= 2 && cast.length <= 4, `${at} 2–4 nhân vật`)
+  for (const c of cast) {
+    ok(CHARACTERS[c.id], `${at} nhân vật "${c.id}" có sprite`)
+    ok(c.x >= 20 && c.x <= 300, `${at} ${c.id} đứng trong khung`, `${c.x}`)
+    ok(typeof c.name === "string" && c.name.length > 0, `${at} ${c.id} có tên`)
+  }
+  eq(st.speakers?.length, item.dialogue.length, `${at} mỗi câu thoại có người nói`)
+  for (const who of st.speakers ?? []) ok(who === "narrator" || castIds.has(who), `${at} người nói "${who}" có trong cảnh`)
+  checkEvents(st.timeline, `${at} timeline`, castIds, { needsDecision: true })
+  for (const choice of item.choices) {
+    const letter = choice.id.slice(id.length + 1)
+    checkEvents(st.consequences?.[letter], `${at} hậu quả ${letter}`, castIds, { needsDecision: false })
+  }
+}
+console.log(`  dàn dựng: ${Object.keys(STAGING).length}/${SCENARIOS.length} tình huống chữ${STRICT_STAGING ? "" : " (chưa đủ — chưa kiểm chặt)"}`)
+if (STRICT_STAGING) ok(SCENARIOS.every((s) => STAGING[s.id]), "mọi tình huống chữ đều có dàn dựng")
 
 /* ── Kết luận ──────────────────────────────────────────────────────────── */
 if (failures.length) {

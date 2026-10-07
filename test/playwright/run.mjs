@@ -111,6 +111,16 @@ async function playText(page, item, choice) {
   await pickByText(page, ".stage .scene", choice.text)
 }
 
+/** Tình huống chữ có dàn dựng được diễn như cảnh động; còn lại dùng khung thoại. */
+async function playAny(page, item, choice) {
+  for (let i = 0; i < 40; i += 1) {
+    if (await page.locator(".scene-stage-host .scn-stage").count()) return playScene(page, item, choice)
+    if (await page.locator(".stage .scene").count()) return playText(page, item, choice)
+    await page.waitForTimeout(150)
+  }
+  check(`«${item.title}» hiện ra`, false)
+}
+
 async function finishSeeded(page, current, pick) {
   const [sceneId, textId] = current.order
   await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded" })
@@ -127,9 +137,8 @@ async function finishSeeded(page, current, pick) {
   await page.getByText("Tiếp tục bài đang làm").click()
   const scene = ITEM_BY_ID[sceneId]
   await playScene(page, scene, pick(scene))
-  await page.waitForSelector(".stage .scene", { timeout: 15000 })
   const text = ITEM_BY_ID[textId]
-  await playText(page, text, pick(text))
+  await playAny(page, text, pick(text))
   for (let i = 0; i < 60 && !(await page.locator(".result").count()); i += 1) {
     const submit = page.locator(".hud__actions .btn--accent")
     if (await submit.isVisible().catch(() => false)) await submit.click().catch(() => {})
@@ -167,12 +176,13 @@ console.log("— luyện tập —")
 await page.goto(`${BASE}/practice`, { waitUntil: "networkidle" })
 check("trang luyện có 6 thẻ kỹ năng", (await page.locator(".skills .skill").count()) === 6)
 await page.locator(".skills .skill").first().click()
-await page.waitForSelector(".stage .scene")
-for (let i = 0; i < 80 && !(await choicesOpen(page, ".stage .scene")); i += 1) {
-  await page.evaluate(() => document.querySelector(".stage .scene")?.click())
-  await page.waitForTimeout(80)
+await page.waitForSelector(".stage .scene, .scene-stage-host .scn-stage")
+const practiceScope = (await page.locator(".scene-stage-host .scn-stage").count()) ? ".scene-stage-host" : ".stage .scene"
+for (let i = 0; i < 120 && !(await choicesOpen(page, practiceScope)); i += 1) {
+  await page.evaluate((sc) => document.querySelector(sc === ".scene-stage-host" ? ".scene-stage-host .scn-stage" : ".stage .scene")?.click(), practiceScope)
+  await page.waitForTimeout(120)
 }
-await page.locator(".stage .scene .choice").first().click()
+await page.locator(`${practiceScope} .choice`).first().click()
 await page.waitForTimeout(1500)
 const reps = await page.evaluate(() => JSON.parse(localStorage.getItem("eq_practice_v2") || "{}").reps?.length ?? 0)
 check("một lượt luyện được ghi lại", reps === 1, `${reps}`)

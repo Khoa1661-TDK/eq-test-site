@@ -7,6 +7,7 @@ import { el, frame } from "../core/dom.js"
 import { sound, soundToggle } from "../core/sound.js"
 import { createQuestionScene } from "../scene/questionScene.js"
 import { createSceneRuntime } from "../scene/sceneRuntime.js"
+import { isStaged, toScene } from "../scene/staged.js"
 import {
   ITEM_BY_ID,
   RETAKE_PRACTICE_REPS,
@@ -196,11 +197,11 @@ export function renderAssessment(mount, { navigate }) {
   function showItem(dir) {
     const item = current()
     if (!item) return
-    if (item.kind === "scene") {
+    if (isStaged(item)) {
       scene.el.remove()
       stopRuntime()
       stage.append(sceneHost)
-      runtime = createSceneRuntime(sceneHost, view(item), {
+      runtime = createSceneRuntime(sceneHost, toScene(view(item)), {
         onAnswer(choiceId) {
           const choice = item.choices.find((c) => c.id === choiceId)
           if (choice) handleAnswer(item, choice)
@@ -229,7 +230,7 @@ export function renderAssessment(mount, { navigate }) {
     const items = list()
     const item = items[index]
     const done = answeredCount()
-    countEl.textContent = item ? `${item.kind === "scene" ? "Cảnh" : "Tình huống"} ${index + 1}` : ""
+    countEl.textContent = item ? `Tình huống ${index + 1}` : ""
     progressEl.textContent = `${done}/${items.length} hoàn thành`
     backBtn.disabled = index <= 0
     submitBtn.style.display = done === items.length ? "" : "none"

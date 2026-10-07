@@ -12,6 +12,7 @@
    xen các micro-beat (blink, glance, weight-shift) XUNG QUANH khung mood đó. */
 
 import { el } from "../core/dom.js"
+import { CAST_COLORS, CAST_FRAMES, CAST_PALETTES } from "./castSprites.js"
 
 /* Bảng màu dùng chung cho mọi sprite trong một cảnh: giữ bộ màu nhỏ, ấm,
    khớp tông giấy/mực của trang. */
@@ -831,6 +832,12 @@ export const CHARACTERS = {
   classmate: COWORKER,
   friend: TEAMMATE,
   teacher: MANAGER,
+  classmate2: COWORKER,
+  friend2: TEAMMATE,
+  teacherF: CAST_FRAMES.teacherF,
+  // gia đình
+  mom: CAST_FRAMES.mom,
+  kid: CAST_FRAMES.kid,
 }
 
 /** Bảng màu riêng theo nhân vật (mặc định dùng P). */
@@ -838,6 +845,11 @@ export const CHARACTER_PALETTES = {
   classmate: { ...P, ...UNIFORM, R: SHIRT, r: SHIRT_SHADE },
   friend: { ...P, ...UNIFORM, Y: SHIRT, y: SHIRT_SHADE },
   teacher: { ...P, B: "#3b6e8a", b: "#2c5469" },
+  classmate2: { ...P, ...CAST_PALETTES.classmate2 },
+  friend2: { ...P, ...CAST_PALETTES.friend2 },
+  teacherF: { ...P, ...CAST_COLORS },
+  mom: { ...P, ...CAST_COLORS },
+  kid: { ...P, ...CAST_COLORS },
 }
 
 /**
@@ -883,4 +895,254 @@ export function createSpriteSet(container, frames, palette = P) {
     for (const [key, node] of set) node.classList.toggle("is-on", key === name)
   }
   return { setFrame, frames: set }
+}
+
+/* ================================================================== biểu cảm (emote)
+   Lưới điểm ảnh nhỏ hiện trên đầu nhân vật. Mỗi emote là một mảng chuỗi cùng độ dài;
+   "." = trong suốt. Khoá màu nằm trong EMOTE_PALETTE. */
+export const EMOTE_PALETTE = {
+  o: "#16181c", // viền mực
+  w: "#fbf8ee", // trắng kem
+  b: "#4a90c8", // xanh nước
+  B: "#a9d3ee", // xanh nhạt (ánh)
+  r: "#d1443b", // đỏ
+  R: "#f08a7e", // đỏ nhạt
+  y: "#f2c230", // vàng
+  Y: "#fff0a8", // vàng nhạt
+  p: "#e0607e", // hồng
+  v: "#7a58b8", // tím
+  g: "#8f9aa6", // xám
+  G: "#4a5058", // xám tối
+}
+
+export const EMOTES = {
+  sweat: [
+    "....o....",
+    "...oBo...",
+    "..oBbbo..",
+    "..oBbbo..",
+    ".oBbbbbo.",
+    ".obbbbbo.",
+    ".obbbbbo.",
+    "..obbbo..",
+    "...ooo...",
+  ],
+  anger: [
+    "oo.....oo",
+    "orro.orro",
+    ".orrrorr.",
+    "..orrro..",
+    "...orro..",
+    "..orrrro.",
+    ".orro.rro",
+    "orro...ro",
+    "oo.....oo",
+  ],
+  heart: [
+    ".ooo.ooo.",
+    "oRRroRrro",
+    "oRwrrrrro",
+    "orrrrrrro",
+    ".orrrrro.",
+    "..orrro..",
+    "...oro...",
+    "....o....",
+  ],
+  sparkle: [
+    "....o....",
+    "...oyo...",
+    "...oyo...",
+    ".oooYooo.",
+    "oyyYYYyyo",
+    ".oooYooo.",
+    "...oyo...",
+    "...oyo...",
+    "....o....",
+  ],
+  question: [
+    "..ooooo..",
+    ".obbbbbo.",
+    "obBooobbo",
+    "ooo.obbo.",
+    "....obo..",
+    "...obbo..",
+    "...obo...",
+    "...ooo...",
+    "...obo...",
+    "...ooo...",
+  ],
+  exclaim: [
+    "...ooo...",
+    "..orrro..",
+    "..orRro..",
+    "..orrro..",
+    "..orrro..",
+    "...orro..",
+    "...ooo...",
+    "...orro..",
+    "...ooo...",
+  ],
+  ellipsis: [
+    "ooo.ooo.ooo",
+    "oGo.oGo.oGo",
+    "ooo.ooo.ooo",
+  ],
+  tear: [
+    "...o...",
+    "..oBo..",
+    "..oBbo.",
+    ".oBbbbo",
+    ".obbbbo",
+    ".obbbbo",
+    "..obbo.",
+    "...oo..",
+  ],
+  music: [
+    "...oooooo",
+    "...ovvvvo",
+    "...ovooo.",
+    "...ov.o..",
+    "...ov.o..",
+    ".ooov.o..",
+    "ovvvo.o..",
+    "ovvvo....",
+    ".ooo.....",
+  ],
+  zzz: [
+    "ooooooo.",
+    "obbbbbo.",
+    "oooobbo.",
+    "...obo..",
+    "..obo...",
+    ".obooooo",
+    "obbbbbbo",
+    "oooooooo",
+  ],
+  gloom: [
+    "...ooo....",
+    "..oGGGo.o.",
+    ".oGGGGGoGo",
+    "oGGGGGGGGo",
+    "oGGGGGGGGo",
+    ".oooooooo.",
+    "..b..b..b.",
+    ".b..b..b..",
+    "..b..b....",
+  ],
+}
+
+/** Chuỗi SVG của một emote, hoặc "" nếu không có loại đó. */
+export function emoteSVG(kind) {
+  const rows = EMOTES[kind]
+  return rows ? svgFor(rows, EMOTE_PALETTE) : ""
+}
+
+/* ================================================================== người qua lại (EXTRAS)
+   Học sinh tí hon ~10x16 ô làm phông phía sau: đứng, đi (hai nhịp), ngồi. Ba biến thể đồng phục.
+   Khoá: o viền, h tóc, s da, E mắt, S áo, T quần/váy. */
+const EXTRA_FRAMES = {
+  stand: [
+    "..oooooo..",
+    ".ohhhhhho.",
+    ".ohhhhhho.",
+    ".ohssssho.",
+    ".osEssEso.",
+    ".osssssso.",
+    "..oossoo..",
+    ".oSSSSSSo.",
+    "oSSSSSSSSo",
+    "oSSSSSSSSo",
+    "oSSSSSSSSo",
+    ".oSSSSSSo.",
+    ".oTTTTTTo.",
+    ".oTTooTTo.",
+    ".oTo..oTo.",
+    ".ooo..ooo.",
+  ],
+  "walk-a": [
+    "..oooooo..",
+    ".ohhhhhho.",
+    ".ohhhhhho.",
+    ".ohssssho.",
+    ".osEssEso.",
+    ".osssssso.",
+    "..oossoo..",
+    ".oSSSSSSo.",
+    "oSSSSSSSSo",
+    "oSSSSSSSSo",
+    ".oSSSSSSo.",
+    ".oSSSSSSo.",
+    ".oTTTTTTo.",
+    "oTTTooTTTo",
+    "oTTo..oTTo",
+    "ooo....ooo",
+  ],
+  "walk-b": [
+    "..oooooo..",
+    ".ohhhhhho.",
+    ".ohhhhhho.",
+    ".ohssssho.",
+    ".osEssEso.",
+    ".osssssso.",
+    "..oossoo..",
+    ".oSSSSSSo.",
+    "oSSSSSSSSo",
+    "oSSSSSSSSo",
+    ".oSSSSSSo.",
+    ".oSSSSSSo.",
+    ".oTTTTTTo.",
+    ".oTTooTTo.",
+    "..oTooTo..",
+    "..ooo.ooo.",
+  ],
+  sit: [
+    "..oooooo..",
+    ".ohhhhhho.",
+    ".ohhhhhho.",
+    ".ohssssho.",
+    ".osEssEso.",
+    ".osssssso.",
+    "..oossoo..",
+    ".oSSSSSSo.",
+    "oSSSSSSSSo",
+    "oSSSSSSSSo",
+    ".oSSSSSSo.",
+    ".oTTTTTTTo",
+    ".oTTTTTTTo",
+    "..oTo..oTo",
+    "..ooo..ooo",
+    "..........",
+  ],
+}
+
+const EXTRA_PALETTES = [
+  { o: "#16181c", h: "#3a2a1f", s: "#f0c9a3", E: "#16181c", S: "#efece3", T: "#2e3f63" },
+  { o: "#16181c", h: "#23262b", s: "#d9a878", E: "#16181c", S: "#efece3", T: "#2e3f63" },
+  { o: "#16181c", h: "#6b4f39", s: "#f0c9a3", E: "#16181c", S: "#6b8047", T: "#3f4652" },
+]
+
+/* Con mèo ngủ cuộn tròn (phòng ngủ). */
+const EXTRA_CAT = [
+  "..o.o.......",
+  ".oGGGGoooo..",
+  "oGGGGGGGGGo.",
+  "oGgGGGGGGGGo",
+  ".oooooooooo.",
+]
+const CAT_PALETTE = { o: "#16181c", G: "#8f7a60", g: "#5d4530" }
+
+export const EXTRAS = {
+  frames: EXTRA_FRAMES,
+  palettes: EXTRA_PALETTES,
+  cat: EXTRA_CAT,
+  cols: 10,
+  rows: 16,
+}
+
+/** SVG của một người qua lại: variant 0-2, frame stand | walk-a | walk-b | sit | cat. */
+export function extraSVG(variant = 0, frame = "stand") {
+  if (frame === "cat") return svgFor(EXTRA_CAT, CAT_PALETTE)
+  const rows = EXTRA_FRAMES[frame] ?? EXTRA_FRAMES.stand
+  const pal = EXTRA_PALETTES[variant % EXTRA_PALETTES.length]
+  return svgFor(rows, pal)
 }

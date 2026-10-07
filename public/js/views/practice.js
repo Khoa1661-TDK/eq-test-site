@@ -7,6 +7,8 @@
 import { el, frame } from "../core/dom.js"
 import { sound, soundToggle } from "../core/sound.js"
 import { createQuestionScene } from "../scene/questionScene.js"
+import { createSceneRuntime } from "../scene/sceneRuntime.js"
+import { isStaged, toScene } from "../scene/staged.js"
 import { EQ_DIMENSIONS, EQ_BY_KEY } from "../data/eqDimensions.js"
 import {
   ITEM_BY_ID,
@@ -124,7 +126,8 @@ export function renderPractice(mount, { navigate, skill = null }) {
   mount.append(el("div", { class: "quiz-wrap" }, hud, stage))
 
   const scene = createQuestionScene({ onAnswer: handleAnswer, onAdvance: handleAdvance })
-  stage.append(scene.el)
+  const sceneHost = el("div", { class: "scene-stage-host assess-scene" })
+  let runtime = null
 
   /* ------------------------------------------------------------- điều phối */
   const current = () => queue[cursor] ?? null
@@ -140,10 +143,37 @@ export function renderPractice(mount, { navigate, skill = null }) {
     barEdge.style.left = `calc(${width} - 5px)`
   }
 
+  function stopRuntime() {
+    runtime?.destroy()
+    runtime = null
+    sceneHost.replaceChildren()
+  }
+
+  /** Tình huống có dàn dựng thì diễn như cảnh động; còn lại dùng khung thoại chữ. */
   function showCurrent() {
     const item = current()
     if (!item) return
     updateHud()
+    if (isStaged(item)) {
+      scene.el.remove()
+      stopRuntime()
+      if (!sceneHost.isConnected) stage.append(sceneHost)
+      let picked = null
+      runtime = createSceneRuntime(sceneHost, toScene(item), {
+        onAnswer(choiceId) {
+          picked = item.choices.find((c) => c.id === choiceId) ?? null
+          if (picked) handleAnswer(item, picked)
+        },
+        onDone() {
+          if (picked) showFeedback(item, picked)
+        },
+      })
+      runtime.start()
+      return
+    }
+    stopRuntime()
+    sceneHost.remove()
+    if (!scene.el.isConnected) stage.append(scene.el)
     scene.show(item, { dir: "next" })
   }
 
@@ -152,6 +182,35 @@ export function renderPractice(mount, { navigate, skill = null }) {
     practised[item.id] = choice.id
     recordPractice(item.id, choice.id)
     updateHud()
+  }
+
+  /** Phản hồi sau một cảnh động: điều vừa xảy ra, tín hiệu, cách mạnh hơn, câu để nhớ. */
+  function showFeedback(item, choice) {
+    const last = cursor >= queue.length - 1
+    const next = el("button", { class: "btn btn--primary", attrs: { type: "button" } }, el("span", { class: "pxf-in", text: last ? "Về danh sách kỹ năng" : "Tình huống tiếp theo →" }))
+    next.addEventListener("click", () => advanceToNext(last))
+    const tip = el(
+      "div",
+      { class: "scene-tip" },
+      frame(
+        el(
+          "div",
+          { class: "scene-tip__in" },
+          el("p", { class: "scene-tip__title", text: "Điều vừa xảy ra" }),
+          el("p", { class: "scene-tip__body", text: `${choice.strategy}. ${choice.consequence}` }),
+          el("p", { class: "scene-tip__title", text: "Tín hiệu quan trọng" }),
+          el("p", { class: "scene-tip__body", text: item.practice.signal }),
+          el("p", { class: "scene-tip__title", text: "Cách mạnh hơn" }),
+          el("p", { class: "scene-tip__body", text: item.practice.stronger }),
+          el("p", { class: "scene-tip__body scene-tip__dim", text: `Nhớ: ${item.practice.principle}` }),
+          el("p", { class: "story-actions" }, next),
+        ),
+        { size: "sm", cls: "scene-tip__frame" },
+      ),
+    )
+    sceneHost.append(tip)
+    tip.scrollIntoView({ block: "nearest", behavior: "smooth" })
+    next.focus({ preventScroll: true })
   }
 
   /** Sau hoạt ảnh xác nhận: không rời sân khấu, mà nối các nhịp phản hồi vào chính khung thoại. */
@@ -177,7 +236,7 @@ export function renderPractice(mount, { navigate, skill = null }) {
       navigate("/practice")
       return
     }
-    await scene.leave()
+    if (!runtime && scene.el.isConnected) await scene.leave()
     cursor += 1
     showCurrent()
     if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "auto" })
@@ -198,6 +257,7 @@ export function renderPractice(mount, { navigate, skill = null }) {
 
   return {
     destroy() {
+      stopRuntime()
       scene.destroy()
       mount.textContent = ""
     },

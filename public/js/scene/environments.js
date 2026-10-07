@@ -3,6 +3,8 @@
    STAGE_W × STAGE_H, mặt sàn ở GROUND_Y. Lớp chuyển động phụ (mưa, màn hình,
    khói, đồng hồ, lá cây) chạy bằng CSS animation theo class scn-*. */
 
+import { canteenSVG, corridorSVG, bedroomSVG, librarySVG } from "./environmentsMore.js"
+
 function officeSVG({ STAGE_W, STAGE_H, GROUND_Y }) {
   /* Phòng họp: tường giấy, cửa sổ mưa nhẹ, bảng trắng, bàn họp, ghế, cây,
      đồng hồ, màn hình máy tính nhấp nhẹ. Toàn bộ vẽ tay bằng rect SVG. */
@@ -254,10 +256,60 @@ function schoolyardSVG({ STAGE_W, STAGE_H, GROUND_Y }) {
 
 const ENVIRONMENTS = {
   office: officeSVG,
+  canteen: canteenSVG,
+  corridor: corridorSVG,
+  bedroom: bedroomSVG,
+  library: librarySVG,
   classroom: classroomSVG,
   schoolyard: schoolyardSVG,
 }
 
 export function environmentSVG(name, dims) {
   return (ENVIRONMENTS[name] ?? officeSVG)(dims)
+}
+
+/* Người qua lại phía sau theo bối cảnh (phông, nhỏ và nhạt hơn nhân vật chính).
+   {kind:"walk", y, from, to, dur, delay, variant}  — đi qua lại dọc y (mép chân), dur giây
+   {kind:"sit"|"chat"|"stand", x, y, variant}       — đứng/ngồi tại chỗ
+   {kind:"cat", x, y}                               — mèo ngủ
+   y là toạ độ mép chân trong khung 320x200; cảnh có thể ghi đè bằng scene.extras. */
+export const ENV_AMBIENT = {
+  classroom: [
+    { kind: "walk", y: 179, from: -30, to: 350, dur: 16, delay: 1, variant: 0 },
+    { kind: "walk", y: 177, from: 350, to: -30, dur: 20, delay: 7, variant: 1 },
+    { kind: "chat", x: 232, y: 178, variant: 0 },
+    { kind: "chat", x: 246, y: 178, variant: 2 },
+  ],
+  schoolyard: [
+    { kind: "walk", y: 180, from: -30, to: 350, dur: 14, delay: 0, variant: 1 },
+    { kind: "walk", y: 177, from: 350, to: -30, dur: 18, delay: 5, variant: 0 },
+    { kind: "chat", x: 20, y: 178, variant: 2 },
+    { kind: "chat", x: 34, y: 178, variant: 0 },
+  ],
+  canteen: [
+    { kind: "walk", y: 179, from: -30, to: 350, dur: 18, delay: 2, variant: 0 },
+    { kind: "sit", x: 40, y: 179, variant: 1 },
+    { kind: "sit", x: 252, y: 179, variant: 2 },
+    { kind: "stand", x: 150, y: 178, variant: 0 },
+  ],
+  corridor: [
+    { kind: "walk", y: 179, from: -30, to: 350, dur: 12, delay: 0, variant: 0 },
+    { kind: "walk", y: 177, from: 350, to: -30, dur: 15, delay: 4, variant: 1 },
+    { kind: "walk", y: 180, from: -30, to: 350, dur: 22, delay: 9, variant: 2 },
+    { kind: "chat", x: 250, y: 178, variant: 1 },
+    { kind: "chat", x: 264, y: 178, variant: 0 },
+  ],
+  library: [
+    { kind: "sit", x: 36, y: 180, variant: 0 },
+    { kind: "sit", x: 252, y: 180, variant: 1 },
+    { kind: "walk", y: 178, from: -30, to: 350, dur: 26, delay: 3, variant: 2 },
+  ],
+  bedroom: [
+    { kind: "cat", x: 250, y: 172 },
+  ],
+  office: [
+    { kind: "walk", y: 179, from: -30, to: 350, dur: 20, delay: 2, variant: 2 },
+    { kind: "sit", x: 30, y: 180, variant: 2 },
+    { kind: "stand", x: 292, y: 178, variant: 1 },
+  ],
 }
