@@ -278,63 +278,7 @@ export function environmentSVG(name, dims) {
    {kind:"sit"|"chat"|"stand", x, y, variant}       — đứng/ngồi tại chỗ
    {kind:"cat", x, y}                               — mèo ngủ
    y là toạ độ mép chân trong khung 320x200; cảnh có thể ghi đè bằng scene.extras. */
-export const ENV_AMBIENT = {
-  classroom: [
-    { kind: "walk", y: 179, from: -30, to: 350, dur: 16, delay: 1, variant: 0 },
-    { kind: "walk", y: 177, from: 350, to: -30, dur: 20, delay: 7, variant: 1 },
-    { kind: "chat", x: 232, y: 178, variant: 0 },
-    { kind: "chat", x: 246, y: 178, variant: 2 },
-  ],
-  schoolyard: [
-    { kind: "walk", y: 180, from: -30, to: 350, dur: 14, delay: 0, variant: 1 },
-    { kind: "walk", y: 177, from: 350, to: -30, dur: 18, delay: 5, variant: 0 },
-    { kind: "chat", x: 20, y: 178, variant: 2 },
-    { kind: "chat", x: 34, y: 178, variant: 0 },
-  ],
-  canteen: [
-    { kind: "walk", y: 179, from: -30, to: 350, dur: 18, delay: 2, variant: 0 },
-    { kind: "sit", x: 40, y: 179, variant: 1 },
-    { kind: "sit", x: 252, y: 179, variant: 2 },
-    { kind: "stand", x: 150, y: 178, variant: 0 },
-  ],
-  corridor: [
-    { kind: "walk", y: 179, from: -30, to: 350, dur: 12, delay: 0, variant: 0 },
-    { kind: "walk", y: 177, from: 350, to: -30, dur: 15, delay: 4, variant: 1 },
-    { kind: "walk", y: 180, from: -30, to: 350, dur: 22, delay: 9, variant: 2 },
-    { kind: "chat", x: 250, y: 178, variant: 1 },
-    { kind: "chat", x: 264, y: 178, variant: 0 },
-  ],
-  library: [
-    { kind: "sit", x: 36, y: 180, variant: 0 },
-    { kind: "sit", x: 252, y: 180, variant: 1 },
-    { kind: "walk", y: 178, from: -30, to: 350, dur: 26, delay: 3, variant: 2 },
-  ],
-  bedroom: [
-    { kind: "cat", x: 250, y: 172 },
-  ],
-  home: [
-    { kind: "cat", x: 120, y: 185 },
-  ],
-  street: [
-    { kind: "walk", y: 179, from: -30, to: 350, dur: 17, delay: 0, variant: 1 },
-    { kind: "walk", y: 177, from: 350, to: -30, dur: 21, delay: 6, variant: 2 },
-    { kind: "walk", y: 180, from: -30, to: 350, dur: 25, delay: 11, variant: 0 },
-    { kind: "stand", x: 128, y: 178, variant: 0 },
-  ],
-  park: [
-    { kind: "walk", y: 179, from: -30, to: 350, dur: 22, delay: 1, variant: 0 },
-    { kind: "walk", y: 177, from: 350, to: -30, dur: 18, delay: 8, variant: 1 },
-    { kind: "walk", y: 180, from: -30, to: 350, dur: 28, delay: 14, variant: 2 },
-    { kind: "chat", x: 150, y: 178, variant: 2 },
-  ],
-  cafe: [
-    { kind: "sit", x: 176, y: 179, variant: 1 },
-    { kind: "sit", x: 212, y: 179, variant: 2 },
-    { kind: "stand", x: 90, y: 178, variant: 0 },
-  ],
-  office: [
-    { kind: "walk", y: 179, from: -30, to: 350, dur: 20, delay: 2, variant: 2 },
-    { kind: "sit", x: 30, y: 180, variant: 2 },
-    { kind: "stand", x: 292, y: 178, variant: 1 },
-  ],
-}
+/* Người qua lại phía sau: tắt. Bản thử dùng người tí hon mờ đứng sau nhân vật chính trông như
+   bóng ma và làm cảnh rối mắt, nên mọi bối cảnh để trống; cảnh nào thật cần thì khai báo
+   `extras` riêng trong dữ liệu. */
+export const ENV_AMBIENT = {}

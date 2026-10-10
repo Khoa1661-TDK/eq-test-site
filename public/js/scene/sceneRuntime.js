@@ -469,6 +469,13 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
   function speak(c, text, { think = false, ms } = {}) {
     if (!text) return
     c.dropSay()
+    // Mỗi lúc chỉ MỘT bóng thoại trên sân khấu: bóng cũ của người khác lui đi trước,
+    // để cảnh không bị dồn chữ và bóng không phải xếp chồng lên tới mép trên.
+    for (const other of [...bubbleBoxes.keys()]) {
+      bubbleBoxes.delete(other)
+      other.classList.add("is-out")
+      later(200, () => other.remove())
+    }
     const node = el("div", { class: think ? "scn-say is-think" : "scn-say", attrs: { "aria-hidden": "true" } })
     node.append(el("span", { class: "scn-say__text", text }))
     node.style.visibility = "hidden"
@@ -485,25 +492,35 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
       w = node.offsetWidth
       h = node.offsetHeight
     }
-    const left = clamp(c.x - w / 2, 3, STAGE_W - w - 3)
-    let bottom = STAGE_H - c.headY + (think ? 12 : 8)
-    // xếp chồng nếu cắt ngang bong bóng khác
-    for (const [other, box] of bubbleBoxes) {
-      if (!other.isConnected) { bubbleBoxes.delete(other); continue }
-      if (left < box.r && left + w > box.l) bottom = Math.max(bottom, box.bottom + box.h + 4)
-    }
-    bottom = Math.min(bottom, STAGE_H - h - 14) // chừa mép trên cho máy quay đẩy gần
-    node.style.left = `${left}px`
-    node.style.bottom = `${bottom}px`
-    node.style.setProperty("--tail", `${clamp(c.x - left, 8, w - 8)}px`)
+    const box = { c, w, h, think }
+    bubbleBoxes.set(node, box)
+    placeBubble(node, box)
     node.style.visibility = ""
-    bubbleBoxes.set(node, { l: left, r: left + w, h, bottom })
 
     const talkMs = ms ?? Math.min(3500, 700 + 40 * text.length)
     if (!think) c.talkFor(talkMs)
     const life = Math.max(talkMs, 1400) + 600
     later(life, () => node.classList.add("is-out"))
     later(life + 320, () => { node.remove(); bubbleBoxes.delete(node) })
+  }
+
+  /** Đặt bóng thoại trên đầu nhân vật, giữ trọn trong phần khung đang nhìn thấy (kể cả khi máy quay phóng gần). */
+  function placeBubble(node, { c, w, h, think }) {
+    const s = cam.scale || 1
+    const visL = -cam.tx / s
+    const visR = (STAGE_W - cam.tx) / s
+    const visTop = -cam.ty / s
+    const left = clamp(c.x - w / 2, visL + 3, visR - w - 3)
+    const top = Math.max(visTop + 3, c.headY - (think ? 12 : 8) - h)
+    node.style.left = `${left}px`
+    node.style.bottom = `${STAGE_H - top - h}px`
+    node.style.setProperty("--tail", `${clamp(c.x - left, 8, w - 8)}px`)
+  }
+  function replaceBubbles() {
+    for (const [node, box] of bubbleBoxes) {
+      if (!node.isConnected) bubbleBoxes.delete(node)
+      else placeBubble(node, box)
+    }
   }
 
   /* ------------------------------------------------------------- máy quay */
@@ -514,16 +531,22 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
     cam.tx = clamp(STAGE_W / 2 - cx * s, STAGE_W - STAGE_W * s, 0)
     cam.ty = clamp(STAGE_H * 0.46 - cy * s, STAGE_H - STAGE_H * s, 0)
     camera.dataset.zoom = String(+s.toFixed(3))
+    replaceBubbles()
     if (isRM()) return // giảm chuyển động: giữ nguyên khung hình
     camera.style.setProperty("--cam-ms", `${ms}ms`)
     camera.style.transform = `translate(${cam.tx.toFixed(1)}px, ${cam.ty.toFixed(1)}px) scale(${s})`
   }
-  function zoom(target, scale, ms) { camTo(charX(target), scale, ms) }
+  // Phóng nhẹ (tối đa 1.2) và lấy tâm ngay dưới đầu nhân vật, để bóng thoại phía trên đầu vẫn nằm trong khung.
+  function zoom(target, scale, ms) {
+    const c = chars.get(target)
+    camTo(charX(target), Math.min(scale ?? 1.2, 1.2), ms, c ? c.headY + 10 : FEET_Y - 88)
+  }
   function zoomReset(ms = 700) {
     cam.scale = 1
     cam.tx = 0
     cam.ty = 0
     camera.dataset.zoom = "1"
+    replaceBubbles()
     if (isRM()) return
     camera.style.setProperty("--cam-ms", `${ms}ms`)
     camera.style.transform = "translate(0px, 0px) scale(1)"
