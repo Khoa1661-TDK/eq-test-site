@@ -1,0 +1,46 @@
+# Đăng MoodQuest lên GitHub Pages mỗi lần push lên main.
+# Trang nằm dưới /<tên repo>/, nên bước build đổi <base href="/"> thành đường dẫn đó và chép
+# index.html thành 404.html để mọi đường dẫn của app (/practice, /result…) mở được trực tiếp.
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Data, scoring and wording tests
+        run: node test/eq-data.test.mjs && node test/scoring.test.mjs && node test/wording.test.mjs
+      - name: Build the static site
+        run: |
+          mkdir -p _site
+          cp -r public/. _site/
+          sed -i 's#<base href="/" />#<base href="/${{ github.event.repository.name }}/" />#' _site/index.html
+          grep -q '<base href="/${{ github.event.repository.name }}/" />' _site/index.html
+          cp _site/index.html _site/404.html
+          touch _site/.nojekyll
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

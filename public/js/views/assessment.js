@@ -290,7 +290,7 @@ export function renderAssessment(mount, { navigate }) {
     // Chỉ gửi mức tổng dạng bậc và thời gian làm bài: không gửi câu trả lời, không gửi mã tình huống.
     const band = scoreAttempt(attempt)?.overallLevel ?? "low"
     window
-      .fetch?.("/api/stats", {
+      .fetch?.("api/stats", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ band, t: elapsed }),

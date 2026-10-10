@@ -10,6 +10,20 @@ import { renderPractice } from "./views/practice.js"
 import { renderSceneView } from "./views/sceneView.js"
 
 const main = qs("#main")
+
+/* Trang có thể nằm dưới một thư mục con (vd. GitHub Pages: /eq-test-site/). Mọi đường dẫn
+   trong app vẫn viết như ở gốc ("/practice"); BASE chỉ được thêm vào URL thật của trình duyệt. */
+const BASE = new URL(document.baseURI).pathname.replace(/\/+$/, "")
+const appPath = (pathname) => (BASE && pathname.startsWith(BASE) ? pathname.slice(BASE.length) : pathname).replace(/\/+$/, "") || "/"
+
+/** Thêm BASE vào mọi liên kết nội bộ, giữ đường dẫn gốc trong data-app-href. */
+function fixLinks(root = document) {
+  for (const a of root.querySelectorAll('a[href^="/"]:not([data-app-href])')) {
+    const href = a.getAttribute("href")
+    a.dataset.appHref = href
+    a.setAttribute("href", BASE + href)
+  }
+}
 const SKILLS = EQ_DIMENSIONS.map((dim) => dim.key)
 
 const TITLES = {
@@ -23,7 +37,8 @@ const TITLES = {
 let view = null
 
 function navigate(path) {
-  const url = new URL(path, location.origin)
+  const target = new URL(path, location.origin)
+  const url = new URL(BASE + appPath(target.pathname) + target.search, location.origin)
   if (url.pathname + url.search === location.pathname + location.search) return
   history.pushState({}, "", url)
   render()
@@ -32,7 +47,7 @@ function navigate(path) {
 
 function route() {
   const url = new URL(location.href)
-  const path = url.pathname.replace(/\/+$/, "") || "/"
+  const path = appPath(url.pathname)
 
   if (path === "/") {
     document.title = TITLES["/"]
@@ -93,8 +108,9 @@ function render() {
   view?.destroy?.()
   main.replaceChildren()
   view = route()
+  fixLinks()
   // đồng bộ trạng thái điều hướng
-  const path = location.pathname.replace(/\/+$/, "") || "/"
+  const path = appPath(location.pathname)
   for (const link of qsa("[data-nav]")) {
     if (link.dataset.nav === path) link.setAttribute("aria-current", "page")
     else link.removeAttribute("aria-current")
@@ -102,6 +118,17 @@ function render() {
   main.setAttribute("tabindex", "-1")
   main.focus({ preventScroll: true })
 }
+
+// Liên kết tạo sau (phản hồi luyện tập, kết quả…) cũng được thêm BASE.
+new MutationObserver(() => fixLinks(main)).observe(main, { childList: true, subtree: true })
+
+// Bấm liên kết nội bộ: đi trong app thay vì tải lại trang (màn hình nào đã tự xử lý thì bỏ qua).
+document.addEventListener("click", (event) => {
+  const link = event.target.closest?.("a[data-app-href]")
+  if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+  event.preventDefault()
+  navigate(link.dataset.appHref)
+})
 
 window.addEventListener("popstate", () => {
   render()
