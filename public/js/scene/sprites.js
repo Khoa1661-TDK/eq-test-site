@@ -1,855 +1,131 @@
-/* sprites.js — bộ sprite pixel tự vẽ cho hệ thống cảnh tình huống EQ.
-   Mọi sprite là lưới ký tự (mỗi ký tự = 1 ô 4x4 điểm ảnh khi render).
-   Không sao chép tài sản của game nào khác.
+/* sprites.js — nhân vật chi tiết (hi-fi) + biểu cảm + người qua lại cho hệ thống cảnh tình huống EQ.
 
-   Mỗi nhân vật có nhiều BIẾN THỂ (variant), mỗi biến thể là một khung đứng:
-     <mood>-idle   : khung nghỉ mặc định (hệ thống sẽ thêm bob/blink quanh khung này)
-     <mood>-talk   : miệng đang nói
-     <mood>-react  : khung phản ứng ngắn (ngạc nhiên, sững lại...)
-     walk          : hai khung đi (walk-a / walk-b), dùng xen kẽ khi di chuyển
+   NHÂN VẬT không còn là lưới gõ tay: mọi id mà cảnh dùng (player, classmate, classmate2, friend,
+   friend2, teacher, teacherF, mom, kid) lấy từ HIFI_CAST trong hifi/cast.js:
+     HIFI_CAST[id] = { frames, palette, cols, rows, cell }   (36 x 60 ô, 2 px/ô => 72 x 120 px)
+   Tên khung (xem hifi/characterKit.js):
+     <mood>-idle / <mood>-talk   mood: neutral happy sad annoyed concerned defensive
+     neutral-react               phản ứng ngắn (ngạc nhiên, sững lại...)
+     neutral-blink               nhắm mắt (runtime dùng để chớp)
+     neutral-breathe             nhịp thở (xen thưa thớt khi đứng yên)
+     walk-a walk-b walk-c walk-d chu kỳ đi: a, c, b, d
+   Mood hiện tại quyết định khung nào được render; runtime xen các micro-beat (blink, breathe,
+   glance, weight-shift) XUNG QUANH khung mood đó.
 
-   Mood hiện tại quyết định biến thể nào được render; hệ thống idle sẽ
-   xen các micro-beat (blink, glance, weight-shift) XUNG QUANH khung mood đó. */
+   Cùng file này còn có EMOTES (lưới nhỏ trên đầu) và EXTRAS (người tí hon phía sau). */
 
 import { el } from "../core/dom.js"
-import { CAST_COLORS, CAST_FRAMES, CAST_PALETTES } from "./castSprites.js"
+import * as CAST from "./hifi/cast.js"
 
-/* Bảng màu dùng chung cho mọi sprite trong một cảnh: giữ bộ màu nhỏ, ấm,
-   khớp tông giấy/mực của trang. */
-const P = {
-  o: "#16181c", // viền mực
-  s: "#f0c9a3", // da
-  s2: "#d9a878", // da — bóng
-  h: "#3a2a1f", // tóc nâu sẫm
-  h2: "#55402e", // tóc — vệt sáng
-  H: "#23262b", // tóc đen xám
-  E: "#16181c", // đồng tử
-  m: "#7d3038", // miệng
-  C: "#f4efe2", // kem: cổ áo, tay, giấy
-  G: "#4f6033", // ô-liu (áo nhân vật chính)
-  q: "#3c4a28", // ô-liu — bóng
-  T: "#3f4652", // quần xám
-  t: "#2f343d", // quần — bóng
-  S: "#6b4f39", // giày
-  B: "#31556b", // áo blazer xanh thép (trưởng phòng)
-  b: "#24404f", // blazer — bóng
-  R: "#7a4a52", // áo hồng đất (đồng nghiệp)
-  r: "#5d363e", // áo hồng — bóng
-  Y: "#8f7a4f", // áo be (thành viên nhóm)
-  y: "#6f5f3c", // áo be — bóng
-  W: "#e9e5d9", // giấy trắng kem
-  D: "#20242a", // màn hình máy tính
-  M: "#3a6f8f", // màn hình — sáng
+/** Bảng màu mặc định cho svgFor khi không truyền bảng màu (chỉ viền mực). */
+const P = { o: "#16181c" }
+
+/* ------------------------------------------------------------------ dàn nhân vật */
+const HIFI_CAST = CAST.HIFI_CAST ?? {}
+
+/** frames của từng nhân vật: { "<mood>-idle": rows, ... } */
+export const CHARACTERS = Object.fromEntries(Object.entries(HIFI_CAST).filter(([, c]) => c?.frames).map(([id, c]) => [id, c.frames]))
+
+/** Bảng màu riêng theo nhân vật (ký tự → "#rrggbb"). */
+export const CHARACTER_PALETTES = Object.fromEntries(Object.entries(HIFI_CAST).filter(([, c]) => c?.frames).map(([id, c]) => [id, c.palette]))
+
+const isBlankRow = (row) => !/[^. ]/.test(row)
+const metricsCache = new Map()
+
+/**
+ * Kích thước thật của một nhân vật, suy ra từ chính các khung đã vẽ (không đoán):
+ *   w, h         cỡ sprite theo px sân khấu (cols x cell, rows x cell)
+ *   firstRow     hàng đầu tiên có điểm ảnh của khung đứng nghỉ (đỉnh tóc)
+ *   lastRow      hàng cuối cùng có điểm ảnh (gót giày)
+ *   headTop      khoảng từ đỉnh khung sprite tới đỉnh đầu (px) = firstRow x cell
+ *   footPad      px trống dưới chân trong khung; runtime hạ khung xuống để chân vẫn đứng đúng y≈186
+ */
+export function characterMetrics(id) {
+  if (metricsCache.has(id)) return metricsCache.get(id)
+  const cast = HIFI_CAST[id]
+  if (!cast?.frames) return null
+  const frames = cast.frames
+  const rows = frames["neutral-idle"] ?? Object.values(frames)[0] ?? []
+  const cell = cast.cell ?? 2
+  const nRows = cast.rows ?? rows.length
+  const nCols = cast.cols ?? (rows[0]?.length ?? 36)
+  let firstRow = rows.findIndex((r) => !isBlankRow(r))
+  if (firstRow < 0) firstRow = 0
+  let lastRow = rows.length - 1
+  while (lastRow > firstRow && isBlankRow(rows[lastRow])) lastRow -= 1
+  const m = {
+    cols: nCols,
+    rows: nRows,
+    cell,
+    w: nCols * cell,
+    h: nRows * cell,
+    firstRow,
+    lastRow,
+    headTop: firstRow * cell,
+    footPad: Math.max(0, nRows - 1 - lastRow) * cell,
+  }
+  metricsCache.set(id, m)
+  return m
 }
 
-/* ------------------------------------------------------------------ người chơi
-   Nữ, tóc nâu ngang vai, áo ô-liu. Lưới 18x24 (render 72x96). */
+/* ------------------------------------------------------------------ chân dung
+   Hộp chân dung bên cạnh khung thoại: dùng portraitFor(id, mood, talking) của cast.js nếu có,
+   không thì cắt phần đầu (18 hàng x 20 cột, tính từ đỉnh tóc thật của nhân vật) từ chính khung. */
+const PORTRAIT_COLS = [8, 28]
+const PORTRAIT_ROWS = 18
+const portraitCache = new Map()
 
-const PLAYER = {
-  "neutral-idle": [
-    ".....oooooooo.......",
-    "....ohhhhhhhho......",
-    "...ohhhhhhhhhho.....",
-    "...ohHhhhhhhHho.....",
-    "..ohHhhhhhhhhHho....",
-    "..ohHhhhhhhhhHho....",
-    "..ohhssssssssshho...",
-    "..ohhssssssssssho...",
-    "..ohssEEssEEsssso...",
-    "..ohssssssssssssho..",
-    "..ohssssmssmssssho..",
-    "...ohssssssssssho...",
-    "....ossooossssso....",
-    ".....oGGGGGGGo......",
-    "..oqoGGGGGGGGGoqo...",
-    "..oqqoGGGGGGGoqqo...",
-    "..oqqoGGCCCGGoqqo...",
-    "..oqqoGGCCCGGoqqo...",
-    "..oqCoGGCCCGGoCoqo..",
-    "..oCo.oGGGGGGo.oCo..",
-    "....oTTTToTTTo......",
-    "...oTTTTToTTTTTo....",
-    "...oSSSSSoSSSSSo....",
-    "....oooo..oooo......",
-  ],
-  "neutral-talk": [
-    ".....oooooooo.......",
-    "....ohhhhhhhho......",
-    "...ohhhhhhhhhho.....",
-    "...ohHhhhhhhHho.....",
-    "..ohHhhhhhhhhHho....",
-    "..ohHhhhhhhhhHho....",
-    "..ohhssssssssshho...",
-    "..ohhssssssssssho...",
-    "..ohssEEssEEsssso...",
-    "..ohssssssssssssho..",
-    "..ohssmmmmmmssssho..",
-    "...ohssssssssssho...",
-    "....ossooossssso....",
-    ".....oGGGGGGGo......",
-    "..oqoGGGGGGGGGoqo...",
-    "..oqqoGGGGGGGoqqo...",
-    "..oqqoGGCCCGGoqqo...",
-    "..oqqoGGCCCGGoqqo...",
-    "..oqCoGGCCCGGoCoqo..",
-    "..oCo.oGGGGGGo.oCo..",
-    "....oTTTToTTTo......",
-    "...oTTTTToTTTTTo....",
-    "...oSSSSSoSSSSSo....",
-    "....oooo..oooo......",
-  ],
-  "neutral-react": [
-    ".....oooooooo.......",
-    "....ohhhhhhhho......",
-    "...ohhhhhhhhhho.....",
-    "...ohHhhhhhhHho.....",
-    "..ohHhhhhhhhhHho....",
-    "..ohHhhhhhhhhHho....",
-    "..ohhssssssssshho...",
-    "..ohhssssssssssho...",
-    "..ohssEEEssEEssho...",
-    "..ohssssssssssssho..",
-    "..ohsssmmmmsssssho..",
-    "...ohssssssssssho...",
-    "....ossooossssso....",
-    ".....oGGGGGGGo......",
-    "..oqoGGGGGGGGGoqo...",
-    "..oqqoGGGGGGGoqqo...",
-    "..oqqoGGCCCGGoqqo...",
-    "..oqqoGGCCCGGoqqo...",
-    "..oqCoGGCCCGGoCoqo..",
-    "..oCo.oGGGGGGo.oCo..",
-    "....oTTTToTTTo......",
-    "...oTTTTToTTTTTo....",
-    "...oSSSSSoSSSSSo....",
-    "....oooo..oooo......",
-  ],
-  "annoyed-idle": [
-    ".....oooooooo.......",
-    "....ohhhhhhhho......",
-    "...ohhhhhhhhhho.....",
-    "...ohHhhhhhhHho.....",
-    "..ohHhhhhhhhhHho....",
-    "..ohHhhhhhhhhHho....",
-    "..ohhssssssssshho...",
-    "..ohhssssssssssho...",
-    "..ohssEEssEEsssso...",
-    "..ohssssssssssssho..",
-    "..ohsssmmsssmsssho..",
-    "...ohssssssssssho...",
-    "....ossooossssso....",
-    ".....oGGGGGGGo......",
-    "..oqoGGGGGGGGGoqo...",
-    "..oqqoGGGGGGGoqqo...",
-    "..oqqoGGCCCGGoqqo...",
-    "..oqqoGGCCCGGoqqo...",
-    "..oqCoGGCCCGGoCoqo..",
-    "..oCo.oGGGGGGo.oCo..",
-    "....oTTTToTTTo......",
-    "...oTTTTToTTTTTo....",
-    "...oSSSSSoSSSSSo....",
-    "....oooo..oooo......",
-  ],
-  "sad-idle": [
-    "......oooooooo......",
-    ".....ohhhhhhhho.....",
-    "....ohhhhhhhhhho....",
-    "....ohHhhhhhhHho....",
-    "...ohHhhhhhhhhHho...",
-    "...ohHhhhhhhhhHho...",
-    "...ohhssssssssshho..",
-    "...ohhssssssssssho..",
-    "...ohssEEssEEsssho..",
-    "...ohsssssssssssho..",
-    "....ohsssmsssso.....",
-    "....ohsssssssso.....",
-    ".....ossooosssso....",
-    ".....oGGGGGGGo......",
-    "....oqGGGGGGGGoq....",
-    "....oqqGGGGGGGoqq...",
-    "....oqqGGCCCGGoqq...",
-    "....oqqGGCCCGGoqq...",
-    "....oqoGGCCCGGoqo...",
-    "....oCoGGGGGGGoCo...",
-    ".....oTTTToTTTo.....",
-    "....oTTTTToTTTTTo...",
-    "....oSSSSSoSSSSSo...",
-    ".....oooo..oooo.....",
-  ],
-  "happy-idle": [
-    ".....oooooooo.......",
-    "....ohhhhhhhho......",
-    "...ohhhhhhhhhho.....",
-    "...ohHhhhhhhHho.....",
-    "..ohHhhhhhhhhHho....",
-    "..ohHhhhhhhhhHho....",
-    "..ohhssssssssshho...",
-    "..ohhssssssssssho...",
-    "..ohssEEssEEsssso...",
-    "..ohssssssssssssho..",
-    "..ohssmmmmmmssssho..",
-    "...ohssssssssssho...",
-    "....ossooossssso....",
-    ".....oGGGGGGGo......",
-    "..oqoGGGGGGGGGoqo...",
-    "..oqqoGGGGGGGoqqo...",
-    "..oqqoGGCCCGGoqqo...",
-    "..oqqoGGCCCGGoqqo...",
-    "..oqCoGGCCCGGoCoqo..",
-    "..oCo.oGGGGGGo.oCo..",
-    "....oTTTToTTTo......",
-    "...oTTTTToTTTTTo....",
-    "...oSSSSSoSSSSSo....",
-    "....oooo..oooo......",
-  ],
-  "walk-a": [
-    ".....oooooooo.......",
-    "....ohhhhhhhho......",
-    "...ohhhhhhhhhho.....",
-    "...ohHhhhhhhHho.....",
-    "..ohHhhhhhhhhHho....",
-    "..ohHhhhhhhhhHho....",
-    "..ohhssssssssshho...",
-    "..ohhssssssssssho...",
-    "..ohssEEssEEsssso...",
-    "..ohssssssssssssho..",
-    "..ohssssmssmssssho..",
-    "...ohssssssssssho...",
-    "....ossooossssso....",
-    ".....oGGGGGGGo......",
-    "..oqoGGGGGGGGGoqo...",
-    "..oqqoGGGGGGGoqqo...",
-    "..oqqoGGCCCGGoqqo...",
-    "..oqqoGGCCCGGoqqo...",
-    "..oqCoGGCCCGGoCoqo..",
-    "..oCo.oGGGGGGo.oCo..",
-    "....oTTTToTTTo......",
-    "...oTTTTToTTTTTo....",
-    "...oSSSSo..oSSSSo...",
-    "...oooo....oooo.....",
-  ],
-  "walk-b": [
-    ".....oooooooo.......",
-    "....ohhhhhhhho......",
-    "...ohhhhhhhhhho.....",
-    "...ohHhhhhhhHho.....",
-    "..ohHhhhhhhhhHho....",
-    "..ohHhhhhhhhhHho....",
-    "..ohhssssssssshho...",
-    "..ohhssssssssssho...",
-    "..ohssEEssEEsssso...",
-    "..ohssssssssssssho..",
-    "..ohssssmssmssssho..",
-    "...ohssssssssssho...",
-    "....ossooossssso....",
-    ".....oGGGGGGGo......",
-    "..oqoGGGGGGGGGoqo...",
-    "..oqqoGGGGGGGoqqo...",
-    "..oqqoGGCCCGGoqqo...",
-    "..oqqoGGCCCGGoqqo...",
-    "..oqCoGGCCCGGoCoqo..",
-    "..oCo.oGGGGGGo.oCo..",
-    "....oTTTToTTTo......",
-    "...oTTTTToTTTTTo....",
-    "....oSSSSSoSSSSSo...",
-    ".....oooo..oooo.....",
-  ],
+function viewBoxOf(svg) {
+  const m = /viewBox="[\d.\s-]*?([\d.]+)\s+([\d.]+)"/.exec(svg)
+  return m ? { cols: Number(m[1]), rows: Number(m[2]) } : null
 }
 
-/* ------------------------------------------------- đồng nghiệp (R) — nam, áo hồng đất, tóc đen ngắn. Lưới 18x24. */
-
-const COWORKER = {
-  "neutral-idle": [
-    ".....oooooooo.......",
-    "....oHHHHHHHHho.....",
-    "...oHHHHHHHHHHho....",
-    "...oHHHHHHHHHHho....",
-    "...oHHssssssssHho...",
-    "...oHHssssssssHho...",
-    "...ohssEEssEEsssho..",
-    "...ohsssssssssssho..",
-    "...ohsssssssssssho..",
-    "....ohssssssssso....",
-    "....ossooosssso.....",
-    "....oRRRRRRRRRo.....",
-    "..oRoRRRRRRRRRRoRo..",
-    "..oroRRRRRRRRRRoro..",
-    "..oroRRCCRRCCRRoro..",
-    "..oroRRCCRRCCRRoro..",
-    "..osoRRCCRRCCRRoso..",
-    "..oso.oRRRRRRR.o.so.",
-    ".....oTTTTTTTTTo....",
-    "....oTTTTToTTTTTo...",
-    "....oTTTTToTTTTTo...",
-    "....oSSSSSoSSSSSo...",
-    ".....oooo..oooo.....",
-    "....................",
-  ],
-  "neutral-talk": [
-    ".....oooooooo.......",
-    "....oHHHHHHHHho.....",
-    "...oHHHHHHHHHHho....",
-    "...oHHHHHHHHHHho....",
-    "...oHHssssssssHho...",
-    "...oHHssssssssHho...",
-    "...ohssEEssEEsssho..",
-    "...ohsssssssssssho..",
-    "...ohssmmmmmmssso...",
-    "....ohssssssssso....",
-    "....ossooosssso.....",
-    "....oRRRRRRRRRo.....",
-    "..oRoRRRRRRRRRRoRo..",
-    "..oroRRRRRRRRRRoro..",
-    "..oroRRCCRRCCRRoro..",
-    "..oroRRCCRRCCRRoro..",
-    "..osoRRCCRRCCRRoso..",
-    "..oso.oRRRRRRR.o.so.",
-    ".....oTTTTTTTTTo....",
-    "....oTTTTToTTTTTo...",
-    "....oTTTTToTTTTTo...",
-    "....oSSSSSoSSSSSo...",
-    ".....oooo..oooo.....",
-    "....................",
-  ],
-  "neutral-react": [
-    ".....oooooooo.......",
-    "....oHHHHHHHHho.....",
-    "...oHHHHHHHHHHho....",
-    "...oHHHHHHHHHHho....",
-    "...oHHssssssssHho...",
-    "...oHHssssssssHho...",
-    "...ohssEEEssEEEsho..",
-    "...ohsssssssssssho..",
-    "...ohsssmsssso......",
-    "....ohssssssssso....",
-    "....ossooosssso.....",
-    "....oRRRRRRRRRo.....",
-    "..oRoRRRRRRRRRRoRo..",
-    "..oroRRRRRRRRRRoro..",
-    "..oroRRCCRRCCRRoro..",
-    "..oroRRCCRRCCRRoro..",
-    "..osoRRCCRRCCRRoso..",
-    "..oso.oRRRRRRR.o.so.",
-    ".....oTTTTTTTTTo....",
-    "....oTTTTToTTTTTo...",
-    "....oTTTTToTTTTTo...",
-    "....oSSSSSoSSSSSo...",
-    ".....oooo..oooo.....",
-    "....................",
-  ],
-  "defensive-idle": [
-    ".....oooooooo.......",
-    "....oHHHHHHHHho.....",
-    "...oHHHHHHHHHHho....",
-    "...oHHHHHHHHHHho....",
-    "...oHHssssssssHho...",
-    "...oHHssssssssHho...",
-    "...ohssEEssEEsssho..",
-    "...ohsssssssssssho..",
-    "...ohssmmsssmsssho..",
-    "....ohssssssssso....",
-    "....ossooosssso.....",
-    "....oRRRRRRRRRo.....",
-    "..oRoRRRRRRRRRRoRo..",
-    "..oroRRRRRRRRRRoro..",
-    "..oroRRCCRRCCRRoro..",
-    "..oroRRCCRRCCRRoro..",
-    "..osoRRCCRRCCRRoso..",
-    "..oso.oRRRRRRR.o.so.",
-    ".....oTTTTTTTTTo....",
-    "....oTTTTToTTTTTo...",
-    "....oTTTTToTTTTTo...",
-    "....oSSSSSoSSSSSo...",
-    ".....oooo..oooo.....",
-    "....................",
-  ],
-  "sad-idle": [
-    "......oooooooo......",
-    ".....oHHHHHHHHho....",
-    "....oHHHHHHHHHHho...",
-    "....oHHHHHHHHHHho...",
-    "...oHHssssssssHho...",
-    "...oHHssssssssHho...",
-    "...ohssEEssEEsssho..",
-    "...ohsssssssssssho..",
-    "....ohsssmsssso.....",
-    "....ohsssssssso.....",
-    ".....ossooosssso....",
-    ".....oRRRRRRRo......",
-    "....oRoRRRRRRRoR....",
-    "....oroRRRRRRRoro...",
-    "....oroRRCCRRRoro...",
-    "....oroRRCCRRRoro...",
-    "....osoRRCCRRRoso...",
-    "....oso.oRRRR.o.so..",
-    ".....oTTTTTTTo......",
-    "....oTTTTToTTTTTo...",
-    "....oTTTTToTTTTTo...",
-    "....oSSSSSoSSSSSo...",
-    ".....oooo..oooo.....",
-    "....................",
-  ],
-  "happy-idle": [
-    ".....oooooooo.......",
-    "....oHHHHHHHHho.....",
-    "...oHHHHHHHHHHho....",
-    "...oHHHHHHHHHHho....",
-    "...oHHssssssssHho...",
-    "...oHHssssssssHho...",
-    "...ohssEEssEEsssho..",
-    "...ohsssssssssssho..",
-    "...ohssmmmmmmsssho..",
-    "....ohssssssssso....",
-    "....ossooosssso.....",
-    "....oRRRRRRRRRo.....",
-    "..oRoRRRRRRRRRRoRo..",
-    "..oroRRRRRRRRRRoro..",
-    "..oroRRCCRRCCRRoro..",
-    "..oroRRCCRRCCRRoro..",
-    "..osoRRCCRRCCRRoso..",
-    "..oso.oRRRRRRR.o.so.",
-    ".....oTTTTTTTTTo....",
-    "....oTTTTToTTTTTo...",
-    "....oTTTTToTTTTTo...",
-    "....oSSSSSoSSSSSo...",
-    ".....oooo..oooo.....",
-    "....................",
-  ],
-  "happy-talk": [
-    ".....oooooooo.......",
-    "....oHHHHHHHHho.....",
-    "...oHHHHHHHHHHho....",
-    "...oHHHHHHHHHHho....",
-    "...oHHssssssssHho...",
-    "...oHHssssssssHho...",
-    "...ohssEEssEEsssho..",
-    "...ohsssssssssssho..",
-    "...ohssmmmmmmsssho..",
-    "....ohssssssssso....",
-    "....ossooosssso.....",
-    "....oRRRRRRRRRo.....",
-    "..oRoRRRRRRRRRRoRo..",
-    "..oroRRRRRRRRRRoro..",
-    "..oroRRCCRRCCRRoro..",
-    "..oroRRCCRRCCRRoro..",
-    "..osoRRCCRRCCRRoso..",
-    "..oso.oRRRRRRR.o.so.",
-    ".....oTTTTTTTTTo....",
-    "....oTTTTToTTTTTo...",
-    "....oTTTTToTTTTTo...",
-    "....oSSSSSoSSSSSo...",
-    ".....oooo..oooo.....",
-    "....................",
-  ],
-  "walk-a": [
-    ".....oooooooo.......",
-    "....oHHHHHHHHho.....",
-    "...oHHHHHHHHHHho....",
-    "...oHHHHHHHHHHho....",
-    "...oHHssssssssHho...",
-    "...oHHssssssssHho...",
-    "...ohssEEssEEsssho..",
-    "...ohsssssssssssho..",
-    "...ohsssssssssssho..",
-    "....ohssssssssso....",
-    "....ossooosssso.....",
-    "....oRRRRRRRRRo.....",
-    "..oRoRRRRRRRRRRoRo..",
-    "..oroRRRRRRRRRRoro..",
-    "..oroRRCCRRCCRRoro..",
-    "..oroRRCCRRCCRRoro..",
-    "..osoRRCCRRCCRRoso..",
-    "..oso.oRRRRRRR.o.so.",
-    ".....oTTTTTTTTTo....",
-    "....oTTTTToTTTTTo...",
-    "....oTTTTToTTTTTo...",
-    "...oSSSSo..oSSSSo...",
-    "...oooo....oooo.....",
-    "....................",
-  ],
-  "walk-b": [
-    ".....oooooooo.......",
-    "....oHHHHHHHHho.....",
-    "...oHHHHHHHHHHho....",
-    "...oHHHHHHHHHHho....",
-    "...oHHssssssssHho...",
-    "...oHHssssssssHho...",
-    "...ohssEEssEEsssho..",
-    "...ohsssssssssssho..",
-    "...ohsssssssssssho..",
-    "....ohssssssssso....",
-    "....ossooosssso.....",
-    "....oRRRRRRRRRo.....",
-    "..oRoRRRRRRRRRRoRo..",
-    "..oroRRRRRRRRRRoro..",
-    "..oroRRCCRRCCRRoro..",
-    "..oroRRCCRRCCRRoro..",
-    "..osoRRCCRRCCRRoso..",
-    "..oso.oRRRRRRR.o.so.",
-    ".....oTTTTTTTTTo....",
-    "....oTTTTToTTTTTo...",
-    "....oTTTTToTTTTTo...",
-    "....oSSSSSoSSSSSo...",
-    ".....oooo..oooo.....",
-    "....................",
-  ],
+/**
+ * Chân dung của một nhân vật: { svg, cols, rows } (svg là chuỗi HTML), hoặc null nếu không có nhân vật.
+ * @param {string} id
+ * @param {string} mood      neutral | happy | sad | annoyed | concerned | defensive
+ * @param {boolean} talking  miệng mở
+ * @param {string} [frame]   tên khung hiện tại của sprite (để chân dung chớp mắt/phản ứng khớp); chỉ dùng khi tự cắt
+ */
+export function portraitSVG(id, mood = "neutral", talking = false, frame = null) {
+  const cast = HIFI_CAST[id]
+  if (!cast?.frames) return null
+  const key = `${id}|${mood}|${talking ? 1 : 0}|${frame ?? ""}`
+  if (portraitCache.has(key)) return portraitCache.get(key)
+  let out = null
+  if (typeof CAST.portraitFor === "function") {
+    try { out = fromPortraitFor(CAST.portraitFor(id, mood, talking), cast) } catch (err) { console.warn("[sprites] portraitFor lỗi:", id, err) }
+  }
+  out ??= cropPortrait(id, cast, mood, talking, frame)
+  portraitCache.set(key, out)
+  return out
 }
 
-/* ----------------------------------------------- trưởng phòng (M) — nam, blazer xanh, tóc xám bạc. Lưới 18x24. */
-
-const MANAGER = {
-  "neutral-idle": [
-    ".....oooooooo.......",
-    "....oHHHHHHHHho.....",
-    "...oHHHHHHHHHHho....",
-    "...oHHHHHHHHHHho....",
-    "...oHHssssssssHho...",
-    "...oHHssssssssHho...",
-    "...ohssEEssEEsssho..",
-    "...ohsssssssssssho..",
-    "...ohsssssssssssho..",
-    "....ohssssssssso....",
-    "....ossooosssso.....",
-    "....oBBBBBBBBBo.....",
-    "..oBoBBBBBBBBBBBoBo.",
-    "..oboBBBBBBBBBBBobo.",
-    "..oboBBCCCBBCCCBo...",
-    "..oboBBCCCBBCCCBo...",
-    "..osoBBCCCBBCCCBo.so",
-    "..oso.oBBBBBBB.o.so.",
-    ".....oTTTTTTTTTo....",
-    "....oTTTTToTTTTTo...",
-    "....oTTTTToTTTTTo...",
-    "....oSSSSSoSSSSSo...",
-    ".....oooo..oooo.....",
-    "....................",
-  ],
-  "happy-idle": [
-    ".....oooooooo.......",
-    "....oHHHHHHHHho.....",
-    "...oHHHHHHHHHHho....",
-    "...oHHHHHHHHHHho....",
-    "...oHHssssssssHho...",
-    "...oHHssssssssHho...",
-    "...ohssEEssEEsssho..",
-    "...ohsssssssssssho..",
-    "...ohssmmmmmmsssho..",
-    "....ohssssssssso....",
-    "....ossooosssso.....",
-    "....oBBBBBBBBBo.....",
-    "..oBoBBBBBBBBBBBoBo.",
-    "..oboBBBBBBBBBBBobo.",
-    "..oboBBCCCBBCCCBo...",
-    "..oboBBCCCBBCCCBo...",
-    "..osoBBCCCBBCCCBo.so",
-    "..oso.oBBBBBBB.o.so.",
-    ".....oTTTTTTTTTo....",
-    "....oTTTTToTTTTTo...",
-    "....oTTTTToTTTTTo...",
-    "....oSSSSSoSSSSSo...",
-    ".....oooo..oooo.....",
-    "....................",
-  ],
-  "concerned-idle": [
-    ".....oooooooo.......",
-    "....oHHHHHHHHho.....",
-    "...oHHHHHHHHHHho....",
-    "...oHHHHHHHHHHho....",
-    "...oHHssssssssHho...",
-    "...oHHssssssssHho...",
-    "...ohssEEssEEsssho..",
-    "...ohsssssssssssho..",
-    "...ohsssmsssssssho..",
-    "....ohssssssssso....",
-    "....ossooosssso.....",
-    "....oBBBBBBBBBo.....",
-    "..oBoBBBBBBBBBBBoBo.",
-    "..oboBBBBBBBBBBBobo.",
-    "..oboBBCCCBBCCCBo...",
-    "..oboBBCCCBBCCCBo...",
-    "..osoBBCCCBBCCCBo.so",
-    "..oso.oBBBBBBB.o.so.",
-    ".....oTTTTTTTTTo....",
-    "....oTTTTToTTTTTo...",
-    "....oTTTTToTTTTTo...",
-    "....oSSSSSoSSSSSo...",
-    ".....oooo..oooo.....",
-    "....................",
-  ],
-  "neutral-talk": [
-    ".....oooooooo.......",
-    "....oHHHHHHHHho.....",
-    "...oHHHHHHHHHHho....",
-    "...oHHHHHHHHHHho....",
-    "...oHHssssssssHho...",
-    "...oHHssssssssHho...",
-    "...ohssEEssEEsssho..",
-    "...ohsssssssssssho..",
-    "...ohssmmmmmmsssho..",
-    "....ohssssssssso....",
-    "....ossooosssso.....",
-    "....oBBBBBBBBBo.....",
-    "..oBoBBBBBBBBBBBoBo.",
-    "..oboBBBBBBBBBBBobo.",
-    "..oboBBCCCBBCCCBo...",
-    "..oboBBCCCBBCCCBo...",
-    "..osoBBCCCBBCCCBo.so",
-    "..oso.oBBBBBBB.o.so.",
-    ".....oTTTTTTTTTo....",
-    "....oTTTTToTTTTTo...",
-    "....oTTTTToTTTTTo...",
-    "....oSSSSSoSSSSSo...",
-    ".....oooo..oooo.....",
-    "....................",
-  ],
-  "walk-a": [
-    ".....oooooooo.......",
-    "....oHHHHHHHHho.....",
-    "...oHHHHHHHHHHho....",
-    "...oHHHHHHHHHHho....",
-    "...oHHssssssssHho...",
-    "...oHHssssssssHho...",
-    "...ohssEEssEEsssho..",
-    "...ohsssssssssssho..",
-    "...ohsssssssssssho..",
-    "....ohssssssssso....",
-    "....ossooosssso.....",
-    "....oBBBBBBBBBo.....",
-    "..oBoBBBBBBBBBBBoBo.",
-    "..oboBBBBBBBBBBBobo.",
-    "..oboBBCCCBBCCCBo...",
-    "..oboBBCCCBBCCCBo...",
-    "..osoBBCCCBBCCCBo.so",
-    "..oso.oBBBBBBB.o.so.",
-    ".....oTTTTTTTTTo....",
-    "....oTTTTToTTTTTo...",
-    "....oTTTTToTTTTTo...",
-    "...oSSSSo..oSSSSo...",
-    "...oooo....oooo.....",
-    "....................",
-  ],
-  "walk-b": [
-    ".....oooooooo.......",
-    "....oHHHHHHHHho.....",
-    "...oHHHHHHHHHHho....",
-    "...oHHHHHHHHHHho....",
-    "...oHHssssssssHho...",
-    "...oHHssssssssHho...",
-    "...ohssEEssEEsssho..",
-    "...ohsssssssssssho..",
-    "...ohsssssssssssho..",
-    "....ohssssssssso....",
-    "....ossooosssso.....",
-    "....oBBBBBBBBBo.....",
-    "..oBoBBBBBBBBBBBoBo.",
-    "..oboBBBBBBBBBBBobo.",
-    "..oboBBCCCBBCCCBo...",
-    "..oboBBCCCBBCCCBo...",
-    "..osoBBCCCBBCCCBo.so",
-    "..oso.oBBBBBBB.o.so.",
-    ".....oTTTTTTTTTo....",
-    "....oTTTTToTTTTTo...",
-    "....oTTTTToTTTTTo...",
-    "....oSSSSSoSSSSSo...",
-    ".....oooo..oooo.....",
-    "....................",
-  ],
+/** portraitFor có thể trả: chuỗi <svg>, mảng hàng, {svg}, hoặc {rows: string[], palette?}. */
+function fromPortraitFor(got, cast) {
+  if (!got) return null
+  if (typeof got === "string") {
+    const vb = viewBoxOf(got)
+    return got.trimStart().startsWith("<svg") && vb ? { svg: got, ...vb } : null
+  }
+  if (Array.isArray(got)) return rowsPortrait(got, cast.palette)
+  if (typeof got.svg === "string") return fromPortraitFor(got.svg, cast)
+  if (Array.isArray(got.rows)) return rowsPortrait(got.rows, got.palette ?? cast.palette)
+  return null
+}
+function rowsPortrait(rows, palette) {
+  if (!rows.length || typeof rows[0] !== "string") return null
+  return { svg: svgFor(rows, palette), cols: rows[0].length, rows: rows.length }
 }
 
-/* ------------------------------------------------ thành viên nhóm (A) — nữ, áo be, tóc đen dài. Lưới 18x24. */
-
-const TEAMMATE = {
-  "neutral-idle": [
-    ".....oooooooo.......",
-    "....oHHHHHHHHho.....",
-    "...oHHHHHHHHHHho....",
-    "...oHHHHHHHHHHHho...",
-    "..oHHHHHHHHHHHHHho..",
-    "..oHHHssssssssHHHho.",
-    "..oHHHssssssssHHHho.",
-    "..oHssEEssEEsssHho..",
-    "..oHssssssssssssHo..",
-    "..oHssssssssssssHho.",
-    "...ohssssssssssho...",
-    "....ossooosssso.....",
-    "....oYYYYYYYYYo.....",
-    "..oYoYYYYYYYYYYoYo..",
-    "..oyoYYYYYYYYYYoyo..",
-    "..oyoYYCCYYCCYYoyo..",
-    "..oyoYYCCYYCCYYoyo..",
-    "..oso.oYYYYYYY.oso..",
-    ".....oTTTTTTTo......",
-    "....oTTTTToTTTTTo...",
-    "....oTTTTToTTTTTo...",
-    "....oSSSSSoSSSSSo...",
-    ".....oooo..oooo.....",
-    "....................",
-  ],
-  "neutral-talk": [
-    ".....oooooooo.......",
-    "....oHHHHHHHHho.....",
-    "...oHHHHHHHHHHho....",
-    "...oHHHHHHHHHHHho...",
-    "..oHHHHHHHHHHHHHho..",
-    "..oHHHssssssssHHHho.",
-    "..oHHHssssssssHHHho.",
-    "..oHssEEssEEsssHho..",
-    "..oHssssssssssssHo..",
-    "..oHssmmmmmmssssHho.",
-    "...ohssssssssssho...",
-    "....ossooosssso.....",
-    "....oYYYYYYYYYo.....",
-    "..oYoYYYYYYYYYYoYo..",
-    "..oyoYYYYYYYYYYoyo..",
-    "..oyoYYCCYYCCYYoyo..",
-    "..oyoYYCCYYCCYYoyo..",
-    "..oso.oYYYYYYY.oso..",
-    ".....oTTTTTTTo......",
-    "....oTTTTToTTTTTo...",
-    "....oTTTTToTTTTTo...",
-    "....oSSSSSoSSSSSo...",
-    ".....oooo..oooo.....",
-    "....................",
-  ],
-  "happy-idle": [
-    ".....oooooooo.......",
-    "....oHHHHHHHHho.....",
-    "...oHHHHHHHHHHho....",
-    "...oHHHHHHHHHHHho...",
-    "..oHHHHHHHHHHHHHho..",
-    "..oHHHssssssssHHHho.",
-    "..oHHHssssssssHHHho.",
-    "..oHssEEssEEsssHho..",
-    "..oHssssssssssssHo..",
-    "..oHssmmmmmmssssHho.",
-    "...ohssssssssssho...",
-    "....ossooosssso.....",
-    "....oYYYYYYYYYo.....",
-    "..oYoYYYYYYYYYYoYo..",
-    "..oyoYYYYYYYYYYoyo..",
-    "..oyoYYCCYYCCYYoyo..",
-    "..oyoYYCCYYCCYYoyo..",
-    "..oso.oYYYYYYY.oso..",
-    ".....oTTTTTTTo......",
-    "....oTTTTToTTTTTo...",
-    "....oTTTTToTTTTTo...",
-    "....oSSSSSoSSSSSo...",
-    ".....oooo..oooo.....",
-    "....................",
-  ],
-  "concerned-idle": [
-    ".....oooooooo.......",
-    "....oHHHHHHHHho.....",
-    "...oHHHHHHHHHHho....",
-    "...oHHHHHHHHHHHho...",
-    "..oHHHHHHHHHHHHHho..",
-    "..oHHHssssssssHHHho.",
-    "..oHHHssssssssHHHho.",
-    "..oHssEEssEEsssHho..",
-    "..oHssssssssssssHo..",
-    "..oHsssmsssssssHho..",
-    "...ohssssssssssho...",
-    "....ossooosssso.....",
-    "....oYYYYYYYYYo.....",
-    "..oYoYYYYYYYYYYoYo..",
-    "..oyoYYYYYYYYYYoyo..",
-    "..oyoYYCCYYCCYYoyo..",
-    "..oyoYYCCYYCCYYoyo..",
-    "..oso.oYYYYYYY.oso..",
-    ".....oTTTTTTTo......",
-    "....oTTTTToTTTTTo...",
-    "....oTTTTToTTTTTo...",
-    "....oSSSSSoSSSSSo...",
-    ".....oooo..oooo.....",
-    "....................",
-  ],
-  "walk-a": [
-    ".....oooooooo.......",
-    "....oHHHHHHHHho.....",
-    "...oHHHHHHHHHHho....",
-    "...oHHHHHHHHHHHho...",
-    "..oHHHHHHHHHHHHHho..",
-    "..oHHHssssssssHHHho.",
-    "..oHHHssssssssHHHho.",
-    "..oHssEEssEEsssHho..",
-    "..oHssssssssssssHo..",
-    "..oHssssssssssssHho.",
-    "...ohssssssssssho...",
-    "....ossooosssso.....",
-    "....oYYYYYYYYYo.....",
-    "..oYoYYYYYYYYYYoYo..",
-    "..oyoYYYYYYYYYYoyo..",
-    "..oyoYYCCYYCCYYoyo..",
-    "..oyoYYCCYYCCYYoyo..",
-    "..oso.oYYYYYYY.oso..",
-    ".....oTTTTTTTo......",
-    "....oTTTTToTTTTTo...",
-    "....oTTTTToTTTTTo...",
-    "...oSSSSo..oSSSSo...",
-    "...oooo....oooo.....",
-    "....................",
-  ],
-  "walk-b": [
-    ".....oooooooo.......",
-    "....oHHHHHHHHho.....",
-    "...oHHHHHHHHHHho....",
-    "...oHHHHHHHHHHHho...",
-    "..oHHHHHHHHHHHHHho..",
-    "..oHHHssssssssHHHho.",
-    "..oHHHssssssssHHHho.",
-    "..oHssEEssEEsssHho..",
-    "..oHssssssssssssHo..",
-    "..oHssssssssssssHho.",
-    "...ohssssssssssho...",
-    "....ossooosssso.....",
-    "....oYYYYYYYYYo.....",
-    "..oYoYYYYYYYYYYoYo..",
-    "..oyoYYYYYYYYYYoyo..",
-    "..oyoYYCCYYCCYYoyo..",
-    "..oyoYYCCYYCCYYoyo..",
-    "..oso.oYYYYYYY.oso..",
-    ".....oTTTTTTTo......",
-    "....oTTTTToTTTTTo...",
-    "....oTTTTToTTTTTo...",
-    "....oSSSSSoSSSSSo...",
-    ".....oooo..oooo.....",
-    "....................",
-  ],
-}
-
-/* Bối cảnh trường học dùng lại dáng người ở trên, chỉ đổi màu áo quần sang đồng phục:
-   áo sơ mi trắng kem, quần/váy xanh than. Cô giáo giữ áo xanh thép. */
-const UNIFORM = { T: "#2e3f63", t: "#222f4b" }
-const SHIRT = "#efece3"
-const SHIRT_SHADE = "#cfc9b8"
-
-export const CHARACTERS = {
-  player: PLAYER,
-  coworker: COWORKER,
-  manager: MANAGER,
-  teammate: TEAMMATE,
-  // trường học
-  classmate: COWORKER,
-  friend: TEAMMATE,
-  teacher: MANAGER,
-  classmate2: COWORKER,
-  friend2: TEAMMATE,
-  teacherF: CAST_FRAMES.teacherF,
-  // gia đình
-  mom: CAST_FRAMES.mom,
-  kid: CAST_FRAMES.kid,
-}
-
-/** Bảng màu riêng theo nhân vật (mặc định dùng P). */
-export const CHARACTER_PALETTES = {
-  classmate: { ...P, ...UNIFORM, R: SHIRT, r: SHIRT_SHADE },
-  friend: { ...P, ...UNIFORM, Y: SHIRT, y: SHIRT_SHADE },
-  teacher: { ...P, B: "#3b6e8a", b: "#2c5469" },
-  classmate2: { ...P, ...CAST_PALETTES.classmate2 },
-  friend2: { ...P, ...CAST_PALETTES.friend2 },
-  teacherF: { ...P, ...CAST_COLORS },
-  mom: { ...P, ...CAST_COLORS },
-  kid: { ...P, ...CAST_COLORS },
+function cropPortrait(id, cast, mood, talking, frame) {
+  const frames = cast.frames
+  const name = [frame, `${mood}-${talking ? "talk" : "idle"}`, `neutral-${talking ? "talk" : "idle"}`, "neutral-idle"].find((n) => n && frames[n])
+  const src = frames[name] ?? Object.values(frames)[0]
+  if (!src) return null
+  const top = characterMetrics(id)?.firstRow ?? 0
+  const rows = src.slice(top, top + PORTRAIT_ROWS).map((r) => r.slice(PORTRAIT_COLS[0], PORTRAIT_COLS[1]))
+  return rowsPortrait(rows, cast.palette)
 }
 
 /**
@@ -881,18 +157,27 @@ export function svgFor(rows, palette = P) {
 
 /**
  * Tạo một sprite container chứa MỌI biến thể của một nhân vật (ẩn/show theo class).
- * @returns {{setFrame(name:string):void, frames:Map<string,Element>}}
+ * Mỗi khung hi-fi có hàng trăm <rect>, mà một nhân vật có ~20 khung: nên node SVG của khung chỉ được
+ * dựng LẦN ĐẦU khi khung đó được hiện (`frames` biết đủ tên khung từ đầu: `frames.has(name)` đúng
+ * ngay, còn `frames.get(name)` là null tới khi khung từng hiện); khung nghỉ đầu tiên dựng sẵn.
+ * @returns {{setFrame(name:string):void, frames:Map<string,Element|null>}}
  */
 export function createSpriteSet(container, frames, palette = P) {
-  const set = new Map()
-  for (const [name, rows] of Object.entries(frames)) {
+  const set = new Map(Object.keys(frames).map((name) => [name, null]))
+  let current = null
+  function build(name) {
     const node = el("div", { class: "scn-sprite__frame", attrs: { "data-frame": name } })
-    node.innerHTML = svgFor(rows, palette ?? P)
+    node.innerHTML = svgFor(frames[name], palette ?? P)
     container.append(node)
     set.set(name, node)
+    return node
   }
   function setFrame(name) {
-    for (const [key, node] of set) node.classList.toggle("is-on", key === name)
+    if (name === current || !set.has(name)) return
+    const next = set.get(name) ?? build(name)
+    if (current) set.get(current)?.classList.remove("is-on")
+    next.classList.add("is-on")
+    current = name
   }
   return { setFrame, frames: set }
 }

@@ -43,26 +43,38 @@
                  1.05 + .scn-vignette → mở lựa chọn)  reaction{glyph}  screenShake
                  cameraFocus{target}  fade{to}
    prefers-reduced-motion: không mấp máy miệng, cử chỉ, nổi lên, máy quay, đám đông di chuyển;
-   bóng thoại, biểu cảm, sắc độ và điện thoại vẫn hiện. */
+   bóng thoại, biểu cảm, sắc độ và điện thoại vẫn hiện.
 
-import { el } from "../core/dom.js"
+   Nhân vật hi-fi 72×120 px (36×60 ô, 2 px/ô; xem sprites.js): chân đứng ở y≈186, đỉnh đầu (headY)
+   tính riêng cho từng nhân vật từ hàng đầu tiên có điểm ảnh của khung đứng nghỉ — bóng thoại, biểu
+   cảm và máy quay bám theo headY đó. Khi một nhân vật nói (dòng thoại có `who`, hoặc `say`), chân
+   dung của họ hiện cạnh chữ trong khung thoại (mở miệng theo hoạt ảnh nói); lời người dẫn: ẩn. */
+
+import { el, frame } from "../core/dom.js"
 import { prefersReducedMotion, onMotionChange, beat } from "../core/motion.js"
 import { sound } from "../core/sound.js"
 import { rateFor } from "../core/typewriter.js"
-import { CHARACTERS, CHARACTER_PALETTES, createSpriteSet, EMOTES, emoteSVG, EXTRAS, extraSVG } from "./sprites.js"
+import { CHARACTERS, CHARACTER_PALETTES, characterMetrics, portraitSVG, createSpriteSet, EMOTES, emoteSVG, EXTRAS, extraSVG } from "./sprites.js"
 import { environmentSVG, ENV_AMBIENT } from "./environments.js"
 import { createConsole } from "../ui/console.js"
 import { createChoiceList } from "../ui/choices.js"
 
 /* ------------------------------------------------------------------ kích thước
    Stage logic 320px rộng (1:1 với lưới điểm ảnh); CSS scale theo container.
-   Nhân vật render cao ~96px (24 ô × 4px). */
+   Nhân vật hi-fi cao 120px (60 ô × 2px); cỡ thật của từng người lấy từ sprites.js (characterMetrics). */
 const STAGE_W = 320
 const STAGE_H = 200
-const SPRITE_H = 96
 const GROUND_Y = STAGE_H - 28
 /** Chân nhân vật chính (khớp `.scn-char { bottom: 14px }`); dải sàn GROUND_Y..FEET_Y là chỗ của người ở xa. */
 const FEET_Y = STAGE_H - 14
+/** Khoảng hở dưới chân mà máy quay luôn chừa khi phóng gần, để chân và bóng đổ không bị cắt. */
+const CAM_FEET_PAD = 4
+/** Chỗ tối thiểu phía trên đầu cho bóng thoại 2 dòng khi tính mức phóng gần tối đa. */
+const BUBBLE_ROOM = 48
+/** Khoảng cách từ đáy bóng thoại tới đỉnh đầu (bóng nói / bóng nghĩ có thêm hai chấm). */
+const BUBBLE_GAP = 8
+const BUBBLE_GAP_THINK = 12
+const WALK_STEP_MS = 120
 const EMOTE_CELL = 2.5
 const EXTRA_CELL = 2.5
 const MAX_CHAT = 5
@@ -134,6 +146,12 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
   let decisionStarted = false
   let chosen = false
   let lastSpeaker = null
+  /* Chân dung cạnh khung thoại — khung thoại đang ở chế độ nào và ai đang nói:
+     "line" (dòng thoại: consoleSpeaker, null = người dẫn chuyện) | "prompt" (câu hỏi) | "choices". */
+  let consoleMode = "line"
+  let consoleSpeaker = null
+  let saySpeaker = null // người vừa `say`, chỉ hiện chân dung khi khung thoại không đang đọc một dòng thoại
+  let sayUntil = 0
 
   const isRM = () => prefersReducedMotion()
 
@@ -206,19 +224,24 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
     others: (self) => [...chars.values()].filter((c) => c !== self),
     getLastSpeaker: () => lastSpeaker,
     later,
+    frameChanged: (c) => { if (c === portraitOwner()) syncPortrait(performance.now()) },
   }
   for (const spec of scenario.characters || []) {
     const frames = CHARACTERS[spec.id]
-    if (!frames) continue
-    const node = el("div", { class: "scn-char", attrs: { style: `left:${spec.x}px`, "data-char": spec.id } })
+    const metrics = characterMetrics(spec.id)
+    if (!frames || !metrics) continue
+    // cỡ sprite + chỗ chân/đầu của riêng nhân vật này (CSS đọc các biến --spr-*, --foot-pad, --head-top)
+    const style = `left:${spec.x - metrics.w / 2}px;--spr-w:${metrics.w}px;--spr-h:${metrics.h}px;--foot-pad:${metrics.footPad}px;--head-top:${metrics.headTop}px`
+    const node = el("div", { class: "scn-char", attrs: { style, "data-char": spec.id } })
+    const shadow = el("div", { class: "scn-char__shadow", attrs: { "aria-hidden": "true" } })
     const body = el("div", { class: "scn-char__body" })
     const spriteBox = el("div", { class: "scn-char__sprite" })
     const set = createSpriteSet(spriteBox, frames, CHARACTER_PALETTES[spec.id])
     const bubble = el("div", { class: "scn-bubble", attrs: { hidden: true, "aria-hidden": "true" } })
     body.append(spriteBox)
-    node.append(bubble, body)
+    node.append(shadow, bubble, body)
     charLayer.append(node)
-    chars.set(spec.id, makeCharCtrl(node, body, set, bubble, spec, api, isRM, frames))
+    chars.set(spec.id, makeCharCtrl(node, body, set, bubble, spec, api, isRM, metrics))
   }
 
   /* ------------------------------------------------------------- hội thoại + lựa chọn */
@@ -231,6 +254,66 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
 
   const board = el("div", { class: "scn-board" }, consoleApi.el, choiceSlot)
   mount.append(stageWrap, board)
+
+  /* ------------------------------------------------------------- chân dung người nói
+     Đoạn chữ của khung thoại được bọc trong một hàng [chân dung | chữ]. Chân dung là khung pixel nhỏ
+     kiểu khung thoại, vẽ pixelated ~4× ô gốc; mỗi biểu cảm một node SVG dựng lần đầu rồi giữ lại. */
+  const portraitArt = el("div", { class: "scn-portrait__art" })
+  const portraitBox = frame(portraitArt, { size: "sm", cls: "scn-portrait pxf--flat", attrs: { "aria-hidden": "true" } })
+  const talkRow = el("div", { class: "scn-talk" })
+  consoleApi.textEl.before(talkRow)
+  talkRow.append(portraitBox, consoleApi.textEl)
+  const portraitFrames = new Map() // khoá → node
+  let portraitCtrl = null
+  let portraitKey = ""
+
+  function portraitOwner() {
+    if (consoleMode === "line") return consoleSpeaker
+    return saySpeaker && performance.now() < sayUntil ? saySpeaker : null
+  }
+  function hidePortrait() {
+    portraitCtrl = null
+    portraitKey = ""
+    portraitBox.classList.remove("is-on")
+    talkRow.classList.remove("has-portrait")
+    for (const n of portraitFrames.values()) n.classList.remove("is-on")
+  }
+  /** Chân dung = khuôn mặt hiện tại của người nói (mood, miệng mở/đóng, chớp mắt) cắt từ cùng bộ khung. */
+  function syncPortrait(t) {
+    const c = portraitOwner()
+    if (!c) {
+      if (portraitCtrl) hidePortrait()
+      return
+    }
+    const name = c.faceFrame(t)
+    const key = `${c.id}|${c.mood}|${name}`
+    if (c === portraitCtrl && key === portraitKey) return
+    const art = portraitSVG(c.id, c.mood, name.endsWith("-talk"), name)
+    if (!art) {
+      hidePortrait()
+      return
+    }
+    let node = portraitFrames.get(key)
+    if (!node) {
+      node = el("div", { class: "scn-portrait__f", html: art.svg })
+      portraitFrames.set(key, node)
+      portraitArt.append(node)
+    }
+    for (const n of portraitFrames.values()) n.classList.toggle("is-on", n === node)
+    portraitBox.style.setProperty("--pcols", String(art.cols))
+    portraitBox.style.setProperty("--prows", String(art.rows))
+    if (c !== portraitCtrl) {
+      // đổi người nói: khung chân dung "nảy" nhẹ để người đọc biết ai đang nói
+      portraitBox.classList.remove("is-pop")
+      void portraitBox.offsetWidth
+      portraitBox.classList.add("is-pop")
+    }
+    portraitBox.dataset.who = c.id
+    portraitBox.classList.add("is-on")
+    talkRow.classList.add("has-portrait")
+    portraitCtrl = c
+    portraitKey = key
+  }
 
   function charX(target) {
     if (typeof target === "number") return target
@@ -247,6 +330,7 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
     if (destroyed) return
     if (!isRM()) {
       for (const c of chars.values()) c.decor(t)
+      syncPortrait(t)
     }
     rAF = requestAnimationFrame(tick)
   }
@@ -311,12 +395,15 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
       if (destroyed) { resolve(); return }
       resolveDialogue = resolve
       dialogueState = "typing"
+      consoleMode = "line"
+      consoleSpeaker = speaker
       consoleApi.setCue(false)
       if (speaker) {
         lastSpeaker = speaker
         speaker.setDialogueTalk(true)
         for (const o of api.others(speaker)) o.turnToward(speaker.x)
       }
+      syncPortrait(performance.now())
       const tw = consoleApi.typewriter
       tw.onDone = () => {
         consoleApi.setCue(true)
@@ -335,6 +422,9 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
     return new Promise((resolve) => {
       if (destroyed) { resolve(); return }
       dialogueState = "typing"
+      consoleMode = "prompt"
+      consoleSpeaker = null
+      syncPortrait(performance.now())
       consoleApi.setCue(false)
       const tw = consoleApi.typewriter
       tw.onDone = () => {
@@ -406,6 +496,9 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
 
   function showChoices() {
     choicesShown = true
+    consoleMode = "choices"
+    consoleSpeaker = null
+    syncPortrait(performance.now())
     consoleApi.setHint(scenario.prompt || "Bạn sẽ làm gì?")
     consoleApi.setCue(false)
     choices.build(scenario.choices.map((c) => ({ id: c.id, code: c.code, text: c.text })))
@@ -457,9 +550,9 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
     node.innerHTML = emoteSVG(kind)
     node.style.width = `${w}px`
     node.style.height = `${h}px`
-    // đặt cạnh đầu, phía bên còn chỗ
-    const side = c.x + 16 + w > STAGE_W - 4 ? -1 : 1
-    const left = side > 0 ? c.x + 14 : c.x - 14 - w
+    // đặt cạnh đầu (nửa bề rộng đầu hi-fi ≈ 20px), phía bên còn chỗ, ngang tầm đỉnh đầu thật của nhân vật
+    const side = c.x + 20 + w > STAGE_W - 4 ? -1 : 1
+    const left = side > 0 ? c.x + 18 : c.x - 18 - w
     node.style.left = `${clamp(left, 2, STAGE_W - w - 2)}px`
     node.style.top = `${Math.max(2, c.headY - 2 - h * 0.35)}px`
     overLayer.append(node)
@@ -485,10 +578,18 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
     let w = node.offsetWidth
     let h = node.offsetHeight
     // bóng quá cao (chữ dài) → nới ngang dần cho tới khi vừa khoảng trống phía trên đầu
-    const room = c.headY - (think ? 12 : 8) - 14
+    // (từ mép trên phần khung đang nhìn thấy tới đỉnh đầu THẬT của người nói)
+    const room = c.headY - (think ? BUBBLE_GAP_THINK : BUBBLE_GAP) - (-cam.ty / (cam.scale || 1)) - 3
+    const span = bubbleSpan()
+    const avail = Math.min(span.r, span.phoneL) - span.l - 6 // bề rộng còn nhìn thấy (trừ chỗ điện thoại đang mở)
+    if (avail < 150) {
+      node.style.maxWidth = `${Math.max(90, avail)}px`
+      w = node.offsetWidth
+      h = node.offsetHeight
+    }
     for (const mw of [180, 210, 240]) {
       if (h <= room) break
-      node.style.maxWidth = `${mw}px`
+      node.style.maxWidth = `${Math.min(mw, avail)}px`
       w = node.offsetWidth
       h = node.offsetHeight
     }
@@ -500,18 +601,41 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
     const talkMs = ms ?? Math.min(3500, 700 + 40 * text.length)
     if (!think) c.talkFor(talkMs)
     const life = Math.max(talkMs, 1400) + 600
+    if (!think) {
+      // chân dung người nói hiện cạnh khung thoại trong lúc bóng thoại còn đó (trừ khi khung thoại đang đọc một dòng thoại)
+      saySpeaker = c
+      sayUntil = performance.now() + life
+      syncPortrait(performance.now())
+      later(life + 20, () => syncPortrait(performance.now()))
+    }
     later(life, () => node.classList.add("is-out"))
     later(life + 320, () => { node.remove(); bubbleBoxes.delete(node) })
   }
 
+  /** Đoạn ngang (toạ độ lớp máy quay) mà bóng thoại được đứng: phần khung nhìn thấy; phoneR = bên trái điện thoại nếu đang mở. */
+  function bubbleSpan() {
+    const s = cam.scale || 1
+    const l = -cam.tx / s
+    const r = (STAGE_W - cam.tx) / s
+    const open = phone.classList.contains("is-open")
+    return { l, r, phoneL: open ? (STAGE_W - 6 - phone.offsetWidth - 4 - cam.tx) / s : Infinity }
+  }
   /** Đặt bóng thoại trên đầu nhân vật, giữ trọn trong phần khung đang nhìn thấy (kể cả khi máy quay phóng gần). */
   function placeBubble(node, { c, w, h, think }) {
     const s = cam.scale || 1
-    const visL = -cam.tx / s
-    const visR = (STAGE_W - cam.tx) / s
     const visTop = -cam.ty / s
+    const span = bubbleSpan()
+    const visL = span.l
+    let visR = span.r
+    // trên đỉnh đầu thật của người nói; nếu không đủ chỗ thì kẹp vào mép trên khung nhìn (không bao giờ trôi ra ngoài)
+    const top = Math.max(visTop + 3, c.headY - (think ? BUBBLE_GAP_THINK : BUBBLE_GAP) - h)
+    // điện thoại đang mở (cố định ở góc trên phải của sân khấu, không theo máy quay): bóng thoại chạm vùng
+    // của nó thì lùi sang trái, để cả bóng thoại lẫn tin nhắn đều đọc được
+    if (span.phoneL < span.r) {
+      const phoneB = 8 + phone.offsetHeight + 2
+      if (top * s + cam.ty < phoneB && (top + h) * s + cam.ty > 8) visR = span.phoneL
+    }
     const left = clamp(c.x - w / 2, visL + 3, visR - w - 3)
-    const top = Math.max(visTop + 3, c.headY - (think ? 12 : 8) - h)
     node.style.left = `${left}px`
     node.style.bottom = `${STAGE_H - top - h}px`
     node.style.setProperty("--tail", `${clamp(c.x - left, 8, w - 8)}px`)
@@ -525,21 +649,28 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
 
   /* ------------------------------------------------------------- máy quay */
   const cam = { scale: 1, tx: 0, ty: 0 }
-  function camTo(cx, scale, ms, cy = FEET_Y - 88) { // cy cao hơn ngực: chừa chỗ cho bóng thoại trên đầu
+  /** Đỉnh đầu cao nhất trong cảnh (+10: máy quay lấy tâm ngay dưới đầu, chừa chỗ cho bóng thoại phía trên). */
+  const sceneFocusY = () => Math.min(FEET_Y - 88, ...[...chars.values()].map((c) => c.headY + 10))
+  function camTo(cx, scale, ms, cy = sceneFocusY()) {
     const s = Math.max(1, scale)
     cam.scale = s
     cam.tx = clamp(STAGE_W / 2 - cx * s, STAGE_W - STAGE_W * s, 0)
-    cam.ty = clamp(STAGE_H * 0.46 - cy * s, STAGE_H - STAGE_H * s, 0)
+    // Lấy tâm quanh đầu, NHƯNG không bao giờ để mép dưới khung nhìn cao hơn chân (nhân vật cao 120px:
+    // lấy tâm ở đầu mà phóng gần sẽ cắt mất chân).
+    cam.ty = clamp(Math.min(STAGE_H * 0.46 - cy * s, STAGE_H - (FEET_Y + CAM_FEET_PAD) * s), STAGE_H - STAGE_H * s, 0)
     camera.dataset.zoom = String(+s.toFixed(3))
     replaceBubbles()
     if (isRM()) return // giảm chuyển động: giữ nguyên khung hình
     camera.style.setProperty("--cam-ms", `${ms}ms`)
     camera.style.transform = `translate(${cam.tx.toFixed(1)}px, ${cam.ty.toFixed(1)}px) scale(${s})`
   }
-  // Phóng nhẹ (tối đa 1.2) và lấy tâm ngay dưới đầu nhân vật, để bóng thoại phía trên đầu vẫn nằm trong khung.
+  // Phóng nhẹ (tối đa 1.2): vừa đủ để cả người (từ chỗ cho bóng thoại 2 dòng phía trên đầu tới chân) nằm trong
+  // khung nhìn. Nhân vật càng cao thì mức phóng càng nhẹ; không bao giờ dưới 1.15 (khi được yêu cầu từ 1.15 trở lên).
   function zoom(target, scale, ms) {
     const c = chars.get(target)
-    camTo(charX(target), Math.min(scale ?? 1.2, 1.2), ms, c ? c.headY + 10 : FEET_Y - 88)
+    const want = Math.min(scale ?? 1.2, 1.2)
+    const fit = c ? STAGE_H / (FEET_Y + CAM_FEET_PAD - (c.headY - BUBBLE_ROOM)) : 1.2
+    camTo(charX(target), Math.min(want, Math.max(fit, 1.15)), ms, c ? c.headY + 10 : undefined)
   }
   function zoomReset(ms = 700) {
     cam.scale = 1
@@ -586,6 +717,7 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
     }
     typingNode = null
     trimChat()
+    replaceBubbles()
   }
   function typing(from = "") {
     from = senderName(from)
@@ -597,6 +729,7 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
     typingNode.dataset.from = from
     phoneList.append(typingNode)
     trimChat()
+    replaceBubbles()
   }
   function chatClose() {
     phone.classList.remove("is-open")
@@ -692,7 +825,7 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
 }
 
 /* ================================================================== nhân vật */
-function makeCharCtrl(node, body, spriteSet, bubble, spec, api, isRM, rawFrames) {
+function makeCharCtrl(node, body, spriteSet, bubble, spec, api, isRM, metrics) {
   let x = spec.x
   let mood = spec.mood || "neutral"
   const name = spec.name || String(spec.id).toUpperCase()
@@ -701,7 +834,6 @@ function makeCharCtrl(node, body, spriteSet, bubble, spec, api, isRM, rawFrames)
   let facing = 1
   let move = null // { from, to, start, dur, walk }
   let bob = 0
-  let squash = 1
   let sayNode = null
   let gestureTimer = 0
   const hasFrame = (n) => spriteSet.frames.has(n)
@@ -709,15 +841,21 @@ function makeCharCtrl(node, body, spriteSet, bubble, spec, api, isRM, rawFrames)
   const phase = (spec.x * 1.7) % 6.28
   let blinkNext = performance.now() + 2200 + ((spec.x * 37) % 2600)
   let blinkUntil = 0
+  let breatheNext = performance.now() + 3200 + ((spec.x * 29) % 3400)
+  let breatheUntil = 0
   let reactUntil = 0
   let reactKind = null
   let nextGlance = performance.now() + 3000 + Math.random() * 3000
 
-  // hàng đầu tiên có điểm ảnh → đỉnh đầu thật (cao thấp khác nhau theo nhân vật)
-  const idleRows = rawFrames["neutral-idle"] || []
-  let firstRow = idleRows.findIndex((r) => /[^. ]/.test(r))
-  if (firstRow < 0) firstRow = 0
-  const headY = FEET_Y - SPRITE_H + (firstRow * SPRITE_H) / Math.max(1, idleRows.length || 24)
+  // Đỉnh đầu thật (stage px), từ hàng đầu tiên có điểm ảnh của khung nghỉ: cao thấp khác nhau theo nhân vật
+  // (em nhỏ thấp hơn người lớn). Khung sprite cao metrics.h, đáy khung = chân (FEET_Y) cộng chỗ trống dưới chân.
+  const spriteH = metrics.h
+  const halfW = metrics.w / 2
+  const headY = FEET_Y + metrics.footPad - spriteH + metrics.headTop
+
+  // chu kỳ đi: a, c, b, d khi đủ 4 khung; thiếu thì a, b như cũ
+  const walkCycle = ["walk-a", "walk-c", "walk-b", "walk-d"].every((n) => spriteSet.frames.has(n)) ? ["walk-a", "walk-c", "walk-b", "walk-d"] : ["walk-a", "walk-b"]
+  const walkStep = walkCycle.length === 4 ? WALK_STEP_MS : 150
 
   /* <mood>-x → neutral-x → null */
   function pick(kind) {
@@ -727,12 +865,15 @@ function makeCharCtrl(node, body, spriteSet, bubble, spec, api, isRM, rawFrames)
     return hasFrame(b) ? b : null
   }
   const idleFrame = () => pick("idle") || "neutral-idle"
+  /** Khung chớp / thở CHỈ khi có đúng khung cho mood hiện tại (neutral-blink đổi cả nét mặt nên không dùng cho mood khác). */
+  const ownFrame = (kind) => (hasFrame(`${mood}-${kind}`) ? `${mood}-${kind}` : null)
 
   const isTalking = (t) => dialogueTalk || t < talkUntil
 
   function frameFor(t) {
     if (move && move.walk) {
-      const n = Math.floor((t - move.start) / 150) % 2 ? "walk-a" : "walk-b"
+      // lướt qua → chạm đất: a, c, b, d
+      const n = walkCycle[Math.floor((t - move.start) / walkStep) % walkCycle.length]
       return hasFrame(n) ? n : idleFrame()
     }
     if (t < reactUntil && reactKind) {
@@ -746,18 +887,27 @@ function makeCharCtrl(node, body, spriteSet, bubble, spec, api, isRM, rawFrames)
       if (isRM()) return talk
       return Math.floor(t / 130) % 2 ? talk : idleFrame()
     }
+    if (t < blinkUntil) return ownFrame("blink") || idleFrame()
+    if (t < breatheUntil) return ownFrame("breathe") || idleFrame()
     return idleFrame()
+  }
+
+  /** Khuôn mặt cho chân dung: như sprite, nhưng đang đi/thở thì vẫn là nét mặt đứng nghỉ. */
+  function faceFrame(t) {
+    const n = frameFor(t)
+    return n.startsWith("walk-") || n.endsWith("-breathe") ? idleFrame() : n
   }
 
   function applyFrame() {
     const t = performance.now()
     node.classList.toggle("is-talking", isTalking(t))
     spriteSet.setFrame(frameFor(t))
+    api.frameChanged(self)
   }
 
   function place() {
-    node.style.left = `${x - 36}px`
-    node.style.transform = `translateY(${bob.toFixed(2)}px) scaleX(${facing}) scaleY(${squash})`
+    node.style.left = `${x - halfW}px`
+    node.style.transform = `translateY(${bob}px) scaleX(${facing})`
   }
 
   function setMood(m, opts = {}) {
@@ -856,13 +1006,18 @@ function makeCharCtrl(node, body, spriteSet, bubble, spec, api, isRM, rawFrames)
     if (mood === "happy") { bobAmp = 1.8; bobSpeed = 0.0032 }
     if (mood === "annoyed") { bobAmp = 0.8; bobSpeed = 0.0026 }
     if (mood === "sad") { bobAmp = 0.6; bobSpeed = 0.0014 }
-    bob = Math.sin(t * bobSpeed + phase) * bobAmp
-    // chớp mắt: co giãn Y nhẹ thay vì đổi frame
+    // làm tròn theo điểm ảnh sân khấu: nhân vật pixel-art không "rung" ở nửa điểm ảnh
+    bob = Math.round(Math.sin(t * bobSpeed + phase) * bobAmp)
+    // chớp mắt: đổi sang khung neutral-blink (frameFor chọn); mỗi 2.4–4.6 giây, 110ms
     if (t > blinkNext && t > blinkUntil) {
       blinkUntil = t + 110
-      blinkNext = t + 2400 + ((x * 53) % 2200)
+      blinkNext = t + 2400 + ((spec.x * 53 + t) % 2200)
     }
-    squash = t < blinkUntil ? 0.92 : 1
+    // thỉnh thoảng hít thở: khung neutral-breathe (vai nhấc một ô) ~1 giây, chỉ khi đứng yên
+    if (t > breatheNext && t > breatheUntil) {
+      if (!move && !isTalking(t) && t > blinkUntil + 200 && !(t < reactUntil)) breatheUntil = t + 1000
+      breatheNext = t + 3800 + ((spec.x * 41 + t) % 3000)
+    }
     // thỉnh thoảng liếc sang người nói gần nhất hoặc người khác
     if (t > nextGlance) {
       nextGlance = t + 3000 + Math.random() * 3000
@@ -882,13 +1037,11 @@ function makeCharCtrl(node, body, spriteSet, bubble, spec, api, isRM, rawFrames)
 
   function resetDecor() {
     bob = 0
-    squash = 1
+    blinkUntil = 0
+    breatheUntil = 0
     place()
     applyFrame()
   }
-
-  face("right")
-  applyFrame()
 
   const self = {
     id: spec.id,
@@ -915,7 +1068,10 @@ function makeCharCtrl(node, body, spriteSet, bubble, spec, api, isRM, rawFrames)
     dropSay,
     decor,
     resetDecor,
+    faceFrame,
   }
+  face("right")
+  applyFrame()
   return self
 }
 

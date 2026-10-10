@@ -133,12 +133,15 @@
   inset: 0;
 }
 
+/* Nhân vật hi-fi 72×120 px (36×60 ô, 2 px/ô). JS đặt, riêng cho từng người, các biến:
+   --spr-w / --spr-h  cỡ sprite;  --foot-pad  phần trống dưới gót trong khung (hạ khung xuống để gót vẫn ở y≈186);
+   --head-top  khoảng từ đỉnh khung tới đỉnh tóc thật (để đặt bong bóng biểu tượng). */
 .scn-char {
   position: absolute;
   /* Nhân vật chính đứng hẳn trên sàn (chân ở y≈186) để dải sàn phía sau (172–186)
      là chỗ cho người qua lại ở xa — họ nhỏ hơn, nhạt hơn và đứng cao hơn trên sàn. */
-  bottom: 14px;
-  width: 72px;
+  bottom: calc(14px - var(--foot-pad, 0px));
+  width: var(--spr-w, 72px);
   will-change: transform;
   transition: filter 240ms steps(3, end);
 }
@@ -150,8 +153,28 @@
 }
 
 .scn-char__sprite {
-  width: 72px;
-  height: 96px;
+  position: relative;
+  width: var(--spr-w, 72px);
+  height: var(--spr-h, 120px);
+}
+
+/* bóng mềm dưới chân: nhân vật đứng trên sàn chứ không lơ lửng. Nằm ngoài .scn-char__body nên
+   không nhảy theo cử chỉ hop/bounce (người nhảy lên, bóng ở lại mặt sàn). */
+.scn-char__shadow {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--foot-pad, 0px) - 4px);
+  width: 46px;
+  height: 9px;
+  margin-left: -23px;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse closest-side,
+    rgba(28, 20, 32, 0.4) 0%,
+    rgba(28, 20, 32, 0.26) 55%,
+    rgba(28, 20, 32, 0) 100%
+  );
+  pointer-events: none;
 }
 .scn-char__sprite svg {
   width: 100%;
@@ -173,8 +196,8 @@
 /* bong bóng biểu tượng ( ! ? ... ) */
 .scn-bubble {
   position: absolute;
-  top: -22px;
-  left: 24px;
+  top: calc(var(--head-top, 0px) - 22px);
+  left: calc(var(--spr-w, 72px) * 0.62);
   min-width: 22px;
   height: 22px;
   padding: 0 4px;
@@ -546,6 +569,61 @@
   cursor: pointer;
 }
 
+/* ------------------------------------------------------------------ chân dung người nói
+   Hàng [chân dung | chữ] bọc đoạn chữ của khung thoại (sceneRuntime.js). Chân dung là phần đầu
+   (20×18 ô) của chính nhân vật đang nói, vẽ pixelated ~4 px/ô trong một khung pixel nhỏ viền hổ phách
+   như dấu nhắc của khung thoại; miệng mấp máy theo hoạt ảnh nói. Lời người dẫn chuyện: ẩn. */
+.scn-talk {
+  display: flex;
+  align-items: flex-start;
+}
+.scn-talk .console__text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.scn-talk.has-portrait {
+  gap: 14px;
+}
+.scn-portrait {
+  --pc: 4px; /* px màn hình mỗi ô gốc */
+  --frame: var(--amber);
+  --fill: #3b465a;
+  display: none;
+  flex: none;
+  margin-top: 2px;
+}
+.scn-portrait.is-on {
+  display: block;
+}
+.scn-portrait.is-pop {
+  animation: scn-portrait-pop 220ms steps(3, end) 1 both;
+}
+@keyframes scn-portrait-pop {
+  0% { transform: scale(0.7); opacity: 0.2; }
+  100% { transform: none; opacity: 1; }
+}
+.scn-portrait__art {
+  position: relative;
+  width: calc(var(--pcols, 20) * var(--pc));
+  height: calc(var(--prows, 18) * var(--pc));
+  /* nền dịu, tối hơn nhân vật: đủ tương phản để viền tóc/da đọc rõ */
+  background: linear-gradient(180deg, #5a6780 0%, #3b465a 100%);
+}
+.scn-portrait__f {
+  position: absolute;
+  inset: 0;
+  display: none;
+}
+.scn-portrait__f.is-on {
+  display: block;
+}
+.scn-portrait__f svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+
 /* danh sách lựa chọn trong cảnh: nằm dưới khung thoại, trên nền giấy sáng của trang, nên mỗi
    lựa chọn là một ô tối đặc (cùng màu khung thoại) để không bị chìm vào nền. */
 .scn-board .choice {
@@ -643,6 +721,13 @@
 
 /* ------------------------------------------------------------------ responsive */
 @media (max-width: 480px) {
+  /* điện thoại: chân dung gọn hơn (3 px/ô) để chữ còn đủ chỗ */
+  .scn-portrait {
+    --pc: 3px;
+  }
+  .scn-talk.has-portrait {
+    gap: 10px;
+  }
   .scene-hud {
     flex-wrap: wrap;
   }
@@ -663,6 +748,7 @@
   .scn-clock rect:nth-child(2),
   .scn-stage.is-shake,
   .scn-bubble.is-pop,
+  .scn-portrait.is-pop,
   .scene-tip {
     animation: none !important;
   }
