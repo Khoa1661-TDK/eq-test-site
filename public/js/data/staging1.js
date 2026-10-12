@@ -81,7 +81,7 @@ export const STAGING_1 = {
     ],
     consequences: {
       A: [
-        { at: 100, char: "player", do: "think", text: "Cậu ấy im hơn mọi ngày… có gì đó đang nặng." },
+        { at: 100, char: "player", do: "think", text: "Mình hơi lo… cậu ấy im lạ quá, chưa biết vì sao." },
         { at: 1500, char: "player", do: "lean", target: "friend" },
         { at: 2200, char: "player", do: "say", text: "Tớ ngồi đây với cậu nhé. Khi nào muốn nói thì nói." },
         { at: 3000, char: "friend", do: "lookAt", target: "player" },
@@ -151,7 +151,7 @@ export const STAGING_1 = {
         { at: 3100, char: "player", do: "emote", kind: "sweat" },
       ],
       B: [
-        { at: 100, char: "player", do: "think", text: "Mình hồi hộp thôi. Cơ thể đang lên dây cót đấy." },
+        { at: 100, char: "player", do: "think", text: "Mình hồi hộp, không phải sợ. Cứ đứng lên thôi." },
         { at: 1100, char: "player", do: "idle", mood: "neutral" },
         { at: 1300, do: "tint", tone: "warm" },
         { at: 1600, char: "player", do: "emote", kind: "sparkle" },
@@ -160,12 +160,13 @@ export const STAGING_1 = {
         { at: 3000, char: "teacherF", do: "nodYes" },
       ],
       C: [
-        { at: 100, char: "player", do: "think", text: "Người cứ lạ lạ… chắc tại ly cà phê sáng nay." },
-        { at: 1300, char: "player", do: "idle", mood: "neutral" },
-        { at: 1800, char: "teacherF", do: "say", text: "Em xem lại bài chưa đấy?" },
-        { at: 2800, char: "player", do: "emote", kind: "ellipsis" },
-        { at: 3200, char: "player", do: "shiver" },
-        { at: 3500, char: "friend", do: "emote", kind: "question" },
+        { at: 100, char: "player", do: "think", text: "Hay xin cô đổi sang hôm khác… mình run quá." },
+        { at: 1300, char: "player", do: "walkTo", x: 215 },
+        { at: 2000, char: "player", do: "say", text: "Cô ơi, em xin đổi sang hôm khác được không ạ?" },
+        { at: 3200, char: "teacherF", do: "say", text: "Ừ, em báo cô ngày khác nhé." },
+        { at: 4100, char: "player", do: "idle", mood: "neutral" },
+        { at: 4400, char: "player", do: "emote", kind: "ellipsis" },
+        { at: 4900, char: "friend", do: "emote", kind: "question" },
       ],
       D: [
         { at: 100, char: "player", do: "think", text: "Mình đang sợ… vì mình chưa làm được gì ra hồn." },

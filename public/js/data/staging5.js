@@ -486,7 +486,7 @@ export const STAGING_5 = {
         { at: 100, char: "player", do: "say", text: "Cậu muốn nghe thật không?" },
         { at: 900, char: "classmate", do: "say", text: "Ừ, nói thật đi." },
         { at: 1800, char: "player", do: "say", text: "Đoạn đầu cậu hát ổn lắm, hai chỗ vấp ở điệp khúc." },
-        { at: 3000, char: "player", do: "say", text: "Chiều mình nghe lại bản gốc với nhau nha?" },
+        { at: 3000, char: "classmate", do: "say", text: "Ừ, để tớ tập lại hai chỗ đó." },
         { at: 3900, char: "classmate", do: "happy" },
         { at: 4100, do: "tint", tone: "warm" },
         { at: 4200, char: "classmate", do: "emote", kind: "sparkle" },

@@ -24,6 +24,7 @@
  */
 
 import { MORE_SCENARIOS } from "./scenariosMore.js"
+import { NEW_SCENARIOS } from "./scenariosNew.js"
 
 export const EQ_DOMAIN_ORDER = ["selfAwareness", "regulation", "empathy", "socialAwareness", "communication", "relationship"]
 
@@ -45,7 +46,7 @@ const BASE_SCENARIOS = [
       {
         id: "AW_01_A",
         code: "A",
-        text: "Mình đang tức. Cô luôn nhắm vào mình.",
+        text: "Mình đang tức. Cô lúc nào cũng nhắm vào mình.",
         strategy: "Mới thấy lớp cảm xúc nằm trên cùng",
         consequence: "Cơn tức che mất điều đang thật sự làm bạn khó chịu, nên rất dễ phản ứng quá đà.",
         scores: { selfAwareness: 1, regulation: 1 },
@@ -54,7 +55,7 @@ const BASE_SCENARIOS = [
       {
         id: "AW_01_B",
         code: "B",
-        text: "Không có gì to tát, chuyện này bình thường.",
+        text: "Có gì to tát đâu, bị gọi tên thôi mà. Chuyện bình thường.",
         strategy: "Phủ nhận cảm xúc để đi qua tình huống",
         consequence: "Cảm xúc không biến mất, nó chỉ nằm đó chờ dịp khác bùng lên.",
         scores: { selfAwareness: 0, regulation: 1 },
@@ -63,7 +64,7 @@ const BASE_SCENARIOS = [
       {
         id: "AW_01_C",
         code: "C",
-        text: "Mình đang xấu hổ, và ngay sau đó là tức vì bị hiểu oan.",
+        text: "Mình xấu hổ trước, rồi mới tức vì bị hiểu oan.",
         strategy: "Gọi đúng tên hai cảm xúc đang chồng lên nhau",
         consequence: "Khi biết mình đang vừa xấu hổ vừa tức, bạn có thể chọn cách nói thay vì để cơn tức nói.",
         scores: { selfAwareness: 3, regulation: 2 },
@@ -72,11 +73,11 @@ const BASE_SCENARIOS = [
       {
         id: "AW_01_D",
         code: "D",
-        text: "Tim mình đập nhanh, người nóng ran — nhưng mình chưa gọi được tên cảm xúc đó.",
-        strategy: "Nhận ra tín hiệu cơ thể trước khi gọi được tên cảm xúc",
+        text: "Tim đập nhanh, người nóng ran. Chưa biết gọi là gì, cứ thở đã.",
+        strategy: "Nhận ra tín hiệu cơ thể và dừng lại trước khi gọi được tên cảm xúc",
         consequence: "Đây là bước đầu tốt: bạn biết cơ thể đang phản ứng, chỉ còn thiếu một cái tên.",
         scores: { selfAwareness: 2, regulation: 2 },
-        pattern: "names_feeling",
+        pattern: "pauses",
       },
     ],
     practice: {
@@ -96,21 +97,21 @@ const BASE_SCENARIOS = [
       "Bạn hỏi “sao thế”, bạn ấy nói “không sao”.",
       "Bạn ấy vẫn dán mắt vào điện thoại.",
     ],
-    prompt: "Đứa bạn thân bỗng im re cả buổi. Bạn để ý gì đầu tiên nè?",
+    prompt: "Đứa bạn thân bỗng im re cả buổi. Còn trong bạn đang có gì nè?",
     choices: [
       {
         id: "AW_02_A",
         code: "A",
-        text: "Bạn ấy im hơn mọi ngày. Chắc có chuyện gì đang nặng lòng, mà mình chưa biết là gì.",
-        strategy: "Nhận ra điều khác thường và chưa vội kết luận",
-        consequence: "Bạn còn chỗ để hỏi tiếp, thay vì phải phòng thủ.",
+        text: "Mình hơi lo. Bạn ấy im lạ quá, mà mình chưa biết vì sao.",
+        strategy: "Nhận ra mình đang lo, và chưa vội đoán lý do của bạn ấy",
+        consequence: "Bạn biết mình đang lo và còn chỗ để hỏi tiếp, thay vì phải phòng thủ.",
         scores: { selfAwareness: 3, empathy: 2 },
         pattern: "reads_room",
       },
       {
         id: "AW_02_B",
         code: "B",
-        text: "Bạn ấy đang né mình. Chắc mình làm gì rồi.",
+        text: "Bạn ấy đang né mình thì phải. Chắc mình lỡ làm gì rồi mà không biết.",
         strategy: "Hiểu sự im lặng thành lời trách mình",
         consequence: "Bạn biến sự im lặng của người khác thành chuyện của mình, và tự tạo ra căng thẳng không có thật.",
         scores: { selfAwareness: 1, empathy: 0 },
@@ -119,16 +120,16 @@ const BASE_SCENARIOS = [
       {
         id: "AW_02_C",
         code: "C",
-        text: "Chắc bạn ấy mệt.",
-        strategy: "Chọn ngay một lời giải thích rồi thôi",
+        text: "Chắc bạn ấy mệt hoặc thiếu ngủ thôi. Không có gì đâu, khỏi hỏi.",
+        strategy: "Chọn ngay một lời giải thích để khỏi phải hỏi",
         consequence: "Bạn đoán đúng phần nổi, nhưng nếu lý do thật khác thì bạn không còn cách nào biết.",
         scores: { selfAwareness: 1, empathy: 1 },
-        pattern: "assumes",
+        pattern: "avoids",
       },
       {
         id: "AW_02_D",
         code: "D",
-        text: "Bạn ấy im, còn mình thấy hơi lo — nhưng mình đang nghĩ cho mình nhiều hơn là cho bạn ấy.",
+        text: "Mình thấy hơi lo, nhưng mình lo cho mình nhiều hơn là cho bạn ấy.",
         strategy: "Nhận ra cảm xúc của mình nhưng chưa nhìn sang phía bạn ấy",
         consequence: "Nhận ra cảm xúc của mình là tốt, nhưng bạn vẫn đang đứng hoàn toàn ở phía mình.",
         scores: { selfAwareness: 2, empathy: 1 },
@@ -157,17 +158,17 @@ const BASE_SCENARIOS = [
       {
         id: "AW_03_A",
         code: "A",
-        text: "Mình đang lo. Lo thì phải mở lại bài ra xem một lượt cho chắc.",
+        text: "Mình đang lo. Lo thì mở lại bài ra xem một lượt cho chắc.",
         strategy: "Gọi được tên cảm giác, rồi xử lý bằng một việc quen tay",
         consequence: "Bạn làm được một việc cụ thể, nhưng chưa phân biệt được lo với hồi hộp.",
         scores: { selfAwareness: 2, regulation: 1 },
-        pattern: "names_feeling",
+        pattern: "fixes_too_fast",
       },
       {
         id: "AW_03_B",
         code: "B",
-        text: "Mình đang hồi hộp — cơ thể đang nạp năng lượng cho một việc khó.",
-        strategy: "Phân biệt hồi hộp với sợ và hiểu hồi hộp đang giúp mình việc gì",
+        text: "Mình hồi hộp, không phải sợ. Cứ đứng lên thuyết trình thôi.",
+        strategy: "Phân biệt hồi hộp với sợ và vẫn làm việc cần làm",
         consequence: "Bạn đứng vững được mà vẫn làm việc cần làm.",
         scores: { selfAwareness: 3, regulation: 3 },
         pattern: "names_feeling",
@@ -175,11 +176,11 @@ const BASE_SCENARIOS = [
       {
         id: "AW_03_C",
         code: "C",
-        text: "Người mình lạ lắm, chắc tại ly cà phê sáng nay.",
-        strategy: "Đổ cảm giác cho một nguyên nhân bên ngoài rồi thôi",
-        consequence: "Bạn có một lời giải thích gọn ghẽ, và bỏ qua luôn việc đang chờ phía trước.",
-        scores: { selfAwareness: 1, regulation: 0 },
-        pattern: "ignores_feeling",
+        text: "Nhắn xin cô đổi sang hôm khác, chiều nay mình run lắm.",
+        strategy: "Dời việc đi để hạ áp lực, chưa gọi tên cảm giác",
+        consequence: "Cô có thể đồng ý và bạn thở được ngay, nhưng cảm giác đó vẫn chưa có tên nên hôm khác nó lại tới.",
+        scores: { selfAwareness: 1, regulation: 2 },
+        pattern: "avoids",
       },
       {
         id: "AW_03_D",
@@ -187,7 +188,7 @@ const BASE_SCENARIOS = [
         text: "Mình đang sợ. Sợ vì mình chưa chuẩn bị được gì ra hồn.",
         strategy: "Biến cảm giác của mình thành một bản án về năng lực",
         consequence: "Bạn tự chồng thêm một lớp sợ lên một cảm giác vốn chỉ là hồi hộp.",
-        scores: { selfAwareness: 1, regulation: 1 },
+        scores: { selfAwareness: 1, regulation: 0 },
         pattern: "self_blames",
       },
     ],
@@ -213,7 +214,7 @@ const BASE_SCENARIOS = [
       {
         id: "AW_04_A",
         code: "A",
-        text: "Mình ghen tị. Mà sâu hơn nữa chắc là mình đang lo mình chưa đủ giỏi.",
+        text: "Mình ghen tị. Sâu hơn nữa là mình lo mình chưa đủ giỏi.",
         strategy: "Gọi được cảm xúc nổi lên và điều mình lo ở bên dưới",
         consequence: "Bạn hiểu cảm giác này cho biết điều mình đang muốn, chứ không nói gì về bạn kia.",
         scores: { selfAwareness: 3, empathy: 2 },
@@ -222,16 +223,16 @@ const BASE_SCENARIOS = [
       {
         id: "AW_04_B",
         code: "B",
-        text: "Mình mừng cho bạn ấy, nhưng trong bụng vẫn nặng. Để mai nghĩ tiếp.",
-        strategy: "Thấy cả hai cảm xúc cùng lúc rồi gác lại",
+        text: "Mình mừng cho bạn ấy, nhưng trong bụng vẫn nặng. Để mai nghĩ tiếp vậy.",
+        strategy: "Thấy cả hai cảm xúc cùng lúc rồi hẹn lúc khác nghĩ tiếp",
         consequence: "Bạn qua được buổi này, nhưng cảm giác đó vẫn còn nguyên khi gặp lại bạn ấy.",
         scores: { selfAwareness: 2, empathy: 1 },
-        pattern: "suppresses",
+        pattern: "pauses",
       },
       {
         id: "AW_04_C",
         code: "C",
-        text: "Mình thấy khó chịu với bạn ấy. Lúc nào bạn ấy cũng khoe.",
+        text: "Mình khó chịu với bạn ấy. Lúc nào cũng khoe, nhìn phát bực.",
         strategy: "Đẩy cảm xúc của mình thành lỗi của người khác",
         consequence: "Bạn bỏ lỡ thông tin về chính mình và còn thêm một mâu thuẫn không đáng có.",
         scores: { selfAwareness: 1, empathy: 1 },
@@ -240,7 +241,7 @@ const BASE_SCENARIOS = [
       {
         id: "AW_04_D",
         code: "D",
-        text: "Mình phải vui cho bạn ấy chứ, ghen tị là xấu.",
+        text: "Mình phải vui cho bạn ấy chứ. Ghen tị là xấu, đừng nghĩ nữa.",
         strategy: "Tự phán xét cảm xúc nên khó gọi tên nó",
         consequence: "Cảm xúc bị nén xuống nhưng vẫn âm thầm ảnh hưởng tới cách bạn cư xử.",
         scores: { selfAwareness: 1, empathy: 0 },
@@ -269,7 +270,7 @@ const BASE_SCENARIOS = [
       {
         id: "AW_05_A",
         code: "A",
-        text: "“Ổn” nghĩa là không cần nghĩ gì. Mùa thi ai cũng vậy mà.",
+        text: "“Ổn” là không cần nghĩ gì nữa. Mùa thi ai cũng vậy mà, than làm gì.",
         strategy: "Dùng một lời giải thích chung chung để lờ tín hiệu của cơ thể",
         consequence: "Cơ thể cứ báo hiệu mà không được để ý, cho tới khi bạn không còn đủ sức.",
         scores: { selfAwareness: 0, regulation: 1 },
@@ -278,7 +279,7 @@ const BASE_SCENARIOS = [
       {
         id: "AW_05_B",
         code: "B",
-        text: "Vai cứng và ngủ ít là tín hiệu mình đang quá tải — kể cả khi mình chưa gọi được tên cảm xúc.",
+        text: "Vai cứng, ngủ ít. Người mình đang báo trước điều gì đó.",
         strategy: "Xem cơ thể là tín hiệu báo sớm",
         consequence: "Bạn có thể xử lý trước khi kiệt sức.",
         scores: { selfAwareness: 3, regulation: 2 },
@@ -287,7 +288,7 @@ const BASE_SCENARIOS = [
       {
         id: "AW_05_C",
         code: "C",
-        text: "Mình yếu quá. Không nên để ai thấy.",
+        text: "Mình yếu quá, mới vậy mà đã mệt. Không nên để ai thấy.",
         strategy: "Nghe đúng tín hiệu nhưng quay ra phán xét bản thân",
         consequence: "Bạn giấu tình trạng của mình và giấu luôn cả cách để được giúp.",
         scores: { selfAwareness: 1, regulation: 0 },
@@ -296,11 +297,11 @@ const BASE_SCENARIOS = [
       {
         id: "AW_05_D",
         code: "D",
-        text: "Chắc tại thiếu ngủ thôi, ngủ bù là hết.",
+        text: "Chắc chỉ tại thiếu ngủ thôi, cuối tuần ngủ bù một giấc là hết.",
         strategy: "Giải thích tín hiệu bằng một nguyên nhân duy nhất",
         consequence: "Ngủ bù giúp được một phần, nhưng phần quá tải bên dưới vẫn còn.",
         scores: { selfAwareness: 2, regulation: 1 },
-        pattern: "ignores_feeling",
+        pattern: "assumes",
       },
     ],
     practice: {
@@ -325,7 +326,7 @@ const BASE_SCENARIOS = [
       {
         id: "AW_06_A",
         code: "A",
-        text: "Cả nhóm đang khó chịu với mình.",
+        text: "Chắc cả nhóm đang khó chịu với mình, chẳng ai thèm trả lời tử tế.",
         strategy: "Biến một tin nhắn cụt thành kết luận về cả nhóm",
         consequence: "Bạn phản ứng với một kết luận mình vừa tự nghĩ ra, chứ không phải với tin nhắn.",
         scores: { selfAwareness: 0, socialAwareness: 0 },
@@ -334,7 +335,7 @@ const BASE_SCENARIOS = [
       {
         id: "AW_06_B",
         code: "B",
-        text: "Mình đang cần được ghi nhận, và sự im lặng làm mình lo.",
+        text: "Mình đang cần được ghi nhận, nên chữ “ok” lạnh tanh làm mình chùng xuống.",
         strategy: "Gọi được nhu cầu nằm dưới phản ứng",
         consequence: "Bạn biết mình đang thiếu gì, nên có thể nói ra thay vì tự suy diễn.",
         scores: { selfAwareness: 3, socialAwareness: 2 },
@@ -343,7 +344,7 @@ const BASE_SCENARIOS = [
       {
         id: "AW_06_C",
         code: "C",
-        text: "Chắc mọi người bận. Không có gì đâu.",
+        text: "Chắc mọi người đang bận thôi. Không có gì đâu, mình đừng nghĩ nhiều.",
         strategy: "Chọn cách giải thích dễ chịu rồi để cảm giác của mình nằm đó",
         consequence: "Bạn qua được lúc này nhưng nhu cầu của mình vẫn chưa được nói ra.",
         scores: { selfAwareness: 1, socialAwareness: 2 },
@@ -352,11 +353,11 @@ const BASE_SCENARIOS = [
       {
         id: "AW_06_D",
         code: "D",
-        text: "Mình thấy hơi lo nhưng không rõ vì sao.",
-        strategy: "Nhận ra cảm xúc nhưng chưa thấy mình đang cần gì",
+        text: "Mình thấy hơi lo, nhưng không rõ lo cái gì. Để lát xem lại.",
+        strategy: "Nhận ra cảm xúc rồi tạm dừng, chưa thấy mình đang cần gì",
         consequence: "Bạn biết có chuyện, nhưng chưa biết nên làm gì với nó.",
         scores: { selfAwareness: 2, socialAwareness: 1 },
-        pattern: "names_feeling",
+        pattern: "pauses",
       },
     ],
     practice: {
@@ -391,7 +392,7 @@ const BASE_SCENARIOS = [
       {
         id: "EU_01_B",
         code: "B",
-        text: "Mừng và lo đều có lý: mình muốn chuyện này, và mình biết nó có cái giá của nó.",
+        text: "Mừng và lo đều có lý do của nó.",
         strategy: "Hiểu rằng hai cảm xúc trái ngược có thể cùng tồn tại",
         consequence: "Bạn giữ được cả động lực lẫn sự thật về những gì mình phải đánh đổi.",
         scores: { selfAwareness: 3, regulation: 3 },
@@ -409,7 +410,7 @@ const BASE_SCENARIOS = [
       {
         id: "EU_01_D",
         code: "D",
-        text: "Mình thấy lẫn lộn, chắc tại mình nghĩ nhiều quá.",
+        text: "Mình thấy lẫn lộn lắm. Chắc tại mình nghĩ nhiều quá, được chọn mà còn kêu.",
         strategy: "Nhận ra mình đang lẫn lộn nhưng cho đó là lỗi của mình",
         consequence: "Bạn biết mình đang có hai cảm xúc, nhưng không coi chúng là thông tin dùng được.",
         scores: { selfAwareness: 2, regulation: 1 },
@@ -494,7 +495,7 @@ const BASE_SCENARIOS = [
       {
         id: "EU_03_A",
         code: "A",
-        text: "Bạn ấy đang tránh mình. Mình phải hỏi cho ra lẽ.",
+        text: "Bạn ấy đang tránh mình. Mình phải hỏi cho ra lẽ, để còn biết đường mà tránh.",
         strategy: "Nhảy thẳng tới một kết luận chưa có bằng chứng",
         consequence: "Bạn mở đầu cuộc nói chuyện bằng một lời buộc tội, và rất dễ bị đối phương phòng thủ lại.",
         scores: { empathy: 1, selfAwareness: 1 },
@@ -503,7 +504,7 @@ const BASE_SCENARIOS = [
       {
         id: "EU_03_B",
         code: "B",
-        text: "Bạn ấy đang bận việc khác, còn cái ý “chắc mình làm gì sai” là do mình đang lo.",
+        text: "Bạn ấy có thể đang bận. Còn cái “mình sai rồi” là mình tự nghĩ ra.",
         strategy: "Tách sự việc khỏi những điều mình tự suy diễn",
         consequence: "Bạn chừa chỗ cho thông tin thật, thay vì phản ứng với điều mình tự nghĩ ra.",
         scores: { empathy: 3, selfAwareness: 2 },
@@ -512,7 +513,7 @@ const BASE_SCENARIOS = [
       {
         id: "EU_03_C",
         code: "C",
-        text: "Không sao đâu. Bận thì bận.",
+        text: "Không sao đâu, bận thì bận. Mình đâu có để bụng.",
         strategy: "Gạt luôn cảm xúc của mình đi",
         consequence: "Bạn qua được lúc này nhưng để lại một nỗi lo chưa được nhìn tới.",
         scores: { empathy: 1, selfAwareness: 0 },
@@ -550,7 +551,7 @@ const BASE_SCENARIOS = [
       {
         id: "EU_04_A",
         code: "A",
-        text: "Mình phải trả lời ngay, càng nhanh càng tốt.",
+        text: "Phải trả lời ngay cho tụi nó biết tay, để lâu tụi nó tưởng mình sợ.",
         strategy: "Để cảm xúc quyết định tốc độ hành động",
         consequence: "Bạn gửi đi một tin viết ngay lúc cảm xúc lên đỉnh — thứ khó rút lại nhất.",
         scores: { selfAwareness: 0, regulation: 1 },
@@ -559,7 +560,7 @@ const BASE_SCENARIOS = [
       {
         id: "EU_04_B",
         code: "B",
-        text: "Mình đang bị tổn thương, và cảm xúc này mạnh nhất trong vài phút đầu.",
+        text: "Mình bị tổn thương. Cơn này mạnh nhất mấy phút đầu thôi.",
         strategy: "Biết cảm xúc lên đỉnh rồi sẽ hạ xuống",
         consequence: "Bạn biết có thể chờ vài phút rồi mới nói điều mình thật sự muốn nói.",
         scores: { selfAwareness: 3, regulation: 2 },
@@ -568,7 +569,7 @@ const BASE_SCENARIOS = [
       {
         id: "EU_04_C",
         code: "C",
-        text: "Không sao, chỉ là cái ảnh thôi, mình không để bụng.",
+        text: "Không sao, chỉ là cái ảnh thôi mà. Mình cười cho qua, ai nhắc cũng kệ.",
         strategy: "Xem nhẹ cảm xúc để khỏi phải xử lý nó",
         consequence: "Bạn bỏ qua tín hiệu cho thấy có điều gì đó đã vượt quá giới hạn của mình.",
         scores: { selfAwareness: 1, regulation: 0 },
@@ -577,7 +578,7 @@ const BASE_SCENARIOS = [
       {
         id: "EU_04_D",
         code: "D",
-        text: "Mình đang rất tức, và cũng thấy xấu hổ.",
+        text: "Mình đang rất tức và xấu hổ. Mình chưa biết nên làm gì với cảm giác này.",
         strategy: "Gọi được tên cảm xúc nhưng chưa biết nó sẽ thay đổi thế nào",
         consequence: "Bạn biết mình đang ở đâu, nhưng vẫn cần biết rằng cảm xúc sẽ dịu xuống nếu chờ.",
         scores: { selfAwareness: 2, regulation: 2 },
@@ -606,7 +607,7 @@ const BASE_SCENARIOS = [
       {
         id: "EU_05_A",
         code: "A",
-        text: "Chắc mình không còn quan tâm chuyện đó nữa.",
+        text: "Nhẹ rồi nghĩa là hết chuyện thôi. Chắc mình không còn quan tâm nữa.",
         strategy: "Hiểu cảm xúc nhẹ đi là chuyện đó bớt quan trọng",
         consequence: "Bạn dễ bỏ qua một việc vẫn đang chờ được nói ra.",
         scores: { selfAwareness: 1, relationship: 1 },
@@ -615,7 +616,7 @@ const BASE_SCENARIOS = [
       {
         id: "EU_05_B",
         code: "B",
-        text: "Cường độ cảm xúc giảm không có nghĩa là chuyện đã được giải quyết.",
+        text: "Nguôi rồi, nhưng chưa xong chuyện. Giờ nói chắc dễ hơn.",
         strategy: "Phân biệt cảm xúc mạnh hay nhẹ với việc có cần xử lý hay không",
         consequence: "Bạn tận dụng lúc đã nguội để nói chuyện, thay vì để nó trôi đi.",
         scores: { selfAwareness: 3, relationship: 2 },
@@ -624,7 +625,7 @@ const BASE_SCENARIOS = [
       {
         id: "EU_05_C",
         code: "C",
-        text: "Quên được thì tốt hơn, coi như không có gì.",
+        text: "Cứ để nó trôi đi, quên được thì tốt hơn. Coi như chưa có chuyện gì.",
         strategy: "Dùng thời gian để xóa vấn đề",
         consequence: "Chuyện có thể quay lại sau, và lúc đó sẽ khó nói hơn.",
         scores: { selfAwareness: 1, relationship: 0 },
@@ -633,11 +634,11 @@ const BASE_SCENARIOS = [
       {
         id: "EU_05_D",
         code: "D",
-        text: "Mình bớt giận rồi, nhưng có thể chuyện vẫn còn đó.",
-        strategy: "Nhận ra hai chuyện này khác nhau nhưng chưa biết làm gì tiếp",
-        consequence: "Bạn biết đây là lúc thuận lợi để nói, chỉ còn thiếu một bước.",
+        text: "Mình bớt giận rồi, nhưng có thể chuyện vẫn còn đó. Chờ thêm chút nữa xem.",
+        strategy: "Nhận ra hai chuyện này khác nhau nhưng còn chờ thêm",
+        consequence: "Bạn thấy chuyện chưa xong nhưng còn chờ thêm, và càng chờ thì câu mở lời càng khó nói.",
         scores: { selfAwareness: 2, relationship: 2 },
-        pattern: "names_feeling",
+        pattern: "pauses",
       },
     ],
     practice: {
@@ -664,7 +665,7 @@ const BASE_SCENARIOS = [
       {
         id: "ER_01_A",
         code: "A",
-        text: "Nhắn riêng hỏi bạn ấy đang vướng gì, nghe hết rồi để bạn ấy tự sắp xếp.",
+        text: "Nhắn riêng: “Cậu đang vướng gì vậy?” rồi nghe hết, để bạn ấy tự sắp xếp.",
         strategy: "Mở một cánh cửa để lắng nghe, nhưng chưa chốt gì",
         consequence: "Bạn ấy thấy mình được lắng nghe, còn bạn thì vẫn chưa biết tối nay có kịp không.",
         scores: { regulation: 1, communication: 2 },
@@ -673,7 +674,7 @@ const BASE_SCENARIOS = [
       {
         id: "ER_01_B",
         code: "B",
-        text: "Nhắn riêng, chốt một mốc: “9 giờ tớ lấy phần cậu nhé. Có gì vướng thì nói tớ.”",
+        text: "Nhắn riêng: “9 giờ tớ lấy phần cậu nhé. Có gì vướng thì cứ nói tớ, tớ chờ.”",
         strategy: "Vừa nêu mốc thời gian vừa chừa chỗ cho bạn ấy nói",
         consequence: "Bạn ấy biết chính xác cần làm gì, và có chỗ để nói nếu đang thật sự vướng.",
         scores: { regulation: 3, communication: 3 },
@@ -691,7 +692,7 @@ const BASE_SCENARIOS = [
       {
         id: "ER_01_D",
         code: "D",
-        text: "Không nói gì, tối nay tự làm luôn phần đó cho kịp.",
+        text: "Không nói gì, tối nay tự làm luôn phần của bạn ấy cho kịp, đỡ phải cãi nhau.",
         strategy: "Nuốt cơn bực vào trong và tự gánh cho xong",
         consequence: "Việc xong, nhưng cơn bực còn đó và lần sau chuyện này sẽ lặp lại.",
         scores: { regulation: 1, communication: 0 },
@@ -729,7 +730,7 @@ const BASE_SCENARIOS = [
       {
         id: "ER_02_B",
         code: "B",
-        text: "Cho mình một buổi tối để thất vọng, mai mở bài ra xem từng lỗi.",
+        text: "Tối nay cứ buồn đã, mai mở bài ra xem từng lỗi một.",
         strategy: "Chừa chỗ cho cảm xúc rồi mới quay lại với việc",
         consequence: "Bạn không phải giả vờ ổn, mà vẫn có đường quay lại với bài.",
         scores: { regulation: 3, selfAwareness: 2 },
@@ -751,7 +752,7 @@ const BASE_SCENARIOS = [
         strategy: "Đổi sang việc khác để giữ nhịp học",
         consequence: "Bạn giữ được nhịp học hôm nay, nhưng các lỗi sai vẫn chưa được xem lại.",
         scores: { regulation: 2, selfAwareness: 1 },
-        pattern: "pauses",
+        pattern: "suppresses",
       },
     ],
     practice: {
@@ -776,7 +777,7 @@ const BASE_SCENARIOS = [
       {
         id: "ER_03_A",
         code: "A",
-        text: "Nói ngay tại chỗ: “phần đó không phải em làm”, giọng vừa đủ nghe.",
+        text: "Nói ngay giữa buổi: “Phần đó không phải em làm, anh chị nhầm rồi ạ”, cho mọi người nghe rõ.",
         strategy: "Nói sự thật ngay, giữa lúc nhiều người đang có mặt",
         consequence: "Sự thật được nói ra, nhưng cả buổi trở nên căng thẳng.",
         scores: { regulation: 2, communication: 2 },
@@ -785,7 +786,7 @@ const BASE_SCENARIOS = [
       {
         id: "ER_03_B",
         code: "B",
-        text: "Im lặng cho hết buổi, rồi tìm anh chị nói riêng.",
+        text: "Cắn răng im lặng cho hết buổi, rồi mới tìm anh chị nói riêng cho rõ.",
         strategy: "Chọn đúng chỗ để nói, đổi lại là nói muộn hơn",
         consequence: "Buổi sinh hoạt vẫn êm, còn bạn phải ôm cảm giác đó cho tới hết buổi.",
         scores: { regulation: 1, communication: 2 },
@@ -794,7 +795,7 @@ const BASE_SCENARIOS = [
       {
         id: "ER_03_C",
         code: "C",
-        text: "Nói một câu ngắn ngay tại chỗ để giữ sự thật, rồi xin nói riêng sau buổi.",
+        text: "Nói một câu: “phần đó em không làm ạ”, rồi xin anh chị cho nói riêng sau buổi.",
         strategy: "Giữ sự thật ở mức tối thiểu rồi hạ nhiệt tình hình",
         consequence: "Bạn không nhận phần không phải của mình, và vẫn còn chỗ để nói tiếp khi cả hai đã bình tĩnh.",
         scores: { regulation: 3, communication: 3 },
@@ -803,7 +804,7 @@ const BASE_SCENARIOS = [
       {
         id: "ER_03_D",
         code: "D",
-        text: "Nhận cho yên chuyện, rồi về nhà thấy uất ức.",
+        text: "Nhận lỗi cho yên chuyện, đỡ mất công cãi. Về nhà mới thấy uất ức.",
         strategy: "Nhận lỗi về mình để thoát khỏi tình huống",
         consequence: "Chuyện qua nhanh, đổi lại bạn mang theo một điều không phải của mình.",
         scores: { regulation: 1, communication: 1 },
@@ -841,7 +842,7 @@ const BASE_SCENARIOS = [
       {
         id: "ER_04_B",
         code: "B",
-        text: "Hỏi lại một lần: “cậu bận hay không thích xem phim?”, rồi để câu trả lời là câu trả lời.",
+        text: "Hỏi lại một lần cho rõ: “Cậu bận hay không thích xem phim?”",
         strategy: "Hỏi để biết thêm, không hỏi để thuyết phục",
         consequence: "Bạn biết mình đang đứng ở đâu, và bạn ấy cũng không phải giải thích thêm.",
         scores: { regulation: 3, empathy: 2 },
@@ -850,7 +851,7 @@ const BASE_SCENARIOS = [
       {
         id: "ER_04_C",
         code: "C",
-        text: "Chắc bạn ấy thấy đi với mình không vui.",
+        text: "Chắc bạn ấy thấy đi với mình không vui. Hèn gì từ chối.",
         strategy: "Tự điền một kết luận về mình vào chỗ còn trống",
         consequence: "Bạn phản ứng với điều mình vừa tự nghĩ ra, chứ không phải với câu trả lời.",
         scores: { regulation: 1, empathy: 0 },
@@ -859,7 +860,7 @@ const BASE_SCENARIOS = [
       {
         id: "ER_04_D",
         code: "D",
-        text: "Thấy hụt hẫng một chút, nhưng một lời từ chối chưa nói lên điều gì về mình.",
+        text: "Hụt hẫng một chút, nhưng tự nhủ: “Bị từ chối chưa nói gì về mình.”",
         strategy: "Giữ khoảng cách giữa một sự việc và giá trị của bản thân",
         consequence: "Bạn vượt qua cú hụt mà không mang thêm một kết luận nặng nề về mình.",
         scores: { regulation: 2, empathy: 2 },
@@ -888,7 +889,7 @@ const BASE_SCENARIOS = [
       {
         id: "ER_05_A",
         code: "A",
-        text: "Thức tới sáng làm cho xong hết, kịp hạn là được.",
+        text: "Thức tới sáng làm cho xong hết, kịp hạn là được, ngủ lúc nào chẳng được.",
         strategy: "Lấy sức khỏe ra bù cho việc quá tải",
         consequence: "Bạn có thể xong tuần này, nhưng tuần sau sẽ hết sức.",
         scores: { regulation: 1, selfAwareness: 1 },
@@ -906,19 +907,19 @@ const BASE_SCENARIOS = [
       {
         id: "ER_05_C",
         code: "C",
-        text: "Nghỉ mười phút, chọn đúng một bài quan trọng nhất, và xin gia hạn phần còn lại.",
-        strategy: "Hạ nhiệt, chọn việc rồi bớt tải",
-        consequence: "Bạn vừa dịu được cảm xúc vừa thay đổi được tình hình.",
+        text: "Nghỉ mười phút cho đỡ rối, rồi chọn một bài để làm trước.",
+        strategy: "Hạ nhiệt rồi chọn việc quan trọng nhất",
+        consequence: "Bạn dịu lại và có một việc rõ ràng để làm, thay vì bốn việc cùng đè xuống.",
         scores: { regulation: 3, selfAwareness: 3 },
         pattern: "pauses",
       },
       {
         id: "ER_05_D",
         code: "D",
-        text: "Làm phần dễ nhất trước để thấy mình đang tiến lên.",
+        text: "Làm phần dễ nhất trước cho có đà, thấy mình đang tiến lên đã rồi tính.",
         strategy: "Lấy đà bằng một việc nhỏ",
         consequence: "Bạn lấy lại được chút cảm giác kiểm soát, nhưng bài khó vẫn đang chờ.",
-        scores: { regulation: 1, selfAwareness: 1 },
+        scores: { regulation: 2, selfAwareness: 1 },
         pattern: "fixes_too_fast",
       },
     ],
@@ -944,16 +945,16 @@ const BASE_SCENARIOS = [
       {
         id: "ER_06_A",
         code: "A",
-        text: "Nhắn ngay lúc đang tức: “cậu kể chuyện của tớ cho người khác hả?”",
+        text: "Nhắn ngay lúc đang tức: “cậu kể chuyện của tớ cho người khác hả? Sao cậu làm vậy?”",
         strategy: "Nói ngay khi cơn tức đang lên đỉnh",
         consequence: "Bạn ấy nhận một câu hỏi đang nóng, và rất dễ trả lời trong thế phòng thủ.",
-        scores: { relationship: 1, regulation: 2 },
+        scores: { relationship: 1, regulation: 0 },
         pattern: "vents",
       },
       {
         id: "ER_06_B",
         code: "B",
-        text: "Không nhắc gì, nhưng từ nay không kể chuyện riêng cho bạn ấy nữa.",
+        text: "Không nhắc gì, nhưng từ nay giữ khoảng cách và không kể chuyện riêng cho bạn ấy nữa.",
         strategy: "Âm thầm rút lại lòng tin",
         consequence: "Bạn đỡ phải đối diện, và bạn ấy không biết mình vừa mất gì.",
         scores: { relationship: 2, regulation: 1 },
@@ -962,7 +963,7 @@ const BASE_SCENARIOS = [
       {
         id: "ER_06_C",
         code: "C",
-        text: "Chờ nguội rồi nói: “chuyện đó tớ đã dặn là chuyện riêng. Từ giờ tớ sẽ không kể cho cậu nữa.”",
+        text: "Chờ nguội rồi nói: “Tớ dặn là chuyện riêng rồi. Từ giờ tớ sẽ không kể cho cậu nữa.”",
         strategy: "Chờ cơn cảm xúc qua đỉnh rồi nói đúng điều đã bị tổn hại",
         consequence: "Bạn ấy nghe được điều mình đã đánh mất, thay vì chỉ nghe một cơn giận.",
         scores: { relationship: 3, regulation: 3 },
@@ -971,7 +972,7 @@ const BASE_SCENARIOS = [
       {
         id: "ER_06_D",
         code: "D",
-        text: "Không nói gì, tự kết luận rồi cứ thế giận bạn ấy.",
+        text: "Không nói gì, tự kết luận bạn ấy phản bội rồi cứ thế giận, nói chuyện cụt lủn.",
         strategy: "Tự kết luận trong im lặng và giữ cơn giận kéo dài",
         consequence: "Quan hệ nguội dần mà bạn ấy không có cơ hội biết vì sao.",
         scores: { relationship: 1, regulation: 1 },
@@ -1010,7 +1011,7 @@ const BASE_SCENARIOS = [
       {
         id: "EM_01_B",
         code: "B",
-        text: "Ngồi lại gần, không hỏi thêm: “tớ ngồi đây thôi, lúc nào cậu muốn nói thì nói nhé.”",
+        text: "Ngồi xuống cạnh bạn ấy: “Tớ ngồi đây thôi. Lúc nào cậu muốn nói thì nói nhé.”",
         strategy: "Có mặt mà không bắt người kia phải mở lòng",
         consequence: "Bạn ấy có thể im lặng mà vẫn không phải ở một mình.",
         scores: { empathy: 3, relationship: 2 },
@@ -1028,11 +1029,11 @@ const BASE_SCENARIOS = [
       {
         id: "EM_01_D",
         code: "D",
-        text: "Đưa bạn ấy tờ khăn giấy, rồi ngồi im bên cạnh một lúc.",
-        strategy: "Ở bên bằng một cử chỉ, không nói gì",
-        consequence: "Bạn ấy biết có người ở đó mà không phải mở lời.",
-        scores: { empathy: 2, relationship: 2 },
-        pattern: "reads_room",
+        text: "Hỏi luôn: “Cậu sao vậy, ai làm gì cậu à?” dù hai bạn bàn bên đang nhìn.",
+        strategy: "Quan tâm thật lòng nhưng hỏi ngay giữa chỗ có người",
+        consequence: "Bạn ấy biết có người để ý, nhưng phải trả lời trước mắt người khác nên càng khép lại.",
+        scores: { empathy: 2, relationship: 1 },
+        pattern: "misreads_room",
       },
     ],
     practice: {
@@ -1066,7 +1067,7 @@ const BASE_SCENARIOS = [
       {
         id: "EM_02_B",
         code: "B",
-        text: "Nhắn một lần là mình vẫn ở đây, rồi để bạn ấy chủ động tìm lại.",
+        text: "Nhắn một lần là mình vẫn ở đây, rồi để bạn ấy tự tìm lại.",
         strategy: "Tôn trọng khoảng riêng và vẫn để ngỏ cửa",
         consequence: "Bạn ấy biết mình không bị bỏ rơi, và vẫn được tự quyết lúc nào muốn nói.",
         scores: { empathy: 3, relationship: 3 },
@@ -1116,13 +1117,13 @@ const BASE_SCENARIOS = [
         text: "Dù hoàn cảnh thế nào cũng không có lý do gì để nói với mọi người như vậy.",
         strategy: "Đúng về chuẩn mực nhưng chưa nhìn ra điều đằng sau",
         consequence: "Bạn giữ được chuẩn mực nhưng bỏ lỡ chuyện đang xảy ra với bạn ấy.",
-        scores: { empathy: 1, socialAwareness: 1 },
+        scores: { empathy: 1, socialAwareness: 2 },
         pattern: "blames",
       },
       {
         id: "EM_03_B",
         code: "B",
-        text: "Bạn ấy đang mang cơn bực từ nhà sang nhóm, và điều đó không biến cách nói này thành đúng.",
+        text: "Bạn ấy đang mang cơn bực từ nhà sang, nhưng nói vậy với cả nhóm vẫn không ổn đâu.",
         strategy: "Hiểu được nguồn gốc mà vẫn giữ chuẩn mực",
         consequence: "Bạn vừa hiểu được bạn ấy vừa giữ được ranh giới cho cả nhóm.",
         scores: { empathy: 3, socialAwareness: 3 },
@@ -1131,16 +1132,16 @@ const BASE_SCENARIOS = [
       {
         id: "EM_03_C",
         code: "C",
-        text: "Thông cảm hết cho bạn ấy, mặc kệ mọi người nghĩ sao.",
+        text: "Thông cảm với bạn ấy, bị mắng sáng nay mà. Mặc kệ mọi người nghĩ sao.",
         strategy: "Hiểu hoàn cảnh nhưng bỏ qua ảnh hưởng lên người khác",
         consequence: "Cả nhóm phải chịu một cách nói không ổn, còn bạn ấy không có dịp nhìn lại mình.",
-        scores: { empathy: 1, socialAwareness: 1 },
+        scores: { empathy: 2, socialAwareness: 0 },
         pattern: "people_pleases",
       },
       {
         id: "EM_03_D",
         code: "D",
-        text: "Chắc bạn ấy áp lực quá. Thôi kệ.",
+        text: "Chắc bạn ấy áp lực quá nên mới vậy. Thôi kệ, ai cũng có lúc thế.",
         strategy: "Có một lời giải thích rồi thôi",
         consequence: "Bạn hết bực, và cũng chẳng còn gì để làm với tình huống.",
         scores: { empathy: 1, socialAwareness: 1 },
@@ -1169,7 +1170,7 @@ const BASE_SCENARIOS = [
       {
         id: "EM_04_A",
         code: "A",
-        text: "Họ cố tình loại mình ra.",
+        text: "Họ cố tình loại mình ra. Chắc họ không ưa mình.",
         strategy: "Hiểu một chuyện chưa rõ ràng thành ý xấu",
         consequence: "Bạn đau vì một điều có thể chưa từng xảy ra, và rất khó nói chuyện bình thường lại với họ.",
         scores: { socialAwareness: 0, empathy: 0 },
@@ -1178,7 +1179,7 @@ const BASE_SCENARIOS = [
       {
         id: "EM_04_B",
         code: "B",
-        text: "Mình không biết vì sao, và có thể có nhiều lý do, kể cả lý do chẳng liên quan gì tới mình.",
+        text: "Chưa biết vì sao mình không được rủ. Chưa đủ để kết luận gì, hỏi thử xem sao.",
         strategy: "Giữ chỗ cho nhiều khả năng khi chưa đủ thông tin",
         consequence: "Bạn vẫn còn đường để hỏi thay vì phải phòng thủ.",
         scores: { socialAwareness: 3, empathy: 2 },
@@ -1196,7 +1197,7 @@ const BASE_SCENARIOS = [
       {
         id: "EM_04_D",
         code: "D",
-        text: "Mình thấy tủi, và mình muốn biết thật ra là chuyện gì.",
+        text: "Mình thấy tủi lắm, và mình muốn biết thật ra là chuyện gì mới yên tâm.",
         strategy: "Gọi đúng cảm xúc và có một nhu cầu rõ ràng",
         consequence: "Bạn biết mình cần thông tin, chỉ còn phải chọn hỏi ai và hỏi thế nào.",
         scores: { socialAwareness: 2, empathy: 2 },
@@ -1225,16 +1226,16 @@ const BASE_SCENARIOS = [
       {
         id: "EM_05_A",
         code: "A",
-        text: "“Cậu có học đâu, đừng đổ lỗi cho đề.”",
+        text: "“Cậu có học đâu mà đổ lỗi cho đề? Đừng có chối nữa.”",
         strategy: "Nói đúng sự thật nhưng bỏ qua điều bạn ấy đang phải chịu",
         consequence: "Bạn ấy phải phòng thủ để bảo vệ lời giải thích của mình.",
-        scores: { empathy: 1, communication: 1 },
+        scores: { empathy: 0, communication: 1 },
         pattern: "blames",
       },
       {
         id: "EM_05_B",
         code: "B",
-        text: "“Ừ, đề khó thật”, rồi đổi chủ đề.",
+        text: "“Ừ, đề khó thật”, rồi chuyển sang chuyện khác cho bạn ấy đỡ buồn.",
         strategy: "Đồng tình cho xong để tránh căng thẳng",
         consequence: "Bạn ấy qua được lúc này và không có gì để nhìn lại.",
         scores: { empathy: 1, communication: 2 },
@@ -1243,7 +1244,7 @@ const BASE_SCENARIOS = [
       {
         id: "EM_05_C",
         code: "C",
-        text: "“Tớ hiểu là cậu đang thấy tệ lắm. Tớ thấy mấy hôm nay cậu học không nhiều — cậu có muốn tớ nói thật không?”",
+        text: "“Cậu thấy tệ lắm hả? Tớ hiểu mà. Tớ nói thật với cậu một chút được không?”",
         strategy: "Công nhận cảm xúc rồi xin phép trước khi góp ý",
         consequence: "Bạn ấy được giữ thể diện và vẫn có cửa để nghe điều thật.",
         scores: { empathy: 3, communication: 3 },
@@ -1252,10 +1253,10 @@ const BASE_SCENARIOS = [
       {
         id: "EM_05_D",
         code: "D",
-        text: "Không nói gì về chuyện học, chỉ rủ đi ăn cho khuây khỏa.",
+        text: "Không nhắc gì chuyện học, chỉ rủ bạn ấy đi ăn trà sữa cho khuây khỏa.",
         strategy: "Lái sang chuyện khác để giữ không khí",
         consequence: "Buổi đi ăn dễ chịu, nhưng chuyện học vẫn chưa được nhắc tới.",
-        scores: { empathy: 1, communication: 1 },
+        scores: { empathy: 2, communication: 1 },
         pattern: "avoids",
       },
     ],
@@ -1283,7 +1284,7 @@ const BASE_SCENARIOS = [
       {
         id: "RS_01_A",
         code: "A",
-        text: "Mở lịch sử chỉnh sửa ra và nói ngắn gọn: “bản cuối là bạn ấy sửa lúc 10 giờ”.",
+        text: "Mở lịch sử chỉnh sửa: “bản cuối bạn ấy sửa lúc 10 giờ ạ”.",
         strategy: "Dùng bằng chứng, không dùng giọng điệu",
         consequence: "Sự thật được nói ra mà bạn không phải mở màn đối đầu.",
         scores: { communication: 3, regulation: 2 },
@@ -1292,7 +1293,7 @@ const BASE_SCENARIOS = [
       {
         id: "RS_01_B",
         code: "B",
-        text: "Im lặng nhận cho xong, rồi nói riêng sau.",
+        text: "Im lặng nhận cho xong để khỏi căng trước mặt cô, có gì nói riêng sau.",
         strategy: "Giữ yên ổn trước mặt cô nhưng không đòi lại sự thật",
         consequence: "Bạn giữ được buổi học yên ả, còn bạn kia không phải chịu trách nhiệm.",
         scores: { communication: 1, regulation: 2 },
@@ -1301,7 +1302,7 @@ const BASE_SCENARIOS = [
       {
         id: "RS_01_C",
         code: "C",
-        text: "Nói: “cậu xem lại đi, rõ ràng cậu làm hỏng rồi”.",
+        text: "Quay sang bạn ấy: “cậu xem lại đi, rõ ràng cậu làm hỏng rồi mà còn đổ cho tớ!”",
         strategy: "Đúng về sự việc nhưng đẩy mâu thuẫn ra trước mặt mọi người",
         consequence: "Bạn có thể đúng, nhưng đồng thời khiến cả nhóm phải chọn phe.",
         scores: { communication: 1, regulation: 1 },
@@ -1310,7 +1311,7 @@ const BASE_SCENARIOS = [
       {
         id: "RS_01_D",
         code: "D",
-        text: "Cười cho qua, rồi về kể hết chuyện này cho cả lớp.",
+        text: "Cười cho qua trước mặt cô, rồi về kể hết chuyện này cho cả lớp nghe.",
         strategy: "Xử lý bề ngoài cho qua chuyện",
         consequence: "Chuyện lan ra ngoài nhóm và khó sửa hơn nhiều.",
         scores: { communication: 0, regulation: 0 },
@@ -1339,7 +1340,7 @@ const BASE_SCENARIOS = [
       {
         id: "RS_02_A",
         code: "A",
-        text: "Nhận hết cho xong, ai muốn sao thì sao.",
+        text: "Nhận hết cho xong, ai muốn sao thì sao, mình làm một mình cũng được.",
         strategy: "Giữ cho việc chạy bằng cách tự chịu thiệt",
         consequence: "Bài xong nhưng bạn ôm cơn bực trong lòng, và cách chia việc này sẽ lặp lại.",
         scores: { communication: 0, regulation: 1 },
@@ -1348,7 +1349,7 @@ const BASE_SCENARIOS = [
       {
         id: "RS_02_B",
         code: "B",
-        text: "Nói với nhóm trưởng: “tớ đang làm phần của cả hai người, mình chia lại việc được không?”",
+        text: "Nói với nhóm trưởng: “Tớ đang làm quá nửa việc, mình chia lại được không?”",
         strategy: "Nói về khối lượng công việc, không nói về con người",
         consequence: "Vấn đề được đặt ra theo hướng sửa được, không phải theo hướng buộc tội.",
         scores: { communication: 3, regulation: 3 },
@@ -1357,16 +1358,16 @@ const BASE_SCENARIOS = [
       {
         id: "RS_02_C",
         code: "C",
-        text: "Nhắn riêng cho bạn kia là bạn ấy lười và đang làm chậm cả nhóm.",
+        text: "Nhắn riêng cho bạn kia là bạn ấy lười và đang làm chậm cả nhóm, phải làm cho tử tế vào.",
         strategy: "Đưa lời chê về con người vào cuộc nói chuyện",
         consequence: "Bạn ấy phòng thủ, và cuộc nói chuyện biến thành chuyện bạn ấy có lười hay không.",
-        scores: { communication: 0, regulation: 1 },
+        scores: { communication: 1, regulation: 0 },
         pattern: "blames",
       },
       {
         id: "RS_02_D",
         code: "D",
-        text: "Chờ tới khi nộp bài rồi mới nói thẳng trong phần đánh giá nhóm.",
+        text: "Chờ tới khi nộp bài, rồi ghi vào phần đánh giá nhóm: “Có người gần như không làm gì.”",
         strategy: "Để tới lúc kết thúc mới nói",
         consequence: "Bạn không còn cơ hội thay đổi tình hình, chỉ còn cơ hội trả đũa.",
         scores: { communication: 1, regulation: 1 },
@@ -1396,7 +1397,7 @@ const BASE_SCENARIOS = [
       {
         id: "RS_03_A",
         code: "A",
-        text: "Nhắc to trước lớp cho bạn ấy xấu hổ.",
+        text: "Nhắc to giữa lớp: “Trả tiền tớ đi!” cho bạn ấy xấu hổ mà trả.",
         strategy: "Dùng áp lực của đám đông để đòi lại",
         consequence: "Bạn có thể lấy lại tiền nhưng chắc chắn mất tình bạn, cùng với uy tín của mình.",
         scores: { relationship: 0, regulation: 1 },
@@ -1414,7 +1415,7 @@ const BASE_SCENARIOS = [
       {
         id: "RS_03_C",
         code: "C",
-        text: "Nói riêng, nêu rõ mốc thời gian: “tớ cần số tiền đó trước thứ Sáu”.",
+        text: "Nói riêng với bạn ấy: “Tớ cần số tiền đó trước thứ Sáu nhé.”",
         strategy: "Nói rõ yêu cầu và mốc thời gian",
         consequence: "Bạn ấy biết chính xác cần làm gì, và bạn không phải nhắc đi nhắc lại.",
         scores: { relationship: 3, regulation: 3 },
@@ -1423,7 +1424,7 @@ const BASE_SCENARIOS = [
       {
         id: "RS_03_D",
         code: "D",
-        text: "Nhắn hỏi thăm trước, rồi mới nhắc khéo.",
+        text: "Nhắn hỏi thăm trước cho đỡ ngại, rồi nhắc khéo là tiền cũng lâu rồi.",
         strategy: "Làm dịu không khí nhưng để yêu cầu mơ hồ",
         consequence: "Cuộc nói chuyện dễ chịu hơn, nhưng có thể bạn vẫn chưa lấy lại được tiền.",
         scores: { relationship: 2, regulation: 2 },
@@ -1461,7 +1462,7 @@ const BASE_SCENARIOS = [
       {
         id: "RS_04_B",
         code: "B",
-        text: "Nhắn: “câu hôm qua của tớ nặng lời quá, tớ sai rồi. Tớ không muốn cậu phải nghe những lời đó”.",
+        text: "Nhắn: “Câu hôm qua của tớ nặng lời quá. Tớ sai ở câu đó.”",
         strategy: "Sửa đúng điều mình đã gây ra, không kèm lý do biện hộ",
         consequence: "Bạn ấy nhận được điều mình cần nhận, và cánh cửa để nói tiếp được mở ra.",
         scores: { relationship: 3, regulation: 3 },
@@ -1470,20 +1471,20 @@ const BASE_SCENARIOS = [
       {
         id: "RS_04_C",
         code: "C",
-        text: "Nhắn: “tớ cũng tức lắm, nhưng thôi bỏ qua nhé”.",
+        text: "Nhắn: “Tớ cũng tức lắm, nhưng thôi bỏ qua nhé.”",
         strategy: "Làm lành mà không nhận phần của mình",
         consequence: "Bạn ấy được đề nghị bỏ qua một chuyện mà bạn chưa nhận là mình gây ra.",
         scores: { relationship: 1, regulation: 2 },
-        pattern: "hints",
+        pattern: "people_pleases",
       },
       {
         id: "RS_04_D",
         code: "D",
-        text: "Mua đồ ăn mang tới cho bạn ấy, không nói gì.",
+        text: "Mua đồ ăn bạn ấy thích mang tới, không nhắc gì chuyện hôm qua.",
         strategy: "Sửa bằng hành động, không nói lời nào",
         consequence: "Không khí dịu lại, nhưng câu nói hôm qua vẫn chưa được nhắc tới.",
         scores: { relationship: 2, regulation: 1 },
-        pattern: "repairs",
+        pattern: "hints",
       },
     ],
     practice: {
@@ -1508,7 +1509,7 @@ const BASE_SCENARIOS = [
       {
         id: "RS_05_A",
         code: "A",
-        text: "Đi cùng cho vui, dù trong lòng thấy không ổn.",
+        text: "Thôi đi cùng cho khỏi bị nói khó chơi, dù trong lòng thấy không ổn.",
         strategy: "Đổi sự thuộc về nhóm lấy một việc mình không muốn làm",
         consequence: "Hôm nay bạn ở cùng họ, nhưng cũng tự đặt ra cái giá cho những lần sau.",
         scores: { communication: 0, regulation: 1 },
@@ -1517,7 +1518,7 @@ const BASE_SCENARIOS = [
       {
         id: "RS_05_B",
         code: "B",
-        text: "Nói: “tớ không trốn tiết được đâu”, rồi rủ họ đi chơi cùng vào cuối tuần.",
+        text: "Nói: “Tớ không trốn tiết đâu. Cuối tuần đi chơi thì tớ đi cùng mấy cậu.”",
         strategy: "Từ chối việc, không từ chối người",
         consequence: "Bạn giữ được ranh giới mà không phải rời khỏi nhóm.",
         scores: { communication: 3, regulation: 3 },
@@ -1526,16 +1527,16 @@ const BASE_SCENARIOS = [
       {
         id: "RS_05_C",
         code: "C",
-        text: "Từ chối thẳng: “tớ không tham gia mấy vụ này”.",
+        text: "Từ chối thẳng: “Tớ không tham gia mấy vụ này, mấy cậu cũng đừng làm.”",
         strategy: "Giữ ranh giới nhưng đặt mình cao hơn họ",
         consequence: "Ranh giới được giữ, nhưng bạn bị nghe như đang phán xét họ.",
         scores: { communication: 2, regulation: 2 },
-        pattern: "sets_boundary",
+        pattern: "blames",
       },
       {
         id: "RS_05_D",
         code: "D",
-        text: "Im lặng rồi tự bỏ về, không nói gì.",
+        text: "Im lặng rồi tự bỏ về một mình, không giải thích gì với ai.",
         strategy: "Rời đi mà không cho họ biết gì",
         consequence: "Bạn không phải giải thích, còn họ tự đoán lý do bạn bỏ đi.",
         scores: { communication: 1, regulation: 1 },
@@ -1564,7 +1565,7 @@ const BASE_SCENARIOS = [
       {
         id: "RS_06_A",
         code: "A",
-        text: "Nhận lỗi rồi im, về nhà tự làm lại từ đầu.",
+        text: "Nói “dạ, em xin lỗi” rồi im, về nhà tự làm lại, không dám hỏi thêm.",
         strategy: "Thu mình lại và tự chịu",
         consequence: "Bạn có thể làm lại nhưng không biết mình cần sửa đúng chỗ nào.",
         scores: { communication: 1, regulation: 1 },
@@ -1573,7 +1574,7 @@ const BASE_SCENARIOS = [
       {
         id: "RS_06_B",
         code: "B",
-        text: "Cãi lại trước lớp rằng mình đã làm rất kỹ phần đó.",
+        text: "Cãi lại trước lớp rằng mình đã làm rất kỹ phần đó, thầy chưa đọc kỹ.",
         strategy: "Bảo vệ công sức bằng cách mở một cuộc tranh luận",
         consequence: "Bạn biến buổi học thành chỗ phân xử, và thầy thành người mà bạn phải thắng.",
         scores: { communication: 0, regulation: 0 },
@@ -1582,7 +1583,7 @@ const BASE_SCENARIOS = [
       {
         id: "RS_06_C",
         code: "C",
-        text: "Hỏi lại cụ thể ngay trong giờ: “em yếu ở chỗ lập luận hay chỗ dẫn chứng ạ?”",
+        text: "Hỏi lại ngay trong giờ: “Em yếu ở chỗ lập luận hay chỗ dẫn chứng ạ?”",
         strategy: "Biến nhận xét chung chung thành thông tin dùng được",
         consequence: "Bạn ra khỏi buổi học với một việc cụ thể cần sửa.",
         scores: { communication: 3, regulation: 3 },
@@ -1591,7 +1592,7 @@ const BASE_SCENARIOS = [
       {
         id: "RS_06_D",
         code: "D",
-        text: "Cho rằng thầy không hiểu ý mình, rồi cứ làm lại theo cách cũ.",
+        text: "Cho rằng thầy không hiểu ý mình nên chê bừa, rồi cứ làm lại theo cách cũ.",
         strategy: "Giữ nguyên cách làm và không lấy được gì từ nhận xét",
         consequence: "Bạn bảo vệ được cảm giác của mình nhưng mất luôn thông tin trong lời góp ý.",
         scores: { communication: 0, regulation: 1 },
@@ -1607,7 +1608,7 @@ const BASE_SCENARIOS = [
 ]
 
 /** Ngân hàng đầy đủ: 28 tình huống gốc + tình huống bổ sung cho sáu kỹ năng (scenariosMore.js). */
-export const SCENARIOS = [...BASE_SCENARIOS, ...MORE_SCENARIOS]
+export const SCENARIOS = [...BASE_SCENARIOS, ...MORE_SCENARIOS, ...NEW_SCENARIOS]
 
 export const SCENARIO_BY_ID = Object.fromEntries(SCENARIOS.map((s) => [s.id, s]))
 

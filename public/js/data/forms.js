@@ -73,4 +73,10 @@ export const PRACTICE_IDS = [
   "scene-exam-board",
   "scene-chat-pile-on",
   "scene-broken-promise",
+  "NX_01",
+  "NX_02",
+  "NX_03",
+  "NX_04",
+  "NX_05",
+  "NX_06",
 ]
