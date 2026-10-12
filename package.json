@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.mjs",
     "test": "node test/eq-data.test.mjs && node test/scoring.test.mjs && node test/wording.test.mjs",
-    "e2e": "node test/playwright/run.mjs"
+    "e2e": "node test/playwright/run.mjs && node test/playwright/skip-cutscene.mjs"
   },
   "devDependencies": {
     "playwright": "1.62.1"

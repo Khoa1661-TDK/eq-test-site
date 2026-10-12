@@ -137,6 +137,8 @@ const SCENE_ACTIONS = {
   chatClose(api) { api.chatClose() },
 }
 
+const DOUBLE_TAP_MS = 320
+
 export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip } = {}) {
   const timers = []
   let destroyed = false
@@ -145,6 +147,12 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
   let choicesShown = false
   let decisionStarted = false
   let chosen = false
+  let consequencePlaying = false
+  /* Tua nhanh: bấm đúp / nhấn Space hai lần liền → đoạn đang diễn chạy hết ngay
+     (trước lựa chọn: tới thẳng câu hỏi; sau lựa chọn: tới hết hậu quả). */
+  let fastForward = false
+  let lastTap = 0
+  const pendingDelays = new Set()
   let lastSpeaker = null
   /* Chân dung cạnh khung thoại — khung thoại đang ở chế độ nào và ai đang nói:
      "line" (dòng thoại: consoleSpeaker, null = người dẫn chuyện) | "prompt" (câu hỏi) | "choices". */
@@ -168,9 +176,11 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
     return id
   }
   function delay(ms) {
+    if (fastForward) return Promise.resolve()
     return new Promise((resolve) => {
-      const id = setTimeout(() => resolve(), ms)
-      timers.push(id)
+      const done = () => { pendingDelays.delete(done); resolve() }
+      pendingDelays.add(done)
+      timers.push(setTimeout(done, ms))
     })
   }
 
@@ -341,7 +351,7 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
     for (const ev of events) {
       if (destroyed) return
       const wait = t0 + ev.at - performance.now()
-      if (wait > 0) await delay(wait)
+      if (wait > 0 && !fastForward) await delay(wait)
       if (destroyed) return
       runEvent(ev)
     }
@@ -392,7 +402,7 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
 
   function typeLine({ text, speaker, hint }) {
     return new Promise((resolve) => {
-      if (destroyed) { resolve(); return }
+      if (destroyed || fastForward) { resolve(); return }
       resolveDialogue = resolve
       dialogueState = "typing"
       consoleMode = "line"
@@ -432,6 +442,7 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
         resolve()
       }
       tw.type(text, { msPerChar: rateFor(text) })
+      if (fastForward) tw.finish()
       consoleApi.setHint(text)
       consoleApi.announce(text)
     })
@@ -448,14 +459,36 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
     }
   }
 
+  /** Tua tới cuối đoạn đang diễn. Không làm gì khi đang chờ người chơi chọn. */
+  function skipToEnd() {
+    if (destroyed || fastForward) return
+    if (choicesShown && !consequencePlaying) return
+    fastForward = true
+    if (dialogueState === "typing") consoleApi.typewriter.finish()
+    if (dialogueState === "waiting") advanceDialogue()
+    for (const done of [...pendingDelays]) done()
+  }
+
+  /** Một lần bấm đi tiếp một dòng; bấm lần hai thật nhanh thì tua hết đoạn. */
+  function tap() {
+    const now = performance.now()
+    if (now - lastTap < DOUBLE_TAP_MS) {
+      lastTap = 0
+      skipToEnd()
+    } else {
+      lastTap = now
+      advanceDialogue()
+    }
+  }
+
   function onStageClick() {
-    advanceDialogue()
+    tap()
   }
   stage.addEventListener("click", onStageClick)
   // Bấm vào khung thoại (không phải vào một lựa chọn) cũng đi tiếp.
   function onBoardClick(e) {
     if (e.target.closest?.(".choice, button, a")) return
-    advanceDialogue()
+    tap()
   }
   consoleApi.el.addEventListener("click", onBoardClick)
 
@@ -467,9 +500,12 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
     // Enter trên một nút/lựa chọn đang được focus là việc của nút đó.
     if (e.key === "Enter" && e.target?.closest?.("button, a, .choice")) return
     if (e.key === "Enter" || e.key === " " || e.code === "Space") {
-      if (dialogueState !== "idle" && !choicesShown) {
+      if (!choicesShown || consequencePlaying) {
+        // Space trên một nút đang được focus cũng là việc của nút đó (trừ lựa chọn vừa bấm, đã khoá).
+        const btn = e.target?.closest?.("button, a, .choice")
+        if (btn && !(consequencePlaying && btn.closest(".choice"))) return
         e.preventDefault()
-        advanceDialogue()
+        tap()
       }
     }
   }
@@ -495,6 +531,7 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
   }
 
   function showChoices() {
+    fastForward = false
     choicesShown = true
     consoleMode = "choices"
     consoleSpeaker = null
@@ -516,6 +553,7 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
   async function choose(id) {
     if (chosen || !choicesShown) return
     chosen = true
+    consequencePlaying = true
     choices.lock(true)
     choices.confirm(id)
     sound.confirm()
@@ -533,6 +571,7 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
   }
 
   function finish() {
+    consequencePlaying = false
     if (destroyed) return
     after(300, () => { onDone && onDone() })
   }
@@ -541,6 +580,7 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
   const bubbleBoxes = new Map() // node → {l, r, h, bottom}
 
   function showEmote(c, kind) {
+    if (fastForward) return
     const rows = EMOTES[kind]
     if (!rows) return
     const w = rows[0].length * EMOTE_CELL
@@ -560,7 +600,7 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
   }
 
   function speak(c, text, { think = false, ms } = {}) {
-    if (!text) return
+    if (!text || fastForward) return
     c.dropSay()
     // Mỗi lúc chỉ MỘT bóng thoại trên sân khấu: bóng cũ của người khác lui đi trước,
     // để cảnh không bị dồn chữ và bóng không phải xếp chồng lên tới mép trên.
