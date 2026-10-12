@@ -93,8 +93,11 @@
   transition: none;
 }
 
+/* Phần ruột luôn phủ kín khung: khi nút bị kéo rộng (width: 100% trên điện thoại)
+   khung và ruột giãn cùng nhau, không còn một viên thuốc nhỏ giữa khối mực. */
 .btn > .pxf-in {
-  display: inline-flex;
+  display: flex;
+  width: 100%;
   align-items: center;
   justify-content: center;
   gap: 10px;

@@ -157,7 +157,7 @@ export function renderEqResult(mount, { navigate }) {
   const strengthCol = el(
     "div",
     { class: "pair__col" },
-    el("h3", { class: "pair__title", text: strengthTitle }),
+    el("h2", { class: "pair__title", text: strengthTitle }),
     ...result.strengths.map((d) =>
       el(
         "div",
@@ -172,7 +172,7 @@ export function renderEqResult(mount, { navigate }) {
   const growthCol = el(
     "div",
     { class: "pair__col pair__col--focus" },
-    el("h3", { class: "pair__title", text: "Nên luyện tiếp" }),
+    el("h2", { class: "pair__title", text: "Nên luyện tiếp" }),
     ...result.growth.map((d) => {
       const detail = EQ_BY_KEY[d.key]
       const count = practiceQueue(d.key, { patterns: patternKeys }).length
@@ -230,7 +230,7 @@ export function renderEqResult(mount, { navigate }) {
   view.append(dims)
 
   /* ------------------------------------------------------------ cách chấm */
-  const ledger = (k, v) => el("div", { class: "ledger__item" }, el("span", { class: "ledger__k", text: k }), el("span", { class: "ledger__v", text: v }))
+  const ledger = (k, v) => el("div", { class: "ledger__item" }, el("div", { class: "ledger__k", text: k }), el("div", { class: "ledger__v", text: v }))
   view.append(
     el(
       "section",

@@ -281,6 +281,18 @@
   border-top-color: var(--paper-3);
 }
 
+/* Trên dải sáng, giá trị của sổ là chữ mực, không phải chữ giấy. */
+.band--soft .ledger__v {
+  color: var(--ink-2);
+}
+
+/* Văn xuôi đặt thẳng trên dải mực tối lấy màu giấy, giống .band__lead
+   (văn xuôi trong tấm giấy nằm trên dải mực thì giữ chữ mực). */
+.band:not(.band--soft) > .shell > .prose {
+  max-width: 68ch;
+  color: color-mix(in srgb, var(--paper) 78%, transparent);
+}
+
 .ledger__k {
   font-family: var(--font-pixel);
   font-weight: 700;
@@ -304,6 +316,7 @@
   font-family: var(--font-term);
   font-size: 20px;
   line-height: 1.5;
+  max-width: 72ch;
   color: var(--amber-2);
 }
 
