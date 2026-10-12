@@ -57,7 +57,7 @@
 .brand {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 14px;
   text-decoration: none;
   color: var(--ink);
 }
@@ -80,8 +80,6 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--ink-3);
-  border-left: 2px solid var(--paper-3);
-  padding-left: 10px;
 }
 
 .topbar__spacer {
@@ -120,10 +118,6 @@
   grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
   gap: var(--gap-7);
   align-items: center;
-}
-
-.hero__eyebrow {
-  margin-bottom: var(--gap-4);
 }
 
 .hero__title {
@@ -258,7 +252,7 @@
 .band__lead {
   max-width: 60ch;
   margin-bottom: var(--gap-6);
-  color: rgba(243, 240, 231, 0.78);
+  color: color-mix(in srgb, var(--paper) 78%, transparent);
 }
 
 .band--soft .band__lead {
@@ -271,9 +265,20 @@
   gap: var(--gap-4);
 }
 
+/* Mỗi mục là một cột của sổ: nét kẻ ngang phía trên, không phải vệt màu bên
+   trái. Vệt border-left là dấu hiệu rõ nhất của giao diện dựng tự động. */
 .ledger__item {
-  border-left: 4px solid var(--amber);
-  padding: 2px 0 2px 16px;
+  border-top: 3px solid var(--paper-3);
+  padding-top: var(--gap-3);
+}
+
+/* Trên dải mực tối, nét kẻ phải lấy từ màu giấy. */
+.band .ledger__item {
+  border-top-color: color-mix(in srgb, var(--paper) 26%, transparent);
+}
+
+.band--soft .ledger__item {
+  border-top-color: var(--paper-3);
 }
 
 .ledger__k {
@@ -289,7 +294,7 @@
   font-family: var(--font-term);
   font-size: 19px;
   line-height: 1.4;
-  color: rgba(243, 240, 231, 0.82);
+  color: color-mix(in srgb, var(--paper) 82%, transparent);
 }
 
 .formula {
@@ -405,7 +410,7 @@
 /* ---------------------------------------------------------------- footer */
 .foot {
   background: var(--ink);
-  color: rgba(243, 240, 231, 0.72);
+  color: color-mix(in srgb, var(--paper) 72%, transparent);
   padding: var(--gap-6) 0;
   margin-top: var(--gap-7);
 }
@@ -425,7 +430,7 @@
 .foot a {
   color: var(--paper);
   text-decoration: none;
-  border-bottom: 2px solid rgba(243, 240, 231, 0.3);
+  border-bottom: 2px solid color-mix(in srgb, var(--paper) 30%, transparent);
 }
 
 .foot a:hover {
@@ -730,7 +735,7 @@
 .peek__board .choice:hover,
 .peek__board .choice.is-active {
   cursor: default;
-  background: rgba(243, 240, 231, 0.04);
+  background: color-mix(in srgb, var(--paper) 4%, transparent);
   color: var(--console-text);
 }
 

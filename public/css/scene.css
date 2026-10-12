@@ -872,13 +872,15 @@
   font-size: 14px;
   color: var(--ink-2);
 }
+/* Mẹo: một hộp giấy viền cứng đúng ngôn ngữ pixel (như .skill, .pair__col),
+   không phải vệt màu bên trái kiểu hộp cảnh báo. */
 .story-skill__tip {
   margin: 4px 0 0;
   font-size: 14px;
   line-height: 1.45;
   background: var(--paper-2);
-  border-left: 4px solid var(--amber);
-  padding: 6px 10px;
+  border: 2px solid var(--paper-3);
+  padding: 7px 10px;
 }
 .story-delta {
   font-weight: 700;

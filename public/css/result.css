@@ -68,18 +68,6 @@
   min-width: 0;
 }
 
-/* Nhãn nhỏ phía trên tiêu đề. Chỉ áp trong .verdict: ở trang chủ lớp này còn
-   được dùng làm khung chip, đổi cỡ chữ ở đó sẽ làm chip méo. */
-.verdict .hero__eyebrow {
-  font-family: var(--font-pixel);
-  font-weight: 600;
-  font-size: 15px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--olive);
-  margin-bottom: var(--gap-3);
-}
-
 .verdict__name {
   font-family: var(--font-pixel);
   font-weight: 700;
@@ -111,8 +99,8 @@
   align-items: baseline;
   column-gap: var(--gap-2);
   row-gap: var(--gap-4);
-  border-left: 3px solid var(--paper-3);
-  padding-left: var(--gap-5);
+  border-top: 3px solid var(--paper-3);
+  padding-top: var(--gap-4);
 }
 
 .verdict__score {
@@ -197,8 +185,8 @@
   font-size: 15.5px;
   line-height: 1.65;
   color: var(--ink-2);
-  border-left: 3px solid var(--amber);
-  padding-left: var(--gap-3);
+  border-top: 2px solid var(--paper-3);
+  padding-top: var(--gap-2);
 }
 
 .pair__cta {
@@ -221,14 +209,17 @@
 .dim {
   background: transparent;
   border-bottom: 3px solid var(--paper-3);
-  border-left: 4px solid transparent;
 }
 
-/* Dấu hiệu "đang mở" không hét to: một vệt hổ phách bên trái + nền giấy sáng
-   hơn nền dải một chút. */
+/* Dấu hiệu "đang mở" không hét to: nền giấy sáng hơn nền dải một chút, mã kỹ
+   năng đổi sang ô hổ phách, và dấu + đã xoay. Không dùng vệt màu bên trái. */
 .dim[open] {
   background: var(--paper);
-  border-left-color: var(--amber);
+}
+
+.dim[open] .dim__code {
+  background: var(--amber);
+  color: var(--ink);
 }
 
 .dim__head {
@@ -441,8 +432,8 @@
   font-size: 15px;
   line-height: 1.6;
   color: var(--ink-3);
-  border-left: 3px solid var(--amber);
-  padding-left: var(--gap-3);
+  border-top: 2px solid var(--paper-3);
+  padding-top: var(--gap-2);
 }
 
 /* ------------------------------------------------------------ cách chấm --- */
@@ -681,7 +672,7 @@
   gap: 4px;
   padding: var(--gap-3);
   background: var(--paper-2);
-  border-left: 3px solid var(--amber);
+  border: 2px solid var(--paper-3);
   font-family: var(--font-text);
   font-size: 15px;
   line-height: 1.55;

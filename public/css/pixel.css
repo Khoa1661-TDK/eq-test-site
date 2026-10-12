@@ -4,7 +4,11 @@
    Nhờ vậy góc bị "khoét" theo bậc 3–4px, đúng ngôn ngữ pixel, không bo tròn.
    ========================================================================== */
 
-.pxf {
+/* .btn dùng lại đúng hình học của .pxf. Nút được dựng bằng .btn + .pxf-in mà
+   không có .pxf, nên nếu để .btn tự lo hình học thì mọi nút trên trang đều mất
+   khung: không khoét góc, không viền mực, không bóng — chỉ còn một khối màu. */
+.pxf,
+.btn {
   --n-out: 8px;
   --bw: 3px;
   --frame: var(--ink);
@@ -52,12 +56,14 @@
   );
 }
 
-.pxf--lg {
+.pxf--lg,
+.btn--lg {
   --n-out: 11px;
   --bw: 4px;
   --sh: 9px;
 }
-.pxf--lg > .pxf-in {
+.pxf--lg > .pxf-in,
+.btn--lg > .pxf-in {
   --n: 7px;
 }
 
@@ -204,17 +210,8 @@
   transition: width 260ms steps(6, end);
 }
 
-.bar__fill::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: repeating-linear-gradient(
-    to right,
-    rgba(243, 240, 231, 0.16) 0 1px,
-    rgba(243, 240, 231, 0) 1px 6px
-  );
-  pointer-events: none;
-}
+/* Không có vệt sọc trang trí trên nhân thanh: viền mực 3px, nhịp steps() và
+   mũi hổ phách đã đủ chất pixel. Sọc lặp là dấu hiệu của giao diện dựng tự động. */
 
 .bar__edge {
   position: absolute;

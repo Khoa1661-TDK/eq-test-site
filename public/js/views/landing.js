@@ -66,10 +66,6 @@ export function renderLanding(mount, { navigate }) {
       el(
         "div",
         {},
-        frame(el("span", { text: "LUYỆN EQ CHO HỌC SINH" }), {
-          size: "sm",
-          cls: "chip chip--olive hero__eyebrow",
-        }),
         el(
           "h1",
           { class: "hero__title" },

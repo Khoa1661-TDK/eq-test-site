@@ -96,7 +96,6 @@ export function renderEqResult(mount, { navigate }) {
       el(
         "div",
         { class: "verdict__body" },
-        el("p", { class: "hero__eyebrow", text: `HỒ SƠ SÁU KỸ NĂNG · LẦN ${all.length}` }),
         el("h1", { class: "verdict__name", text: "Bạn xử lý cảm xúc và các tình huống với người khác tới đâu" }),
         el("p", {
           class: "verdict__quote",
@@ -104,7 +103,7 @@ export function renderEqResult(mount, { navigate }) {
         }),
         el("p", {
           class: "verdict__meta",
-          text: `Đề ${current.form} · ${result.answered}/${result.total} tình huống · ${dateText(current.finishedAt)}`,
+          text: `Lần ${all.length} · Đề ${current.form} · ${result.answered}/${result.total} tình huống · ${dateText(current.finishedAt)}`,
         }),
       ),
       el(

@@ -1,16 +1,19 @@
 /* ============================================================================
    tokens.css — biến thiết kế, reset, typography nền
    Hướng: MODERN WEB × PIXEL GAME. Bảng màu tiết chế, góc vuông, viền rõ.
+   Nền là trang VỞ Ô LY: giấy trắng lạnh, kẻ ô mờ. Không phải kem ấm —
+   màu kem là mặc định chung của giao diện do AI dựng, không phải màu của
+   một quyển vở học sinh.
    ========================================================================== */
 
 :root {
-  /* --- giấy & mực --- */
-  --paper: #f3f0e7;
-  --paper-2: #e9e5d9;
-  --paper-3: #ded9c9;
+  /* --- giấy vở & mực --- */
+  --paper: #eef1f3;
+  --paper-2: #e2e7ea;
+  --paper-3: #ccd4da;
   --ink: #16181c;
   --ink-2: #3a3f47;
-  --ink-3: #6c727c;
+  --ink-3: #646a74;
 
   /* --- màu nhấn --- */
   --olive: #4f6033;
@@ -24,7 +27,7 @@
   /* --- bảng điều khiển hội thoại --- */
   --console-bg: #14161a;
   --console-bg-2: #1c1f25;
-  --console-line: #f3f0e7;
+  --console-line: var(--paper);
   --console-dim: #8f959e;
   --console-text: #eae6dc;
 
@@ -72,7 +75,7 @@ body {
   /* Chân trang luôn nằm ở đáy khung nhìn, kể cả khi nội dung ngắn (màn câu hỏi). */
   display: flex;
   flex-direction: column;
-  background: var(--paper);
+  background-color: var(--paper);
   color: var(--ink);
   font-family: var(--font-text);
   font-size: 16px;
