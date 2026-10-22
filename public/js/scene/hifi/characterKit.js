@@ -26,11 +26,11 @@
      walk-c, walk-d             hai tư thế lướt qua; chu kỳ đủ 4 nhịp: WALK_CYCLE
 
    DÀN NHÂN VẬT (cast.js dùng các SPECS bên dưới):
-     linh, minh                teen đã duyệt (Minh không còn khăn quàng đỏ: cấp 3 không quàng; giữ huy hiệu Đoàn ở túi)
-     mai, duc                  nữ sinh đuôi ngựa nâu / nam sinh vạm vỡ da rám tóc gai
-     ban                       "Bạn": đồng phục + cardigan ô-liu (jacket), tóc ngắn trung tính, dáng trung tính
-     hanh                      cô giáo ~35t: áo dài xanh ngọc (top "aodai", tunic = vạt áo dài tới bắp chân), quần trắng, búi thấp
-     thay                      thầy ~45t: sơ mi xanh xắn tay (sleeve "rolled"), kính (glasses), tóc muối tiêu, nếp cười (lines)
+     linh, minh                sinh viên đã duyệt (đồ thường ngày: áo thun, jean; Minh khoác áo denim)
+     mai, duc                  sinh viên nữ đuôi ngựa nâu / sinh viên nam vạm vỡ da rám tóc gai
+     ban                       "Bạn": áo thun + cardigan ô-liu (jacket), tóc ngắn trung tính, dáng trung tính
+     hanh                      giảng viên ~35t: blazer navy, áo sage, quần tối, búi thấp
+     thay                      giảng viên ~45t: sơ mi xanh xắn tay (sleeve "rolled"), kính (glasses), tóc muối tiêu, nếp cười (lines)
      me                        mẹ ~45t: áo ấm tay lỡ (sleeve "threeq"), quần vải nâu, tóc ngang vai
      bin                       em ~9t: dáng trẻ con (BODIES.kid dựng trên 47 hàng rồi đệm 13 hàng trống), quần short
    Người lớn dựng trên khung 60 hàng rồi KÉO DÀI (stretch: chèn bản sao hàng ở ngực/đùi/cẳng chân) thành 68 hàng,
@@ -117,50 +117,61 @@ const SHOE_NUDE = { shoe0: "#f4dfc7", shoe1: "#dfc0a0", shoe2: "#bc977b", shoe3:
 const TIE_YELLOW = { acc0: "#fde68c", acc1: "#f0bf40", acc2: "#c4902c", accO: "#5a3a14" }
 const MISC = { belt: "#1d2030", buckle: "#d9c58a", badge0: "#f1c64f", badge1: "#c8412f", eyeW: "#fbf8f3", iris: "#4a2e2a", pupil: "#130e15", lash: "#2c1c28", spec: "#ffffff", frame: "#727c97" }
 
-/* ============================================================ đặc tả nhân vật */
+/* màu đồ sinh viên: áo thun, áo khoác, quần jean / chinos */
+const TEE_MUSTARD = { top0: "#fde9a2", top1: "#f0c456", top2: "#cc9a3c", top3: "#966d28", topO: "#46320f" }
+const TEE_LAV = { top0: "#e2dcf7", top1: "#b7acea", top2: "#8e82c8", top3: "#665c9c", topO: "#2f2a55" }
+const TEE_GREY = { top0: "#e6e8ee", top1: "#bcc1cd", top2: "#8f95a6", top3: "#666c80", topO: "#2b2f40" }
+const TEE_RUST = { top0: "#f4b99c", top1: "#d98059", top2: "#b2593e", top3: "#7f3c2e", topO: "#3d1a17" }
+const JACKET_DENIM = { jkt0: "#9fbbdc", jkt1: "#6f93be", jkt2: "#4f7099", jkt3: "#37506f", jktO: "#16233a" }
+const JACKET_GREY = { jkt0: "#b4b9c6", jkt1: "#868c9e", jkt2: "#5f6577", jkt3: "#41465a", jktO: "#1a1c28" }
+const BLAZER_NAVY = { jkt0: "#7c8db8", jkt1: "#4f6192", jkt2: "#37466f", jkt3: "#252f4e", jktO: "#0e1326" }
+const SHIRT_SAGE = { top0: "#e3efe6", top1: "#b8d3c0", top2: "#8ab09a", top3: "#628473", topO: "#2a4137" }
+const LANYARD = { acc0: "#8fd0e8", acc1: "#4aa3c9", acc2: "#2f7ba0", accO: "#12364d" }
+const BLACKJEANS = { bot0: "#7a7f94", bot1: "#52566b", bot2: "#3a3d52", bot3: "#272a3b", botO: "#0e0f19" }
+
+/* ============================================================ đặc tả nhân vật (bối cảnh đại học: đồ thường ngày) */
 export const SPECS = {
   linh: {
     id: "linh", body: "girl", skin: "fair", hair: { style: "long", color: "black" },
-    top: "uniformShirt", bottom: "skirt", neckwear: "bow", shoes: "sneaker",
-    colors: { ...SHIRT_WHITE, ...NAVY, ...SHOE_WHITE, ...SOCK, ...BOW_RED },
+    top: "tee", bottom: "jeans", neckwear: null, shoes: "sneaker", logo: false,
+    colors: { ...TEE_CORAL, ...JEANS, ...SHOE_WHITE, ...SOCK },
   },
   minh: {
     id: "minh", body: "boy", skin: "warm", hair: { style: "shortSide", color: "espresso" },
-    top: "uniformShirt", bottom: "trousers", neckwear: null, shoes: "leather", pocket: true, /* học sinh cấp 3 không quàng khăn đỏ; giữ huy hiệu Đoàn ở túi */
-    colors: { ...SHIRT_WHITE, ...NAVY, ...SHOE_BLACK, ...SOCK },
+    top: "tee", bottom: "jeans", neckwear: null, shoes: "sneaker", jacket: "cardigan", sleeve: "long",
+    colors: { ...TEE_GREY, ...BLACKJEANS, ...SHOE_WHITE, ...SOCK, ...JACKET_DENIM },
   },
-  /* friend2: nữ sinh buộc đuôi ngựa, tóc nâu hạt dẻ, da ấm, không nơ */
+  /* friend2: sinh viên nữ buộc đuôi ngựa nâu, áo thun vàng mù tạt */
   mai: {
     id: "mai", body: "girl", skin: "warm", hair: { style: "ponytail", color: "chestnut" },
-    top: "uniformShirt", bottom: "skirt", neckwear: null, shoes: "sneaker",
-    colors: { ...SHIRT_WHITE, ...NAVY, ...SHOE_WHITE, ...SOCK, ...TIE_YELLOW },
+    top: "tee", bottom: "jeans", neckwear: null, shoes: "sneaker", logo: false,
+    colors: { ...TEE_MUSTARD, ...JEANS, ...SHOE_WHITE, ...SOCK },
   },
-  /* classmate2: nam sinh vạm vỡ hơn, da rám, tóc đen dựng gai, không túi áo */
+  /* classmate2: sinh viên nam vạm vỡ, da rám, tóc dựng gai, áo thun gạch + quần chinos */
   duc: {
     id: "duc", body: "boyBroad", skin: "tan", hair: { style: "spiky", color: "black" },
-    top: "uniformShirt", bottom: "trousers", neckwear: null, shoes: "leather",
-    colors: { ...SHIRT_WHITE, ...NAVY, ...SHOE_BLACK, ...SOCK },
+    top: "tee", bottom: "trousers", neckwear: null, shoes: "sneaker",
+    colors: { ...TEE_RUST, ...KHAKI, ...SHOE_BLACK, ...SOCK },
   },
-  /* player "Bạn": đồng phục + áo len cardigan ô-liu (nhận ra ở mọi cảnh), tóc ngắn trung tính, dáng trung tính */
+  /* player "Bạn": áo thun + cardigan ô-liu (nhận ra ở mọi cảnh), quần jean, tóc ngắn trung tính */
   ban: {
     id: "ban", body: "neutral", skin: "peach", hair: { style: "neutralCut", color: "walnut" },
-    top: "uniformShirt", bottom: "trousers", neckwear: null, shoes: "sneaker", jacket: "cardigan", sleeve: "long",
-    colors: { ...SHIRT_WHITE, ...NAVY, ...SHOE_WHITE, ...SOCK, ...CARDI_OLIVE },
+    top: "tee", bottom: "jeans", neckwear: null, shoes: "sneaker", jacket: "cardigan", sleeve: "long", logo: false,
+    colors: { ...TEE_LAV, ...JEANS, ...SHOE_WHITE, ...SOCK, ...CARDI_OLIVE },
   },
-  /* teacherF: cô Hạnh ~35 tuổi, áo dài xanh ngọc dịu, quần trắng, búi tóc thấp */
+  /* teacherF: cô Hạnh ~35 tuổi, giảng viên: áo blazer xanh navy, áo trong màu sage, quần tối, búi tóc thấp */
   hanh: {
     id: "hanh", body: "woman", skin: "fair", hair: { style: "lowBun", color: "espresso" },
-    top: "aodai", bottom: "trousers", neckwear: null, shoes: "leather", sleeve: "long", legFlare: 0.35, neckClip: 14,
-    tunic: [[30.5, 4.7], [36, 4.2], [42, 3.8], [48, 3.6], [51, 3.6]],
-    colors: { ...AODAI_TEAL, ...WHITE_PANTS, ...SHOE_NUDE, ...SOCK, lip: "#c9525e", lipD: "#8e3444" },
+    top: "tee", logo: false, bottom: "trousers", neckwear: null, shoes: "leather", sleeve: "long", jacket: "cardigan", neckClip: 14,
+    colors: { ...SHIRT_SAGE, ...CHARCOAL, ...SHOE_NUDE, ...SOCK, ...BLAZER_NAVY, lip: "#c9525e", lipD: "#8e3444" },
   },
-  /* teacher: thầy ~45 tuổi, sơ mi xanh nhạt xắn tay, quần tây, kính, tóc muối tiêu */
+  /* teacher: thầy ~45 tuổi, giảng viên: sơ mi xanh xắn tay, dây đeo thẻ, quần tây, kính, tóc muối tiêu */
   thay: {
     id: "thay", body: "man", skin: "peach", hair: { style: "combed", color: "grey" },
     top: "uniformShirt", bottom: "trousers", neckwear: null, shoes: "leather", sleeve: "rolled", pocket: "plain", glasses: true, lines: true,
     colors: { ...SHIRT_BLUE, ...CHARCOAL, ...SHOE_BLACK, ...SOCK },
   },
-  /* mom: mẹ ~45 tuổi, áo bà ba ấm ở nhà, quần vải, tóc ngang vai, dép */
+  /* mom: mẹ ~45 tuổi, áo ấm ở nhà, quần vải, tóc ngang vai, dép */
   me: {
     id: "me", body: "woman", skin: "warm", hair: { style: "shoulder", color: "mahogany" },
     top: "tee", logo: false, bottom: "trousers", neckwear: null, shoes: "leather", sleeve: "threeq", lines: true, neckClip: 14,

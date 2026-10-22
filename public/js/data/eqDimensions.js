@@ -1,4 +1,4 @@
-// Sáu kỹ năng trí tuệ cảm xúc (EQ) dành cho học sinh cấp 3 và sinh viên.
+// Sáu kỹ năng trí tuệ cảm xúc (EQ) dành cho sinh viên.
 // Mỗi kỹ năng là thứ bạn có thể luyện và nó đổi theo tình huống,
 // không dùng để dán nhãn hay kết luận cố định về con người bạn.
 
@@ -21,7 +21,7 @@ export const EQ_DIMENSIONS = [
         meaning: "Bạn thường nhận ra cảm xúc của mình khá sớm, gọi được tên, biết nó mạnh cỡ nào và truy ra được nó đến từ đâu. Bạn cũng nhận ra khi trong lòng vừa tức vừa tủi cùng lúc, và phân biệt được điều mình quan sát với điều mình suy ra. Kỹ năng này vẫn thay đổi theo hoàn cảnh: lúc mệt hoặc bị dồn ép, bạn có thể khó nhận ra rõ như vậy.",
         examples: [
           "Trong buổi thuyết trình nhóm, bạn nhận ra tim đập nhanh là do lo, không phải do hứng thú.",
-          "Khi bị bỏ ra khỏi nhóm chung của lớp, bạn gọi được tên cảm giác đó là tủi thân, biết nó mới ở mức 4/10 và thấy nó đến từ chuyện bị quên, không phải vì mình kém.",
+          "Khi bị bỏ ra khỏi nhóm chung của lớp học phần, bạn gọi được tên cảm giác đó là tủi thân, biết nó mới ở mức 4/10 và thấy nó đến từ chuyện bị quên, không phải vì mình kém.",
         ],
       },
       mid: {
@@ -37,7 +37,7 @@ export const EQ_DIMENSIONS = [
         meaning: "Bạn hay chỉ phát hiện ra cảm xúc khi nó đã quá mạnh, hoặc khi người xung quanh nhắc. Bạn dễ gán nguyên nhân cho người gần nhất có mặt, trong khi ngòi nổ thật sự nằm ở chuyện khác từ sáng. Đây không phải điều gì cố định ở bạn, chỉ là kỹ năng bạn chưa luyện nhiều. Chỉ cần những lần dừng lại rất ngắn là nó đã rõ dần lên.",
         examples: [
           "Bạn nhận ra mình đã quá tải sau khi trả lời cộc lốc cả nhóm và bỏ luôn buổi học nhóm.",
-          "Bạn gắt với em mình vì một chuyện nhỏ, trong khi cả ngày đang lo về học phí kỳ tới, và chỉ hiểu ra khi bố mẹ hỏi.",
+          "Bạn gắt với em mình vì một chuyện nhỏ, trong khi cả ngày đang lo về học phí kỳ tới, và chỉ hiểu ra khi bạn cùng phòng ký túc xá hỏi.",
         ],
       },
     },
@@ -94,7 +94,7 @@ export const EQ_DIMENSIONS = [
         label: "Có lúc giữ được",
         meaning: "Bạn biết mình nên dừng lại, nhưng chỉ làm được khi cảm xúc chưa quá mạnh. Lúc bị dồn ép hoặc đang mệt, bạn dễ phản ứng ngay rồi sau đó hối hận. Bạn đã biết cần làm gì, giờ chỉ cần luyện để khoảng dừng ngắn ấy thành phản xạ.",
         examples: [
-          "Bạn giữ được bình tĩnh khi bị góp ý trong nhóm, nhưng lại nổi nóng khi bố mẹ nhắc chuyện học.",
+          "Bạn giữ được bình tĩnh khi bị góp ý trong nhóm, nhưng lại nổi nóng khi bố mẹ gọi điện nhắc chuyện điểm và học bổng.",
           "Bạn biết nên chờ rồi mới nhắn lại, nhưng vẫn bấm gửi vì sợ im lặng là thua.",
         ],
       },
@@ -102,7 +102,7 @@ export const EQ_DIMENSIONS = [
         label: "Cảm xúc đi trước",
         meaning: "Bạn thường nói hoặc làm ngay khi cảm xúc vừa dâng, rồi mới thấy hối. Bạn hay nói 'tại nó chọc mình trước' vì lúc đó có cảm giác như mình chẳng còn cách nào khác. Kỹ năng này luyện được bằng những khoảng dừng rất ngắn, bắt đầu từ vài giây.",
         examples: [
-          "Bạn trả lời cộc lốc trong nhóm lớp rồi phải nhắn xin lỗi cả nhóm.",
+          "Bạn trả lời cộc lốc trong nhóm đồ án rồi phải nhắn xin lỗi cả nhóm.",
           "Bạn đứng dậy bỏ ra khỏi buổi học nhóm, và tối đó không muốn mở lại cuộc trò chuyện.",
         ],
       },
@@ -160,7 +160,7 @@ export const EQ_DIMENSIONS = [
         label: "Hiểu nhưng vội kết luận",
         meaning: "Bạn thật sự muốn hiểu người khác và thường đoán khá đúng. Nhưng khi đang bực hoặc đang vội, bạn dễ biến phỏng đoán thành sự thật và nhảy vào khuyên trước khi hỏi. Người kia dễ thấy mình bị đánh giá, dù ý bạn là tốt. Chỉ cần tập thói quen hỏi một câu trước khi kết luận là sẽ khác hẳn.",
         examples: [
-          "Bạn thấy bạn mình im lặng trong nhóm lớp và nghĩ ngay là nó đang giận mình.",
+          "Bạn thấy bạn mình im lặng trong nhóm đồ án và nghĩ ngay là nó đang giận mình.",
           "Bạn đưa ra ba lời khuyên cho đứa bạn vừa bị điểm kém, rồi mới nhận ra nó chỉ cần được ngồi yên một lúc.",
         ],
       },
@@ -208,7 +208,7 @@ export const EQ_DIMENSIONS = [
     tagline: "Đọc được không khí, quy tắc ngầm và thời điểm của cả nhóm.",
     question: "Trong nhóm này lúc này: không khí ra sao, ai đang căng, và lúc này có nên nói điều đó không?",
     includes: [
-      "Cảm nhận không khí của nhóm hoặc lớp học ngay khi bước vào",
+      "Cảm nhận không khí của nhóm đồ án hoặc lớp học phần ngay khi bước vào",
       "Thấy những quy tắc ngầm mà không ai nói ra",
       "Nhận ra ai đang có nhiều ảnh hưởng, ai đang bị bỏ ngoài lề",
       "Chọn đúng lúc, đúng nơi để nói một điều nhạy cảm",
@@ -218,8 +218,8 @@ export const EQ_DIMENSIONS = [
         label: "Đọc được cả căn phòng",
         meaning: "Bạn thường nhận ra không khí của nhóm trước khi nó lộ ra thành lời: ai đang căng, ai đang bị bỏ ngoài lề, và lúc nào nên nói điều nhạy cảm. Bạn cũng để ý được những quy tắc ngầm mà không ai nói ra, nên ít khi nói điều gì làm người khác bất ngờ. Khi mệt hoặc ở chỗ mới, bạn vẫn có thể bỏ sót tín hiệu, nhưng sẽ đọc tốt dần lên nếu luyện.",
         examples: [
-          "Bạn nhận ra cả lớp đang mệt sau tiết kiểm tra, nên giữ câu hỏi phản biện lại cho giờ ra chơi.",
-          "Trong nhóm chat lớp, bạn thấy không khí bắt đầu căng về cách chia việc, nên chủ động đề nghị gặp trực tiếp thay vì tranh luận thêm bằng tin nhắn.",
+          "Bạn nhận ra cả lớp học phần đang mệt sau bài kiểm tra giữa kỳ, nên giữ câu hỏi phản biện lại cho giờ giải lao.",
+          "Trong nhóm chat đồ án, bạn thấy không khí bắt đầu căng về cách chia việc trước deadline, nên chủ động đề nghị gặp trực tiếp thay vì tranh luận thêm bằng tin nhắn.",
         ],
       },
       mid: {
@@ -234,7 +234,7 @@ export const EQ_DIMENSIONS = [
         label: "Dễ nói trúng lúc sai",
         meaning: "Bạn thường chỉ nghĩ đến điều mình muốn nói mà ít để ý người nghe: không khí ra sao, ai đang căng, và lúc này có nên nói không. Vì thế bạn hay nói đúng lúc dễ bị hiểu sai nhất, rồi sau mới nhận ra chỗ và giờ đó không hợp. Đây là kỹ năng luyện được, và nó bắt đầu từ một phút quan sát trước khi lên tiếng.",
         examples: [
-          "Bạn kể chuyện buồn của mình trước cả lớp đúng lúc ai cũng đang chuẩn bị vào bài, và thấy như chẳng ai nghe.",
+          "Bạn kể chuyện buồn của mình trước cả lớp học phần đúng lúc ai cũng đang chuẩn bị vào bài, và thấy như chẳng ai nghe.",
           "Bạn gửi tin nhắn dài vào nhóm chat lúc mười một giờ đêm, và sáng hôm sau mọi người đọc nó như một bản tuyên bố.",
         ],
       },
@@ -242,7 +242,7 @@ export const EQ_DIMENSIONS = [
     exercises: [
       {
         name: "Một phút chỉ quan sát",
-        how: "Trong buổi họp nhóm hoặc hoạt động của lớp, dành phút đầu chỉ quan sát, chưa nói gì: ai im lặng, ai khoanh tay, ai nói nhiều, không khí đang căng hay thoải mái. Ghi lại một điều bạn nhận ra, ví dụ 'cô giáo không nói gì nhưng cả nhóm cứ liếc sang cô mỗi khi căng'. Thử với hai nhóm khác nhau trong tuần để so sánh.",
+        how: "Trong buổi họp nhóm hoặc hoạt động của lớp học phần, dành phút đầu chỉ quan sát, chưa nói gì: ai im lặng, ai khoanh tay, ai nói nhiều, không khí đang căng hay thoải mái. Ghi lại một điều bạn nhận ra, ví dụ 'giảng viên không nói gì nhưng cả nhóm cứ liếc sang thầy cô mỗi khi căng'. Thử với hai nhóm khác nhau trong tuần để so sánh.",
         why: "Không khí thường cho bạn biết điều cần biết trước khi ai kịp lên tiếng.",
       },
       {
@@ -252,7 +252,7 @@ export const EQ_DIMENSIONS = [
       },
       {
         name: "Bản đồ quy tắc ngầm",
-        how: "Chọn một nhóm bạn hay ở cùng và viết ra những quy tắc không ai nói thành lời: mấy giờ thì không nên nhắn, ai là người quyết định, chuyện gì nói trước lớp thì ổn nhưng nói trong nhóm chat thì không. Hỏi một người bạn tin tưởng xem bạn đoán có đúng không. Sửa lại bản đồ khi thấy quy tắc đổi, vì nó không đứng yên.",
+        how: "Chọn một nhóm bạn hay ở cùng và viết ra những quy tắc không ai nói thành lời: mấy giờ thì không nên nhắn, ai là người quyết định, chuyện gì nói trước lớp học phần thì ổn nhưng nói trong nhóm chat thì không. Hỏi một người bạn tin tưởng xem bạn đoán có đúng không. Sửa lại bản đồ khi thấy quy tắc đổi, vì nó không đứng yên.",
         why: "Nhiều hiểu lầm xảy ra vì mỗi người đang theo một luật riêng mà không ai nói ra.",
       },
       {

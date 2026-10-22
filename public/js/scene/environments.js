@@ -80,7 +80,7 @@ function officeSVG({ STAGE_W, STAGE_H, GROUND_Y }) {
 }
 
 /* ------------------------------------------------------------------ bộ vẽ pixel độ phân giải cao
-   Hai bối cảnh dưới đây (lớp học, sân trường) được vẽ như nhân vật hi-fi: một "tấm vải" ô 2 x 2 px
+   Hai bối cảnh dưới đây (giảng đường, sân khuôn viên) được vẽ như nhân vật hi-fi: một "tấm vải" ô 2 x 2 px
    (160 x 100 ô trên sân khấu 320 x 200), mỗi ô một màu, tô bóng 3–4 sắc theo MỘT nguồn sáng
    trên-trái, rồi gộp các ô liền kề cùng màu thành đường <path> (mọi toạ độ đều chẵn). Lớp cần
    chuyển động (lá, quạt, đồng hồ, vệt nắng) là tấm vải riêng, bọc trong <g class="scn-*">. */
@@ -280,10 +280,10 @@ const hfSvg = (w, h, body) =>
   `<svg class="scn-env__svg" viewBox="0 0 ${w} ${h}" shape-rendering="crispEdges" aria-hidden="true">${body}</svg>`
 
 function classroomSVG({ STAGE_W, STAGE_H, GROUND_Y }) {
-  /* Lớp học buổi sáng, ánh nắng từ cửa sổ trên-trái: bảng xanh, bàn giáo viên với sách và hộp
-     bút, hai hàng bàn ghế học sinh (sau hàng đứng của nhân vật), cửa sổ nắng với cây đung đưa,
-     đồng hồ, bảng thông báo, quạt trần, sàn gạch. Tường 4 sắc, vệt nắng chéo từ cửa sổ xuống sàn,
-     bóng đổ của đồ đạc sang phải. Vẽ trên lưới ô 2 px (xem hfCanvas). */
+  /* Giảng đường bậc thang buổi sáng, ánh nắng từ trên-trái: màn chiếu lớn có slide mờ, bảng trắng
+     mảnh + bục giảng, ba bậc bàn dài kèm laptop (không có bàn ghế rời kiểu cấp ba), đồng hồ, sàn
+     gạch, bóng đổ của màn chiếu và bảng trên tường, bóng đồ đạc trên sàn. Vẽ trên lưới ô 2 px
+     (xem hfCanvas). */
   const w = STAGE_W
   const h = STAGE_H
   const G = GROUND_Y
@@ -296,14 +296,12 @@ function classroomSVG({ STAGE_W, STAGE_H, GROUND_Y }) {
   const INK = ["#6b7188", "#474c62", "#2f3347", "#1d2031"] // khung cửa sổ, vành đồng hồ, kim
   const WOOD = ["#b58f68", "#98724f", "#7b5a40", "#5b4332", "#3f2f25"] // gỗ gần (bảng, bàn giáo viên)
   const DESK = ["#b09578", "#987b5f", "#80644c", "#644e3e", "#4a3a2e"] // gỗ bàn học: nhạt, bớt tương phản
-  const CROWN = [[24, 46, 6, 5], [34, 44, 8, 6], [28, 38, 10, 7], [38, 36, 6, 6], [24, 33, 6, 5], [32, 31, 7, 5]]
   const clamp3 = (v) => hfClamp(v, 0, 3)
-  const BAND = [[18, 44], [48, 74]] // hai ô kính → hai vệt nắng chéo 45° (dx = dy)
 
   /* ---- tường: sáng quanh cửa sổ, tối dần sang phải, sát trần và sát chân tường */
   c.fill(0, 0, w, G, (px, py, cx, cy) => {
     let d = 1.05
-    d -= Math.max(0, 1 - Math.hypot((px - 46) * 0.85, py - 54) / 84)
+    d -= Math.max(0, 1 - Math.hypot((px - 60) * 0.85, py - 20) / 120)
     d += 0.9 * hfSmooth(180, 320, px)
     d += 0.75 * hfSmooth(14, 0, py)
     d += 0.5 * hfSmooth(8, 0, px)
@@ -311,18 +309,10 @@ function classroomSVG({ STAGE_W, STAGE_H, GROUND_Y }) {
     return hfTone(WALL, d, 0.035, cx, cy)
   })
   /* ---- sàn gạch: hai hàng, lệch mạch; sáng ở vệt nắng, tối ở chân tường và dưới bóng đồ đạc */
-  const shadows = []
-  const deskX = [30, 82, 134, 186]
-  for (const x of deskX) shadows.push({ x0: x + 2, x1: x + 36, y0: 172, y1: 182, shear: 8 })
-  shadows.push({ x0: 228, x1: 292, y0: 172, y1: 182, shear: 10 })
-  const lit = (px, py) => {
-    let m = 0
-    for (const [a, b] of BAND) {
-      const dy = py - 74
-      m = Math.max(m, hfSmooth(0, 7, Math.min(px - (a + dy), b + dy - px)))
-    }
-    return m
-  }
+  const shadows = [
+    { x0: 30, x1: 64, y0: G, y1: G + 10, shear: 8 },
+    { x0: 150, x1: 320, y0: G, y1: G + 8, shear: 6 },
+  ]
   const rowsDef = [
     { y0: G, y1: G + 14, tw: 32, off: 0 },
     { y0: G + 14, y1: h, tw: 36, off: -18 },
@@ -335,7 +325,7 @@ function classroomSVG({ STAGE_W, STAGE_H, GROUND_Y }) {
       const x0 = Math.max(0, tx)
       const x1 = Math.min(w, tx + r.tw)
       c.fill(x0, r.y0, x1 - x0, r.y1 - r.y0, (px, py, cx, cy) => {
-        const m = lit(px, py)
+        const m = 0
         const sh = hfShadowAmount(shadows, px, py)
         if (py >= r.y1 - 2 || px < tx + 2)
           return hfTone(GROUT, Math.round(1 - 0.8 * m + sh + 0.6 * hfSmooth(150, 320, px)), 0, cx, cy)
@@ -365,207 +355,74 @@ function classroomSVG({ STAGE_W, STAGE_H, GROUND_Y }) {
     c.rect(x + 4, y + ht, wd, 2, WALL[2])
     c.dith(x + 4, y + ht + 2, wd, 2, WALL[2], 1)
   }
-  wallShadow(114, 22, 104, 66) // bảng xanh + khay
-  wallShadow(232, 26, 64, 48) // bảng thông báo
+  wallShadow(114, 14, 108, 68) // màn chiếu
+  wallShadow(14, 30, 64, 42) // bảng trắng
 
-  /* ---- cửa sổ trái: trời, cây đung đưa ngoài sân, khung xám xanh, bệ cửa */
-  const SKY = ["#a9cfe0", "#c3dde5", "#dbead9", "#efecc8"]
-  const LAWN = ["#b4cd82", "#97b86b", "#7a9d57"]
-  const HILL = ["#a7c0a8", "#92ae98"]
-  const LEAF = ["#a9c86e", "#80a652", "#5f8647", "#456a3a"]
-  c.rect(14, 22, 64, 56, INK[2])
-  c.fill(18, 26, 56, 48, (px, py, cx, cy) => {
-    const sd = Math.hypot(px - 64, py - 38)
-    if (sd < 5) return "#fffbea"
-    if (sd < 9) return (cx + cy) & 1 ? "#fbf5d6" : hfTone(SKY, clamp3((py - 26) / 10), 0.1, cx, cy)
-    if (py >= 64) return hfTone(LAWN, (py - 64) / 5 + (px < 46 ? 0 : -0.4), 0.1, cx, cy)
-    if (py >= 56) return hfTone(HILL, (py - 56) / 8, 0.1, cx, cy)
-    return hfTone(SKY, clamp3((py - 26) / 10), 0.1, cx, cy)
-  })
-  // thân cây + tán (cụm lá tô sáng trên-trái, viền lá tối ở mép dưới/phải)
-  c.rect(26, 50, 2, 24, "#8f6e4c")
-  c.rect(28, 50, 2, 24, "#6f533c")
-  c.rect(30, 50, 2, 24, "#4f3c2d")
-  c.rect(24, 70, 10, 4, "#6f533c")
-  const crown = hfCanvas(26, 48, 18, 26)
-  for (const [bx, by, rx, ry] of CROWN) hfBlob(crown, bx, by, rx, ry, LEAF, { k: 1.45, noise: 0.5 })
-  crown.rim((nx, ny, col) => (nx > 0 || ny > 0 ? LEAF[3] : col === LEAF[0] ? LEAF[1] : null))
-  c.blit(crown)
-  // khung + thanh dọc/ngang (vát sáng trên-trái)
-  c.rect(14, 22, 64, 4, INK[2])
-  c.rect(14, 74, 64, 4, INK[2])
-  c.rect(14, 22, 4, 56, INK[2])
-  c.rect(74, 22, 4, 56, INK[2])
-  c.rect(44, 26, 4, 48, INK[2])
-  c.rect(18, 48, 56, 2, INK[2])
-  c.rect(14, 22, 64, 2, INK[1])
-  c.rect(14, 22, 2, 56, INK[1])
-  c.rect(44, 26, 2, 48, INK[1])
-  c.rect(18, 48, 26, 2, INK[1])
-  c.rect(48, 48, 26, 2, INK[1])
-  c.rect(14, 76, 64, 2, INK[3])
-  c.rect(76, 22, 2, 56, INK[3])
-  c.rect(46, 26, 2, 48, INK[3])
-  // bệ cửa + bóng của nó trên tường
-  c.rect(10, 78, 72, 2, "#f2ecd9")
-  c.rect(10, 80, 72, 2, "#ddd4bb")
-  c.rect(10, 82, 72, 2, "#b3a98f")
-  c.rect(14, 84, 66, 2, WALL[3])
-  c.rect(14, 86, 66, 2, WALL[2])
-  c.dith(14, 88, 66, 2, WALL[2])
-
-  /* ---- quạt trần: thanh treo + động cơ (tĩnh); cánh quạt ở lớp chuyển động */
+  /* ---- máy chiếu treo trần: ty + thân + ống kính */
   c.rect(164, 0, 4, 6, INK[2])
-  c.rect(164, 0, 2, 6, INK[1])
-  hfBox(c, 156, 6, 20, 6, INK[0], INK[1], INK[3])
-  c.dith(126, 16, 30, 2, WALL[2])
-  c.dith(178, 16, 30, 2, WALL[2], 1)
+  hfBox(c, 154, 6, 24, 8, "#dcdcd6", "#c4c4bd", "#8e8e88")
+  c.rect(158, 10, 4, 2, INK[3])
 
-  /* ---- bảng xanh: khung gỗ, mặt bảng bóng loáng, chữ phấn, khay phấn */
-  hfBox(c, 114, 22, 104, 60, WOOD[0], WOOD[2], WOOD[4])
-  const BG = ["#4f7564", "#3d6152", "#314f43", "#253e35"]
-  c.fill(118, 26, 96, 52, (px, py, cx, cy) => {
-    if (py < 28) return BG[3] // bóng của khung đổ lên mặt bảng (trên + trái)
-    if (py < 30 || px < 120) return BG[2]
-    let v = 1 + 0.38 * hfSmooth(150, 214, px)
-    const d = px - 118 - (py - 26)
-    if (d > 22 && d < 31) v -= 0.95
-    if (d > 37 && d < 41) v -= 0.6
-    return hfTone(BG, v, 0.1, cx, cy)
+  /* ---- màn chiếu lớn: hộp treo, mặt màn trắng với slide mờ (tiêu đề, gạch đầu dòng, biểu đồ cột) */
+  c.rect(110, 12, 116, 4, INK[2])
+  hfBox(c, 114, 14, 108, 64, "#f4f4f0", "#e9e9e4", "#b9b9b2")
+  const SCR = ["#eef1f4", "#e3e8ee", "#d5dce5"]
+  c.fill(118, 18, 96, 56, (px, py, cx, cy) => hfTone(SCR, 0.3 + ((px - 118) / 96) * 1.2, 0.08, cx, cy))
+  c.rect(126, 24, 50, 4, "#9fb3c8") // tiêu đề slide
+  const bullets = [36, 44, 52]
+  const lineW = [40, 32, 36]
+  for (let i = 0; i < 3; i++) {
+    c.rect(128, bullets[i], 2, 2, "#9fb3c8")
+    c.rect(132, bullets[i], lineW[i], 2, "#c3cfdb")
+  }
+  const bars = [[186, 8], [192, 14], [198, 11], [204, 18]]
+  for (const [bx, bh] of bars) c.rect(bx, 66 - bh, 4, bh, "#a9bcd0")
+  c.rect(112, 78, 112, 2, INK[1]) // thanh dưới màn
+
+  /* ---- bảng trắng mảnh: khung bạc, mặt bảng có vệt chéo sáng, vài dòng bút lông, khay bút */
+  hfBox(c, 14, 30, 64, 42, "#c9ccd2", "#aeb2ba", "#7f838c")
+  const WB = ["#fbfbf8", "#f1f2ee", "#e3e5e0"]
+  c.fill(18, 34, 56, 34, (px, py, cx, cy) => {
+    let v = 0.5 + 0.8 * hfSmooth(18, 74, px)
+    const d = px - 18 - (py - 34)
+    if (d > 14 && d < 20) v -= 0.6
+    return hfTone(WB, v, 0.1, cx, cy)
   })
-  for (let i = 0; i < 16; i++) c.rect(124 + Math.floor(rnd() * 40) * 2, 68 + Math.floor(rnd() * 4) * 2, rnd() < 0.5 ? 2 : 4, 2, BG[0]) // bụi phấn
-  const chalk = (y, x1, col) => {
-    let x = 126
-    while (x < x1) {
-      const len = (3 + Math.floor(rnd() * 6)) * 2
-      c.rect(x, y, Math.min(len, x1 - x), 2, col)
-      x += len + 4
-    }
-  }
-  c.rect(176, 32, 30, 2, "#ece7d6")
-  chalk(44, 172, "#ece7d6")
-  chalk(52, 188, "#cfcab6")
-  chalk(60, 162, "#ece7d6")
-  // khay phấn: mặt trên sáng, mặt trước, đáy tối
-  c.rect(114, 82, 104, 2, "#bf9a6c")
-  c.rect(114, 84, 104, 2, WOOD[2])
-  c.rect(114, 86, 104, 2, WOOD[4])
-  c.rect(124, 80, 8, 2, "#f4efe2")
-  c.rect(136, 80, 6, 2, "#cfc9b6")
-  c.rect(190, 76, 14, 6, "#3e4756")
-  c.rect(190, 76, 14, 2, "#c9b68f")
+  const markerLines = [[40, 30, "#4a6fa5"], [46, 22, "#c4493b"], [52, 34, "#4a6fa5"], [58, 18, "#c4493b"]]
+  for (const [my, ml, mc] of markerLines) c.rect(22, my, ml, 2, mc)
+  c.rect(14, 72, 64, 2, "#9a9ea6") // khay bút
+  c.rect(60, 70, 8, 2, "#4a6fa5") // cây bút trong khay
 
-  /* ---- bảng thông báo: khung gỗ, nền bần lốm đốm, giấy ghim có bóng */
-  hfBox(c, 232, 26, 64, 48, WOOD[0], WOOD[2], WOOD[4])
-  const CORK = ["#dcc99d", "#cbb485", "#b59c70", "#9b835b"]
-  c.fill(236, 30, 56, 40, (px, py, cx, cy) => {
-    const n = hfNoise(cx, cy, 5)
-    let v = 1 + (n > 0.84 ? 1.7 : n < 0.12 ? -0.9 : 0)
-    if (py < 34) v += 0.9
-    if (px < 240) v += 0.5
-    return hfTone(CORK, v, 0, cx, cy)
-  })
-  const paper = (x, y, wd, ht, col, pin, lines) => {
-    c.rect(x + 2, y + 2, wd, ht, CORK[3])
-    c.rect(x, y, wd, ht, col)
-    c.rect(x, y, wd, 2, "#fbf8ec")
-    c.rect(x + wd - 2, y + 2, 2, ht - 2, "#d6cfba")
-    c.rect(x, y + ht - 2, wd, 2, "#d6cfba")
-    for (let i = 0; i < lines; i++) c.rect(x + 2, y + 6 + i * 4, wd - 6 - (i % 2) * 2, 2, "#a8a3b0")
-    c.rect(x + (wd >> 2 << 1), y + 2, 2, 2, pin)
-  }
-  paper(240, 34, 14, 16, "#f1ebd8", "#c4493b", 3)
-  paper(262, 36, 14, 14, "#e5dfcc", "#3c6ea5", 2)
-  paper(242, 54, 12, 12, "#e8e2cf", "#d6a935", 2)
-  paper(264, 56, 14, 12, "#f1ebd8", "#c4493b", 2)
+  /* ---- bục giảng: hộp gỗ vát, mặt bàn, ô trang trí, micro */
+  hfBox(c, 30, G - 44, 34, 44, WOOD[0], WOOD[2], WOOD[4])
+  c.rect(26, G - 48, 42, 4, WOOD[1])
+  c.rect(26, G - 48, 42, 2, WOOD[0])
+  hfBox(c, 36, G - 36, 22, 26, WOOD[1], WOOD[2], WOOD[3])
+  c.rect(54, G - 58, 2, 10, INK[2]) // micro
+  c.rect(52, G - 60, 4, 2, INK[3])
 
-  /* ---- bàn giáo viên (phải): mặt bàn có vân, hai chân, tấm chắn, sách, hộp bút */
-  c.rect(238, 152, 46, 12, "#9e947e")
-  c.dith(238, 164, 46, 8, "#65574a", 1)
-  c.rect(294, 124, 2, G - 8 - 124, WALL[2])
-  c.dith(296, 124, 2, G - 8 - 124, WALL[2])
-  c.rect(226, 116, 68, 8, WOOD[2])
-  c.rect(226, 116, 68, 2, WOOD[0])
-  c.rect(226, 118, 68, 2, WOOD[1])
-  c.rect(226, 122, 68, 2, WOOD[4])
-  hfGrain(c, 228, 118, 64, 4, [WOOD[0], WOOD[2]], rnd, 0.45)
-  c.rect(226, 116, 2, 8, WOOD[0])
-  for (const [lx, hiC] of [[228, WOOD[1]], [284, WOOD[1]]]) {
-    c.rect(lx, 124, 8, 50, WOOD[3])
-    c.rect(lx, 124, 2, 50, hiC)
-    c.rect(lx + 6, 124, 2, 50, WOOD[4])
-  }
-  hfBox(c, 236, 124, 48, 28, WOOD[1], WOOD[2], WOOD[4])
-  c.rect(238, 126, 44, 2, WOOD[4])
-  for (const sx of [250, 264]) {
-    c.rect(sx, 128, 2, 22, WOOD[3])
-    c.rect(sx + 2, 128, 2, 22, WOOD[1])
-  }
-  c.rect(256, 138, 8, 2, "#d6b25a") // tay nắm
-  const book = (x, y, wd, hi, main, lo) => {
-    c.rect(x, y, wd, 6, main)
-    c.rect(x, y, wd, 2, hi)
-    c.rect(x, y + 4, wd, 2, lo)
-    c.rect(x + wd - 2, y + 2, 2, 2, "#efe7cf")
-  }
-  book(232, 110, 24, "#5d7fa6", "#41628a", "#2b4565")
-  book(234, 104, 20, "#7d9c63", "#5c7c46", "#3f5a33")
-  book(236, 98, 16, "#b8705a", "#99503f", "#6e342b")
-  hfBox(c, 270, 100, 14, 16, "#7f9fc2", "#527299", "#35506e")
-  c.rect(270, 100, 14, 2, "#2c4258")
-  c.rect(272, 90, 2, 10, "#eadfae")
-  c.rect(276, 86, 2, 14, "#b4503f")
-  c.rect(280, 92, 2, 8, "#5b7fa8")
-
-  /* ---- bàn ghế liền khối (hàng sau): mặt bàn, hai chân, tấm ngồi nằm giữa hai chân; gỗ nhạt, bớt tương phản */
-  const desk = (x, y) => {
-    c.rect(x + 4, y + 22, 28, 6, DESK[2]) // tấm ngồi (sau chân bàn)
-    c.rect(x + 4, y + 22, 28, 2, DESK[0])
-    c.rect(x + 4, y + 26, 28, 2, DESK[4])
-    c.rect(x + 6, y + 28, 24, 2, DESK[3])
-    c.rect(x + 6, y + 6, 24, 4, DESK[2]) // thanh ngang dưới mặt bàn
-    c.rect(x + 6, y + 6, 24, 2, DESK[3])
-    for (const lx of [x + 2, x + 30]) {
-      c.rect(lx, y + 6, 4, 40, DESK[3])
-      c.rect(lx, y + 6, 2, 40, DESK[1])
-      c.rect(lx + 2, y + 6, 2, 40, DESK[4])
-    }
-    c.rect(x, y, 36, 6, DESK[2]) // mặt bàn
-    c.rect(x, y, 36, 2, DESK[0])
-    c.rect(x, y + 2, 36, 2, DESK[1])
-    c.rect(x, y + 4, 36, 2, DESK[4])
-    c.rect(x, y, 2, 6, DESK[0])
-    hfGrain(c, x + 2, y + 2, 32, 2, [DESK[0], DESK[2]], rnd, 0.35)
-  }
-  for (const x of deskX) desk(x, 130)
-  c.rect(42, 126, 12, 4, "#f1ebd8") // tờ giấy + quyển vở trên bàn
-  c.rect(42, 126, 12, 2, "#fbf8ec")
-  c.rect(146, 124, 12, 6, "#6f8fb3")
-  c.rect(146, 124, 12, 2, "#8fb0cf")
-  c.rect(146, 128, 12, 2, "#4b6d92")
-
-  /* ---- lớp chuyển động + ánh sáng */
-  const sway = hfCanvas(26, 24, 18, 28) // lá lung linh: đúng các ô sáng nhất của tán cây trong ô kính trái
-  sway.fill(18, 28, 26, 24, (px, py, cx, cy) =>
-    c.get(px - 1, py - 1) === LEAF[0] && hfNoise(cx, cy, 9) > 0.3 ? "#d6ea94" : null,
-  )
-  const blades = hfCanvas(100, 8, 122, 8)
-  for (const [bx, ex] of [[122, 156], [176, 210]]) {
-    const left = bx === 122
-    for (const [by, col] of [[8, "#9a7550"], [10, "#76563c"], [12, "#4d392b"]]) {
-      const x0 = left ? bx + (by === 8 ? 8 : 0) : bx
-      const x1 = left ? ex : ex - (by === 8 ? 8 : 0)
-      blades.rect(x0, by, x1 - x0, 2, col)
-    }
-  }
-  // vệt nắng chéo: quầng ngoài mờ + lõi sáng (chỉ trên tường; trên sàn nắng nằm trong màu gạch)
-  const beamOuter = hfCanvas(w, G, 0, 0)
-  const beamCore = hfCanvas(w, G, 0, 0)
-  for (const [a, b] of BAND) {
-    for (let py = 84; py < G; py += 2) {
-      const dy = py - 74
-      beamOuter.rect(a + dy - 4, py, b - a + 8, 2, "#fff1c2")
-      beamCore.rect(a + dy, py, b - a, 2, "#fff1c2")
+  /* ---- ba bậc giảng đường (vẽ sau → trước): bậc thềm, bàn dài liền mạch kèm laptop ngửa */
+  const TIER = ["#c9c4d2", "#a7a3b4", "#8f8a9e", "#777287"]
+  for (let i = 2; i >= 0; i--) {
+    const x0 = 150 + i * 56
+    const top = G - 16 - i * 22
+    c.fill(x0, top, 320 - x0, G - top, (px, py, cx, cy) => {
+      if (py < top + 2) return TIER[0]
+      if (px < x0 + 2) return TIER[1]
+      return hfTone(TIER, 1.6 + 0.8 * hfSmooth(200, 320, px), 0.05, cx, cy)
+    })
+    const dw = 314 - x0
+    c.rect(x0 + 6, top - 14, dw, 4, DESK[2]) // mặt bàn dài
+    c.rect(x0 + 6, top - 14, dw, 2, DESK[0])
+    c.rect(x0 + 8, top - 10, dw - 2, 10, DESK[3]) // tấm chắn
+    c.rect(x0 + 8, top - 10, dw - 2, 2, DESK[2])
+    hfGrain(c, x0 + 8, top - 12, dw - 4, 2, [DESK[0], DESK[2]], rnd, 0.35)
+    for (let lx = x0 + 16; lx < 300; lx += 40) {
+      c.rect(lx, top - 16, 14, 2, "#9aa0aa") // thân laptop
+      c.rect(lx + 2, top - 26, 10, 10, "#c3c8d0") // lưng màn hình
+      c.rect(lx + 2, top - 26, 2, 10, "#dfe3e8")
+      c.rect(lx + 10, top - 26, 2, 10, "#8e949e")
+      c.rect(lx + 6, top - 22, 2, 2, "#eef1f4") // logo
     }
   }
 
@@ -586,22 +443,13 @@ function classroomSVG({ STAGE_W, STAGE_H, GROUND_Y }) {
     `<rect x="92" y="38" width="6" height="2" fill="${INK[2]}"/>` +
     `<rect x="96" y="38" width="2" height="2" fill="#c9553f"/></g>`
 
-  return hfSvg(
-    w,
-    h,
-    c.paths() +
-      `<g class="scn-rain">${sway.paths()}</g>` +
-      `<g class="scn-rain">${blades.paths()}</g>` +
-      clock +
-      `<g opacity=".12">${beamOuter.paths()}</g>` +
-      `<g opacity=".18"><g class="scn-rain">${beamCore.paths()}</g></g>`,
-  )
+  return hfSvg(w, h, c.paths() + clock)
 }
 
 function schoolyardSVG({ STAGE_W, STAGE_H, GROUND_Y }) {
-  /* Sân trường giờ ra chơi, nắng sáng từ trên-trái: trời có mây, dãy phòng học hai tầng mái ngói đỏ
-     (tường vàng nhạt, cửa xanh), tường thấp, ki-ốt nước giải khát mái hiên sọc, cây phượng lớn với
-     ghế đá dưới tán, tường rào + hàng cây xa mờ, sân lát xi măng có vệt bóng cây đổ sang phải.
+  /* Sân khuôn viên đại học giờ giải lao, nắng sáng từ trên-trái: trời có mây, toà nhà gạch hai tầng
+     cửa kính lớn, biểu ngữ câu lạc bộ, bãi cỏ với cây non, dàn để xe đạp, ghế đá dưới cây, hàng cây
+     xa mờ + tường rào, lối đi lát đá có vệt bóng cây đổ sang phải.
      Mặt sân bắt đầu từ chân tường (y 150); hàng gạch từ y 172 là phần gần người xem. */
   const w = STAGE_W
   const h = STAGE_H
@@ -612,15 +460,16 @@ function schoolyardSVG({ STAGE_W, STAGE_H, GROUND_Y }) {
 
   const SKY = ["#b1d0e0", "#c7dfe7", "#dcebe1", "#eeeed4"]
   const CLOUD = ["#fdfbf1", "#eef1ea", "#d2dee3"]
-  const BW = ["#f0e9cf", "#e4dbbc", "#d3c9a6", "#b9ad8a"] // tường vàng nhạt
-  const ROOF = ["#d4825f", "#b6644b", "#904a3c", "#693633"]
-  const FRAME = ["#93b0a3", "#6f8f83", "#557469", "#3d5750"] // khung cửa xanh rêu
+  const BW = ["#c98a6e", "#b57458", "#9a5f4b", "#7b4a3c"] // tường gạch đỏ của toà nhà đại học
+  const ROOF = ["#c9ced6", "#aab1bc", "#838b98", "#5d6573"] // mái phẳng bê tông xám
+  const FRAME = ["#7d8696", "#5d6676", "#454d5c", "#2f3643"] // khung cửa kính thép
   const GLASS = ["#dcecf0", "#b3d2df", "#8db3c9", "#6c92ad"]
   const WOODS = ["#b79677", "#9b7b5e", "#80644b", "#624d3d", "#473829"] // gỗ nhạt, bớt tương phản
   const BARK = ["#a98763", "#82634a", "#5f4733", "#3f3023"]
   const LEAF = ["#b4cf77", "#89ac58", "#698f4a", "#4d713d", "#35543a"]
   const PAVE = ["#e0d9c4", "#d1c9b2", "#bfb69e", "#a8a089", "#8e8772"]
   const JOINT = ["#b4ab93", "#9f9680", "#898270"]
+  const LAWN = ["#a8c870", "#8db35d", "#729a4c", "#5a7f3f"]
 
   /* ---- trời: xanh nhạt → vàng kem sát đường chân trời, sáng hơn về góc trên-trái (phía mặt trời) */
   c.fill(0, 0, w, Y0, (px, py, cx, cy) =>
@@ -633,7 +482,7 @@ function schoolyardSVG({ STAGE_W, STAGE_H, GROUND_Y }) {
   cloud([[124, 9, 8, 4, 12], [136, 10, 10, 3, 12]])
   cloud([[188, 5, 8, 3, 8], [198, 6, 8, 3, 8]])
 
-  /* ---- hàng cây xa mờ + tường rào (bên phải, sau cây phượng) */
+  /* ---- hàng cây xa mờ + tường rào (bên phải, sau cây lớn) */
   const FARC = ["#aec8b1", "#9ab5a0", "#86a290"]
   for (const [cx, cy, rx, ry] of [[236, 126, 14, 10], [256, 120, 16, 12], [280, 122, 16, 12], [302, 126, 16, 10], [318, 120, 10, 12]])
     hfBlob(c, cx, cy, rx, ry, FARC, { k: 1, bias: 0.3, noise: 0.35 })
@@ -647,7 +496,7 @@ function schoolyardSVG({ STAGE_W, STAGE_H, GROUND_Y }) {
     c.rect(px + 6, 132, 2, 18, "#bdb398")
   }
 
-  /* ---- dãy phòng học: mái ngói 3 hàng, diềm, tường vàng, gờ sàn giữa hai tầng */
+  /* ---- toà giảng đường gạch đỏ: mái phẳng 3 hàng, diềm, tường vàng, gờ sàn giữa hai tầng */
   c.fill(0, 40, 224, Y0 - 40, (px, py, cx, cy) => {
     let v = 0.9 - 0.35 * hfSmooth(110, 8, px) + 0.5 * hfSmooth(70, 224, px)
     v += 1.5 * hfSmooth(54, 40, py) // bóng mái hiên
@@ -776,8 +625,8 @@ function schoolyardSVG({ STAGE_W, STAGE_H, GROUND_Y }) {
 
   /* ---- mặt sân: bốn hàng gạch, rộng dần về phía người xem, lệch mạch; lấm tấm; bóng đổ sang phải */
   const shadows = [
-    { x0: 6, x1: 102, y0: 150, y1: 160, shear: 8 },
-    { x0: 166, x1: 220, y0: 154, y1: 164, shear: 10 },
+    { x0: 60, x1: 90, y0: 154, y1: 162, shear: 8 },
+    { x0: 162, x1: 222, y0: 154, y1: 162, shear: 8 },
     { x0: 244, x1: 294, y0: 160, y1: 170, shear: 8 },
     { x0: 258, x1: 272, y0: 158, y1: 172, shear: 46 },
   ]
@@ -799,6 +648,7 @@ function schoolyardSVG({ STAGE_W, STAGE_H, GROUND_Y }) {
       const x0 = Math.max(0, tx)
       const x1 = Math.min(w, tx + r.tw)
       c.fill(x0, r.y0, x1 - x0, r.y1 - r.y0, (px, py, cx, cy) => {
+        if (py < 160 && px < 150) return hfTone(LAWN, 1 + (hfNoise(cx, cy, 4) - 0.5) * 0.8 + (py < 152 ? 1 : 0), 0.1, cx, cy) // bãi cỏ bên trái, phần còn lại là lối đi
         const sh = Math.max(hfShadowAmount(shadows, px, py), dapple(px, py, cx, cy))
         if (py >= r.y1 - 2 || px < tx + 2) return hfTone(JOINT, Math.round(1 + sh * 0.6 + (px > 230 ? 0.4 : 0)), 0, cx, cy)
         const ao = py < Y0 + 2 ? 1 : py < Y0 + 4 && (cx + cy) & 1 ? 1 : 0 // bóng sát chân tường
@@ -811,14 +661,32 @@ function schoolyardSVG({ STAGE_W, STAGE_H, GROUND_Y }) {
       })
     }
   }
-  // cánh hoa phượng rơi dưới tán
-  for (let i = 0; i < 12; i++) {
-    const x = 232 + Math.floor(rnd() * 44) * 2
-    const y = 156 + Math.floor(rnd() * 15) * 2
-    c.rect(x, y, 2, 2, i % 3 ? "#cf5742" : "#e7806a")
-  }
+  /* ---- cây non trên cỏ: thân + tán trên tấm vải riêng */
+  c.rect(72, 100, 2, 56, BARK[0])
+  c.rect(74, 100, 2, 56, BARK[2])
+  const youngCrown = hfCanvas(40, 32, 54, 82)
+  for (const [bx, by, rx, ry] of [[74, 96, 14, 12], [64, 104, 10, 8], [84, 104, 10, 8]])
+    hfBlob(youngCrown, bx, by, rx, ry, LEAF, { k: 1.55, noise: 0.5 })
+  youngCrown.rim((nx, ny) => (nx > 0 || ny > 0 ? LEAF[4] : LEAF[2]))
+  c.blit(youngCrown)
 
-  /* ---- cây phượng lớn: thân có vân vỏ + gốc xoè, hai cành, tán nhiều cụm, hoa đỏ */
+  /* ---- dàn để xe đạp: thanh ray + trụ, hai chiếc dựng trong hàng */
+  c.rect(162, 146, 58, 2, "#8e949e")
+  for (const px of [164, 190, 216]) c.rect(px, 146, 2, 10, "#6b7188")
+  const bike = (x, y, col) => {
+    for (const cx of [x, x + 20])
+      c.ellipse(cx, y, 6, 6, (px, py, nx, ny) => (nx * nx + ny * ny > 0.5 ? "#2f3347" : null))
+    c.rect(x + 8, y - 10, 2, 10, col)
+    c.rect(x + 8, y - 10, 12, 2, col)
+    c.rect(x, y, 10, 2, col)
+    c.rect(x + 20, y - 12, 2, 12, col)
+    c.rect(x + 18, y - 14, 6, 2, "#2f3347") // ghi-đông
+    c.rect(x + 6, y - 12, 6, 2, "#2f3347") // yên
+  }
+  bike(168, 152, "#4f7fa3")
+  bike(196, 152, "#c4493b")
+
+  /* ---- cây lớn trên cỏ: thân có vân vỏ + gốc xoè, hai cành, tán nhiều cụm */
   for (let py = 76; py < 160; py += 2) {
     const flare = Math.max(0, Math.round(((py - 140) / 20) * 2)) * 2
     const x0 = 258 - flare
@@ -836,14 +704,6 @@ function schoolyardSVG({ STAGE_W, STAGE_H, GROUND_Y }) {
   const BLOBS = [[268, 24, 20, 10], [240, 34, 18, 12], [296, 34, 20, 12], [258, 40, 22, 14], [286, 46, 22, 14], [226, 48, 16, 12], [310, 52, 14, 12], [246, 56, 20, 12], [272, 60, 22, 12], [298, 64, 18, 10], [230, 66, 14, 8], [256, 70, 16, 8], [284, 72, 16, 8], [268, 78, 12, 5]]
   for (const [bx, by, rx, ry] of BLOBS) hfBlob(crown, bx, by, rx, ry, LEAF, { k: 1.55, bias: ((by - 40) / 60) * 0.5, noise: 0.6 })
   crown.rim((nx, ny) => (nx > 0 || ny > 0 ? LEAF[4] : LEAF[2]))
-  for (let i = 0; i < 18; i++) {
-    const x = 208 + Math.floor(rnd() * 54) * 2
-    const y = 18 + Math.floor(rnd() * 32) * 2
-    if (!crown.get(x, y) || !crown.get(x + 2, y)) continue
-    crown.rect(x, y, 4, 2, "#d5523d")
-    crown.rect(x, y, 2, 2, "#ec7f63")
-    if (rnd() < 0.5) crown.rect(x + 2, y + 2, 2, 2, "#b53f33")
-  }
   c.blit(crown)
 
   /* ---- ghế đá dưới cây: lưng tựa hai thanh, mặt ghế, chân; gỗ nhạt */
@@ -865,7 +725,7 @@ function schoolyardSVG({ STAGE_W, STAGE_H, GROUND_Y }) {
   c.rect(240, 148, 2, 6, WOODS[0])
   hfGrain(c, 242, 150, 52, 2, [WOODS[0], WOODS[2]], rnd, 0.3)
 
-  /* ---- lớp chuyển động: lá phượng lung linh (các ô sáng nhất của tán) */
+  /* ---- lớp chuyển động: lá cây lung linh (các ô sáng nhất của tán) */
   const sway = hfCanvas(114, 72, 206, 14)
   sway.fill(206, 14, 114, 72, (px, py, cx, cy) =>
     crown.get(px - 1, py - 1) === LEAF[0] && hfNoise(cx, cy, 13) > 0.4 ? "#dcee98" : null,

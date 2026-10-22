@@ -25,6 +25,7 @@
 
 import { MORE_SCENARIOS } from "./scenariosMore.js"
 import { NEW_SCENARIOS } from "./scenariosNew.js"
+import { UNI_SCENARIOS } from "./scenariosUni.js"
 
 export const EQ_DOMAIN_ORDER = ["selfAwareness", "regulation", "empathy", "socialAwareness", "communication", "relationship"]
 
@@ -1608,7 +1609,7 @@ const BASE_SCENARIOS = [
 ]
 
 /** Ngân hàng đầy đủ: 28 tình huống gốc + tình huống bổ sung cho sáu kỹ năng (scenariosMore.js). */
-export const SCENARIOS = [...BASE_SCENARIOS, ...MORE_SCENARIOS, ...NEW_SCENARIOS]
+export const SCENARIOS = [...BASE_SCENARIOS, ...MORE_SCENARIOS, ...NEW_SCENARIOS, ...UNI_SCENARIOS]
 
 export const SCENARIO_BY_ID = Object.fromEntries(SCENARIOS.map((s) => [s.id, s]))
 

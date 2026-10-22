@@ -115,7 +115,7 @@ export function renderAssessment(mount, { navigate }) {
   const notes = [
     el("p", {
       class: "prose",
-      text: `${total} tình huống rất đời thường của học sinh, trong đó có cả cảnh động: nhân vật sẽ diễn lại chuyện xảy ra sau lựa chọn của bạn.`,
+      text: `${total} tình huống rất đời thường của sinh viên, trong đó có cả cảnh động: nhân vật sẽ diễn lại chuyện xảy ra sau lựa chọn của bạn.`,
     }),
     el("p", { class: "prose", text: "Cách nào cũng có lý. Hãy chọn cách gần với điều bạn thật sự sẽ làm, đừng chọn cách bạn nghĩ là “đúng”." }),
     el("p", { class: "prose", text: "Trong lúc làm, bạn sẽ không thấy điểm. Cuối bài, bạn sẽ thấy sáu kỹ năng kèm những tình huống giải thích vì sao, và cách luyện kỹ năng cần luyện nhất." }),

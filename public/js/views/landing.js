@@ -1,4 +1,4 @@
-/* landing.js — trang chủ của website LUYỆN Trí tuệ Cảm xúc (EQ) cho học sinh.
+/* landing.js — trang chủ của website LUYỆN Trí tuệ Cảm xúc (EQ) cho sinh viên.
    Bảy khối: mở đầu · xem trước một tình huống · vòng luyện · sáu kỹ năng · cách tính điểm · ba chế độ · giới hạn.
    Sản phẩm là một trainer theo vòng: đánh giá → hiểu → luyện → đánh giá lại → tiến bộ.
    Không phải bài kiểm tra dán nhãn con người: chỉ có 6 kỹ năng luyện được và những tình huống thực tế. */
@@ -80,7 +80,7 @@ export function renderLanding(mount, { navigate }) {
         el("p", {
           class: "prose hero__desc",
           text:
-            "Trả lời 20 tình huống của đời học sinh, xem kỹ năng nào còn yếu, luyện đúng chỗ đó, rồi đánh giá lại bằng đề khác để thấy mình tiến bộ.",
+            "Trả lời 20 tình huống của đời sinh viên, xem kỹ năng nào còn yếu, luyện đúng chỗ đó, rồi đánh giá lại bằng đề khác để thấy mình tiến bộ.",
         }),
         el("div", { class: "hero__cta" }, assessButton, practiceGhost),
         el("p", {
@@ -104,7 +104,7 @@ export function renderLanding(mount, { navigate }) {
         el("p", {
           class: "facts__note",
           text:
-            "Các tình huống lấy từ đời sống học sinh. Điểm số cho biết cách phản ứng của bạn hiệu quả tới đâu, chứ không phán xét con người bạn.",
+            "Các tình huống lấy từ đời sống sinh viên. Điểm số cho biết cách phản ứng của bạn hiệu quả tới đâu, chứ không phán xét con người bạn.",
         }),
       ),
     ),
@@ -120,7 +120,7 @@ export function renderLanding(mount, { navigate }) {
       el("p", {
         class: "band__lead",
         text:
-          "Ở đây không có danh sách câu để bạn chấm từ 1 đến 5. Bạn bước vào một tình huống ngắn ở trường hay ở nhà, đọc lời thoại, rồi chọn cách trả lời ngay trong khung hội thoại. Có tình huống là cảnh động pixel, nơi các nhân vật tự diễn lại chuyện cho bạn xem.",
+          "Ở đây không có danh sách câu để bạn chấm từ 1 đến 5. Bạn bước vào một tình huống ngắn ở giảng đường, ký túc xá hay ở nhà, đọc lời thoại, rồi chọn cách trả lời ngay trong khung hội thoại. Có tình huống là cảnh động pixel, nơi các nhân vật tự diễn lại chuyện cho bạn xem.",
       }),
       scenarioPeek(SCENARIO_BY_ID.ER_01),
       el("p", {

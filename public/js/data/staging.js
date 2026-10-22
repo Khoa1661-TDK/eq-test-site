@@ -25,5 +25,6 @@ import { STAGING_4 } from "./staging4.js"
 import { STAGING_5 } from "./staging5.js"
 import { STAGING_6 } from "./staging6.js"
 import { STAGING_7 } from "./staging7.js"
+import { STAGING_UNI } from "./stagingUni.js"
 
-export const STAGING = { ...STAGING_1, ...STAGING_2, ...STAGING_3, ...STAGING_4, ...STAGING_5, ...STAGING_6, ...STAGING_7 }
+export const STAGING = { ...STAGING_1, ...STAGING_2, ...STAGING_3, ...STAGING_4, ...STAGING_5, ...STAGING_6, ...STAGING_7, ...STAGING_UNI }

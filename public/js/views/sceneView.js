@@ -1,4 +1,4 @@
-/* sceneView.js — view cho route /scenes: "Một tuần ở lớp" — chế độ LUYỆN bằng cảnh động.
+/* sceneView.js — view cho route /scenes: "Một tuần ở giảng đường" — chế độ LUYỆN bằng cảnh động.
    Các cảnh nối nhau, mỗi cảnh một quyết định. Sau mỗi quyết định: hậu quả diễn trên
    stage, rồi một khung phản hồi (người chơi tự bấm Tiếp tục). Cuối tuần: nhìn lại từng
    cảnh, cách mạnh hơn, và kỹ năng mà mỗi cảnh luyện.
@@ -70,10 +70,10 @@ export function renderSceneView(mount, { navigate } = {}) {
       "div",
       { class: "story-intro" },
       el("p", { class: "story-kicker", text: "Luyện bằng cảnh động" }),
-      el("h1", { class: "story-title", text: "Một tuần ở lớp" }),
+      el("h1", { class: "story-title", text: "Một tuần ở giảng đường" }),
       el("p", {
         class: "prose",
-        text: `Tuần này có ${total} tình huống khó ở trường. Ở mỗi tình huống, bạn chọn một cách phản ứng rồi xem chuyện gì xảy ra tiếp theo: các nhân vật sẽ diễn lại hậu quả cho bạn xem.`,
+        text: `Tuần này có ${total} tình huống khó ở giảng đường và ký túc xá. Ở mỗi tình huống, bạn chọn một cách phản ứng rồi xem chuyện gì xảy ra tiếp theo: các nhân vật sẽ diễn lại hậu quả cho bạn xem.`,
       }),
       el("p", {
         class: "prose",

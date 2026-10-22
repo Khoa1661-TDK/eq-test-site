@@ -472,7 +472,7 @@ export function canteenSVG({ STAGE_W, STAGE_H, GROUND_Y }) {
 /* ------------------------------------------------------------------ hành lang */
 export function corridorSVG({ STAGE_W, STAGE_H, GROUND_Y }) {
   /* Hành lang: cửa sổ nắng bên trái (nguồn sáng ấm) rọi xuống sàn gạch dài, bảng tin
-     bần có giấy ghim, hai cửa lớp 11A1 / 11A2 có biển số bằng khối pixel và ô kính,
+     bần có giấy ghim, hai cửa phòng A1 / A2 có biển số theo tòa pixel và ô kính,
      bình nước uống ở cuối hành lang, đèn tuýp trên trần. */
   const w = STAGE_W, h = STAGE_H
   const { rect, tone, solid, pix, grain, halo, slab, sunPatch, castShadow, svg, group } = painter(w, h)
@@ -595,7 +595,7 @@ export function corridorSVG({ STAGE_W, STAGE_H, GROUND_Y }) {
   note(104, 78, 16, 10, "#e9ddd8", 1, "#3b6a86")
   note(124, 72, 20, 14, LN[0], 2, "#c0574a")
 
-  /* ---- hai cửa lớp: khung gỗ, ô kính, hai ô nổi, tay nắm, biển số */
+  /* ---- hai cửa giảng đường: khung gỗ, ô kính, hai ô nổi, tay nắm, biển số */
   const glyph = {
     "1": [".#.", "##.", ".#.", ".#.", "###"],
     "2": ["##.", "..#", ".#.", "#..", "###"],
@@ -604,13 +604,13 @@ export function corridorSVG({ STAGE_W, STAGE_H, GROUND_Y }) {
   const door = (x, label) => {
     // bóng cửa đổ lên tường bên phải
     tone(x + 48, 40, 4, 130, SHADOW, 0.11)
-    // biển số lớp
+    // biển số phòng
     rect(x + 6, 18, 38, 18, "#6a7d92")
     rect(x + 6, 18, 38, 2, "#8fa3b6")
     rect(x + 6, 34, 38, 2, "#4d5f74")
     rect(x + 8, 20, 34, 14, "#37507f")
     tone(x + 8, 36, 38, 2, SHADOW, 0.14)
-    let gx = x + 10
+    let gx = x + 18
     for (const ch of label) {
       pix(gx, 22, glyph[ch], "#f4efe2", 2)
       gx += 8
@@ -621,7 +621,7 @@ export function corridorSVG({ STAGE_W, STAGE_H, GROUND_Y }) {
     rect(x + 4, 42, 40, 2, DW[2])
     rect(x + 4, 42, 2, 128, DW[2])
     grain(x + 6, 44, 36, 124, DW[2], x + 7, { op: 0.4, step: 6 })
-    // ô kính: nhìn thấy lớp học mờ + vệt loá chéo
+    // ô kính: nhìn thấy giảng đường mờ + vệt loá chéo
     rect(x + 8, 48, 32, 32, DW[2])
     rect(x + 10, 50, 28, 28, "#9db8c6")
     rect(x + 10, 50, 28, 12, "#b3cad5")
@@ -649,8 +649,8 @@ export function corridorSVG({ STAGE_W, STAGE_H, GROUND_Y }) {
     rect(x + 4, 168, 40, 2, WD[3])
     castShadow(x + 2, x + 46, 172, { depth: 8, shift: 6, op: 0.18 })
   }
-  door(168, "11A1")
-  door(232, "11A2")
+  door(168, "A1")
+  door(232, "A2")
 
   /* ---- bình nước uống: bình xanh trên thân trắng có hai vòi */
   const dx = 290

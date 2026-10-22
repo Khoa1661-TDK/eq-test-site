@@ -208,11 +208,11 @@ export const SCENE_SCENARIOS = [
     },
   },
 
-  /* ------------------------------------------------ 3. Bạn ngồi một mình giờ ra chơi */
+  /* ------------------------------------------------ 3. Bạn ngồi một mình giờ giải lao */
   {
     id: "scene-quiet-teammate",
     label: "THỨ SÁU · SÂN TRƯỜNG",
-    title: "Linh ngồi một mình giờ ra chơi",
+    title: "Linh ngồi một mình giờ giải lao",
     prompt: "Linh chỉ đáp đúng một chữ “Ừ”… bạn làm gì nè?",
     environment: "schoolyard",
     domain: "empathy",
@@ -222,7 +222,7 @@ export const SCENE_SCENARIOS = [
       { id: "friend", name: "Linh", x: 216, mood: "sad" },
     ],
     dialogue: [
-      { who: "narrator", text: "Giờ ra chơi, sân trường. Linh ngồi một mình dưới bóng cây, hộp cơm vẫn còn nguyên." },
+      { who: "narrator", text: "Giờ giải lao, sân khuôn viên. Linh ngồi một mình dưới bóng cây, hộp cơm vẫn còn nguyên." },
       { who: "friend", text: "Ừ." },
       { who: "narrator", text: "Bạn hỏi hôm nay của Linh thế nào, Linh chỉ đáp vậy, mắt vẫn nhìn xuống đất." },
     ],
@@ -514,7 +514,7 @@ export const SCENE_SCENARIOS = [
       { id: "friend", name: "Linh", x: 252, mood: "sad" },
     ],
     dialogue: [
-      { who: "narrator", text: "Giờ ra chơi buổi chiều ở sân trường. Minh giơ điện thoại cho cả nhóm xem ảnh chụp một tin nhắn." },
+      { who: "narrator", text: "Giờ giải lao buổi chiều ở sân khuôn viên. Minh giơ điện thoại cho cả nhóm xem ảnh chụp một tin nhắn." },
       { who: "classmate", text: "Mọi người xem tin nhắn của Linh nè, cười xỉu luôn!" },
       { who: "narrator", text: "Linh đứng ngay sau lưng, tay siết quai cặp, mặt tái đi." },
     ],
@@ -612,7 +612,7 @@ export const SCENE_SCENARIOS = [
       { id: "friend", name: "Linh", x: 280, mood: "neutral" },
     ],
     dialogue: [
-      { who: "narrator", text: "Sân trường, giờ tan học. Hôm qua là buổi diễn của câu lạc bộ Linh. Bạn đã hứa sẽ tới xem, nhưng quên bẵng đi." },
+      { who: "narrator", text: "Sân khuôn viên, giờ tan học. Hôm qua là buổi diễn của câu lạc bộ Linh. Bạn đã hứa sẽ tới xem, nhưng quên bẵng đi." },
       { who: "narrator", text: "Linh vác cây đàn guitar đi ngang qua, thấy bạn thì cúi đầu rảo bước." },
     ],
     timeline: [

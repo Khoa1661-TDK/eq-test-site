@@ -231,7 +231,7 @@ export const MORE_SCENARIOS = [
     face: "thinking",
     title: "Cô vừa họp phụ huynh xong",
     dialogue: [
-      "Cô chủ nhiệm vừa vào lớp sau buổi họp phụ huynh căng thẳng, trông rõ là mệt.",
+      "Cô chủ nhiệm vừa vào lớp sau buổi họp lớp căng thẳng, trông rõ là mệt.",
       "Bạn định xin cô dời bài kiểm tra sang tuần sau vì hôm đó bạn có trận thi đấu thể thao.",
       "Cô hỏi ngay trước lớp: “Em có chuyện gì không?”",
     ],
@@ -267,7 +267,7 @@ export const MORE_SCENARIOS = [
       {
         id: "SO_05_D",
         code: "D",
-        text: "Về nhà nhắn tin: “Cô ơi, em là An lớp 11. Lúc nào cô rảnh em xin hỏi cô về ngày kiểm tra ạ.”",
+        text: "Về nhà nhắn tin: “Cô ơi, em là An sinh viên năm hai. Lúc nào cô rảnh em xin hỏi cô về ngày kiểm tra ạ.”",
         strategy: "Chuyển sang nhắn tin để cô tự chọn lúc trả lời",
         consequence: "Cô đọc yêu cầu vào lúc cô muốn đọc, nhưng bạn phải đợi đến tối mới nói được chuyện của mình.",
         scores: { socialAwareness: 2, communication: 2 },
@@ -623,7 +623,7 @@ export const MORE_SCENARIOS = [
     face: "happy",
     title: "Bản cover hơi vấp",
     dialogue: [
-      "Giờ ra chơi, Phúc hát cover một bài giữa sân, giọng vấp hai ba chỗ.",
+      "Giờ giải lao, Phúc hát cover một bài giữa sân, giọng vấp hai ba chỗ.",
       "Hát xong, Phúc quay sang bạn: “Ê, nói thật nha — tớ hát có ổn không?”",
       "Mấy người xung quanh cười ồ lên, còn Phúc đứng đó chờ câu trả lời của riêng bạn.",
     ],

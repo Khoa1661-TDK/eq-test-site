@@ -16,13 +16,13 @@ import { buildCharacter, SPECS, MOODS, HEAD_BOX } from "./characterKit.js"
 
 /** id của cảnh → đặc tả nhân vật trong characterKit.SPECS. */
 const CAST_SPECS = {
-  friend: SPECS.linh, // Linh: tóc dài đen, nơ đỏ
-  classmate: SPECS.minh, // Minh: tóc nâu rẽ ngôi, huy hiệu Đoàn (không khăn quàng đỏ)
-  friend2: SPECS.mai, // nữ sinh đuôi ngựa nâu
-  classmate2: SPECS.duc, // nam sinh vạm vỡ, tóc gai, da rám
+  friend: SPECS.linh, // Linh: tóc dài đen, áo thun san hô
+  classmate: SPECS.minh, // Minh: tóc nâu rẽ ngôi, áo khoác denim
+  friend2: SPECS.mai, // sinh viên nữ đuôi ngựa nâu
+  classmate2: SPECS.duc, // sinh viên nam vạm vỡ, tóc gai, da rám
   player: SPECS.ban, // "Bạn": áo len ô-liu, tóc ngắn trung tính
-  teacherF: SPECS.hanh, // cô Hạnh: áo dài xanh ngọc, búi tóc thấp
-  teacher: SPECS.thay, // thầy: kính, tóc muối tiêu, sơ mi xanh
+  teacherF: SPECS.hanh, // cô Hạnh (giảng viên): blazer navy, búi tóc thấp
+  teacher: SPECS.thay, // thầy (giảng viên): kính, tóc muối tiêu, sơ mi xanh
   mom: SPECS.me, // mẹ: áo ấm, tóc ngang vai
   kid: SPECS.bin, // em nhỏ ~9 tuổi
 }
