@@ -496,132 +496,70 @@ function schoolyardSVG({ STAGE_W, STAGE_H, GROUND_Y }) {
     c.rect(px + 6, 132, 2, 18, "#bdb398")
   }
 
-  /* ---- toà giảng đường gạch đỏ: mái phẳng 3 hàng, diềm, tường vàng, gờ sàn giữa hai tầng */
-  c.fill(0, 40, 224, Y0 - 40, (px, py, cx, cy) => {
-    let v = 0.9 - 0.35 * hfSmooth(110, 8, px) + 0.5 * hfSmooth(70, 224, px)
-    v += 1.5 * hfSmooth(54, 40, py) // bóng mái hiên
-    v += 0.8 * hfSmooth(196, 224, px)
-    v += 0.7 * hfSmooth(134, 150, py)
-    return hfTone(BW, v, 0.035, cx, cy)
+  /* ---- toà nhà gạch: tường xây mạch so le, diềm đá, cửa kính lớn, cửa chính, biểu ngữ câu lạc bộ */
+  const BRICK = ["#c98a6c", "#b5735a", "#9a5d4a", "#7c4a3c"]
+  const METAL = ["#6b7188", "#474c62", "#2f3347"] // khung kính thép
+  c.fill(0, 32, 224, Y0 - 32, (px, py, cx, cy) => {
+    const r = Math.floor((py - 33) / 6)
+    const ry = (py - 33) % 6
+    const off = (r & 1) * 6
+    const lx = (((px - 1 + off) % 12) + 12) % 12
+    if (ry >= 4 || lx >= 10) return px > 180 ? "#c2b099" : "#d6c4ad" // vữa
+    const id = hfNoise(Math.floor((px - 1 + off) / 12), r, 21)
+    const v = 1 + 0.7 * hfSmooth(100, 224, px) + 1.4 * hfSmooth(46, 32, py) + 0.7 * hfSmooth(132, 150, py) + (id > 0.8 ? 0.7 : id < 0.15 ? -0.6 : 0)
+    return hfTone(BRICK, v, 0.06, cx, cy)
   })
-  c.rect(0, 40, 2, Y0 - 40, "#f6f0dd")
-  c.rect(222, 40, 2, Y0 - 40, BW[3])
-  c.rect(0, 20, 222, 2, ROOF[0])
-  c.rect(0, 22, 222, 2, ROOF[2])
-  c.fill(0, 24, 228, 12, (px, py, cx, cy) => {
-    const k = Math.floor((py - 24) / 4)
-    const off = (k & 1) * 4
-    const lx = (((px - 4 + off) % 8) + 8) % 8
-    const mid = px - lx + 4
-    const side = mid > 190 ? 2 : mid > 100 ? 1 : 0
-    let v = (py - 24) % 4 < 2 ? 0 : 1
-    if (lx === 7) v += 1
-    return ROOF[hfClamp(v + side, 0, 3)]
-  })
-  c.rect(0, 36, 228, 2, "#f1ead4")
-  c.rect(0, 38, 228, 2, "#b3a684")
-  c.rect(0, 78, 224, 2, "#f5efdb") // gờ sàn tầng hai
-  c.rect(0, 80, 224, 2, "#d9ceac")
-  c.rect(0, 82, 224, 2, BW[3])
-  c.rect(0, 84, 224, 2, BW[2])
-  c.dith(0, 86, 224, 2, BW[2])
-  c.rect(0, 144, 224, 2, "#d3c9a7") // bệ chân tường
-  c.rect(0, 146, 224, 4, "#a79c7c")
+  c.rect(0, 22, 228, 4, "#d6cdb8") // diềm mái
+  c.rect(0, 26, 228, 4, "#e9e2d0")
+  c.rect(0, 30, 228, 2, "#b8ae98")
+  c.rect(0, 86, 224, 2, "#e6dfcc") // gờ sàn tầng hai
+  c.rect(0, 88, 224, 2, "#bfb59e")
+  c.rect(0, 140, 224, 10, "#cfc6b0") // bệ chân tường
+  c.rect(0, 140, 224, 2, "#e6dfcc")
+  c.rect(222, 22, 2, Y0 - 22, BRICK[3])
 
-  const win = (x, y) => {
-    c.rect(x, y, 32, 24, FRAME[2])
-    c.rect(x, y, 32, 2, FRAME[1])
-    c.rect(x, y, 2, 24, FRAME[1])
-    c.rect(x, y + 22, 32, 2, FRAME[3])
-    c.rect(x + 30, y, 2, 24, FRAME[3])
-    c.fill(x + 4, y + 4, 24, 16, (px, py, cx, cy) => {
+  const win = (x, y, wd, ht) => {
+    c.rect(x, y, wd, ht, METAL[1])
+    c.rect(x, y, wd, 2, METAL[0])
+    c.rect(x, y, 2, ht, METAL[0])
+    c.rect(x, y + ht - 2, wd, 2, METAL[2])
+    c.rect(x + wd - 2, y, 2, ht, METAL[2])
+    c.fill(x + 4, y + 4, wd - 8, ht - 8, (px, py, cx, cy) => {
       const d = px - x - 4 + (py - y - 4) * 0.9
-      let v = 0.4 + ((py - y - 4) / 16) * 1.8
+      let v = 0.4 + ((py - y - 4) / (ht - 8)) * 1.8
       if (d > 10 && d < 16) v -= 0.7 // vệt phản quang chéo
       if (d > 21 && d < 24) v -= 0.4
       if (py < y + 6) v += 0.7 // bóng khung đổ xuống kính
       return hfTone(GLASS, v, 0.1, cx, cy)
     })
-    c.rect(x + 14, y + 4, 4, 16, FRAME[2])
-    c.rect(x + 14, y + 4, 2, 16, FRAME[1])
-    c.rect(x + 16, y + 4, 2, 16, FRAME[3])
-    c.rect(x - 2, y + 24, 36, 2, "#f3edd5") // bệ cửa
-    c.rect(x - 2, y + 26, 36, 2, "#cdc2a0")
-    c.rect(x, y + 28, 32, 2, BW[3])
-    c.dith(x + 2, y + 30, 32, 2, BW[2])
+    for (let mx = x + 16; mx < x + wd - 4; mx += 16) c.rect(mx, y + 4, 2, ht - 8, METAL[1]) // nẹp dọc
+    c.rect(x + 4, y + ((ht / 3) & ~1), wd - 8, 2, METAL[1]) // nẹp ngang
+    c.rect(x - 2, y - 4, wd + 4, 4, "#e9e2d0") // chỉ cửa đá
+    c.rect(x - 2, y + ht, wd + 4, 2, "#f3edd5") // bệ cửa
+    c.rect(x - 2, y + ht + 2, wd + 4, 2, "#cdc2a0")
+    c.rect(x, y + ht + 4, wd, 2, BRICK[3])
+    c.dith(x + 2, y + ht + 6, wd, 2, BRICK[2])
   }
-  for (const x of [24, 72, 120, 168]) win(x, 48)
-  for (const x of [24, 72]) win(x, 88)
+  for (const [x, y, wd, ht] of [[16, 40, 48, 40], [86, 40, 48, 40], [156, 40, 48, 40], [16, 94, 48, 44], [156, 94, 48, 44]])
+    win(x, y, wd, ht)
 
-  /* cửa chính: khung kem, hai cánh xanh có lá sách, ô kính, bậc thềm */
-  const DOOR = ["#7ea08d", "#5d8170", "#436253", "#2e473d"]
-  c.rect(118, 104, 34, 46, "#ece4c8")
-  c.rect(118, 104, 34, 2, "#f6f0dc")
-  c.rect(118, 104, 2, 46, "#f6f0dc")
-  c.rect(150, 104, 2, 46, "#bfb592")
-  c.fill(122, 108, 26, 42, (px, py, cx, cy) => {
-    if (px >= 134 && px < 136) return DOOR[3] // khe giữa hai cánh
-    const left = px < 134
-    const lx = left ? px - 122 : px - 136
-    if (py < 124 && lx > 2 && lx < 10 + (left ? 0 : 0)) return hfTone(GLASS, 0.5 + (py - 108) / 14, 0.1, cx, cy) // ô kính
-    if (py >= 126 && py < 146) return ((py - 126) >> 1) & 1 ? DOOR[3] : DOOR[1] // lá sách
-    return lx < 2 ? DOOR[0] : lx > 10 ? DOOR[3] : DOOR[2]
-  })
-  c.rect(122, 108, 26, 2, DOOR[3])
-  c.rect(130, 132, 2, 4, "#d8b85a")
-  c.rect(138, 132, 2, 4, "#d8b85a")
-  c.rect(114, 150, 42, 2, "#e6dec4") // bậc thềm
-  c.rect(114, 152, 42, 2, "#b6aa8a")
+  /* cửa chính: khung đá, hai cánh kính, mái che, bậc thềm */
+  c.rect(90, 94, 48, 46, "#e6dfcc")
+  c.fill(94, 98, 40, 42, (px, py, cx, cy) => hfTone(GLASS, 0.4 + ((py - 98) / 42) * 1.8, 0.1, cx, cy))
+  c.rect(113, 98, 2, 42, "#2f3347") // khe giữa hai cánh
+  c.rect(86, 90, 56, 4, "#474c62") // mái che
+  c.rect(86, 150, 56, 2, "#e6dec4") // bậc thềm
+  c.rect(86, 152, 56, 2, "#b6aa8a")
 
-  /* ---- tường thấp bên trái: trụ + tường quét vôi, đổ bóng dưới nắp */
-  const LW = ["#e8e0c6", "#d6cdaf", "#c0b695", "#a69b7a"]
-  c.fill(0, 126, 104, 26, (px, py, cx, cy) => {
-    if (py < 128) return "#f1ead3"
-    if (py < 130) return LW[2]
-    let v = 0.9 + (px > 60 ? 0.5 : 0) + (py > 146 ? 1 : 0) + (py < 134 ? 0.9 : 0)
-    return hfTone(LW, v, 0.05, cx, cy)
-  })
-  for (const px of [0, 32, 64, 96]) {
-    c.rect(px, 120, 8, 32, LW[1])
-    c.rect(px, 120, 8, 2, "#f6f0dc")
-    c.rect(px, 122, 2, 30, "#f1ead3")
-    c.rect(px + 6, 122, 2, 30, LW[2])
-    c.rect(px, 150, 8, 2, LW[3])
-  }
-
-  /* ---- ki-ốt nước giải khát: mái hiên sọc, quầy gỗ, chai nước */
-  c.rect(168, 112, 48, 10, "#54443a")
-  c.rect(168, 112, 48, 4, "#3b2f2a")
-  for (const [i, col, hi] of [[0, "#4f7fa3", "#86b0cf"], [1, "#5f9157", "#97c58b"], [2, "#d2593f", "#f08a6c"], [3, "#d7ab38", "#f2d278"]]) {
-    const bx = 172 + i * 10
-    c.rect(bx, 114, 6, 6, col)
-    c.rect(bx + 2, 112, 2, 2, "#e9e2c9")
-    c.rect(bx, 114, 2, 6, hi)
-  }
-  c.rect(164, 120, 56, 2, "#cfab7a")
-  c.rect(164, 122, 56, 2, "#9d7b55")
-  c.fill(166, 124, 52, 32, (px, py, cx, cy) => {
-    const lx = (px - 166) % 10
-    const v = lx < 2 ? 0 : lx > 7 ? 3 : 1.4
-    return hfTone(WOODS, v + (py > 148 ? 1 : 0) + (px > 190 ? 0.3 : 0), 0.0, cx, cy)
-  })
-  c.rect(166, 154, 52, 2, WOODS[4])
-  for (const px of [164, 216]) {
-    c.rect(px, 100, 4, 56, WOODS[3])
-    c.rect(px, 100, 2, 56, WOODS[1])
-    c.rect(px + 2, 100, 2, 56, WOODS[4])
-  }
-  const AW = [["#d9715a", "#b9503e", "#8f3d33"], ["#fbf6e4", "#e6dec3", "#c8bd9d"]]
-  c.fill(166, 98, 52, 4, (px, py, cx, cy) => AW[(Math.floor((px - 160) / 8) & 1)][py < 100 ? 0 : 1])
-  for (let i = 0; i < 8; i++) {
-    const sx = 160 + i * 8
-    const [hi, mid, lo] = AW[i & 1]
-    c.rect(sx, 102, 8, 8, mid)
-    c.rect(sx, 102, 8, 2, hi)
-    c.rect(sx, 102, 2, 8, hi)
-    c.rect(sx + 6, 104, 2, 6, lo)
-    c.rect(sx + 2, 110, 4, 2, lo) // diềm hình vòm
-  }
+  /* ---- biểu ngữ câu lạc bộ treo giữa hai cửa kính trên */
+  c.rect(134, 36, 20, 2, "#2f3347") // thanh treo
+  c.rect(136, 38, 16, 46, "#3c6ea5")
+  c.rect(136, 38, 2, 46, "#5f8fc4")
+  c.ellipse(144, 52, 5, 5, "#f2d278")
+  c.rect(138, 64, 12, 2, "#e9e2c9")
+  c.rect(138, 70, 10, 2, "#e9e2c9")
+  c.rect(136, 84, 6, 2, "#3c6ea5") // đuôi xẻ
+  c.rect(146, 84, 6, 2, "#3c6ea5")
 
   /* ---- mặt sân: bốn hàng gạch, rộng dần về phía người xem, lệch mạch; lấm tấm; bóng đổ sang phải */
   const shadows = [
