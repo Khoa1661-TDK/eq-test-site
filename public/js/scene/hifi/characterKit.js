@@ -31,7 +31,7 @@
      ban                       "Bạn": áo thun cam FPT (logo ba khối), jean tối, giày trắng, tóc ngắn trung tính, dáng trung tính
      hanh                      giảng viên ~35t: blazer navy, áo sage, quần tối, búi thấp
      thay                      giảng viên ~45t: sơ mi xanh xắn tay (sleeve "rolled"), kính (glasses), tóc muối tiêu, nếp cười (lines)
-     tri                       Thầy Trí ~40t: hói vành tóc xám, THẤP ngang teen (không stretch), sơ mi sọc xanh-trắng (stripes), quần tối, giày nâu, kính
+     tri                       Thầy Trí ~40t: tóc xám ngắn gọn, trán cao hơn một chút, THẤP ngang teen (không stretch), sơ mi sọc xanh-trắng (stripes), quần tối, giày nâu, kính
      me                        mẹ ~45t: áo ấm tay lỡ (sleeve "threeq"), quần vải nâu, tóc ngang vai
      bin                       em ~9t: dáng trẻ con (BODIES.kid dựng trên 47 hàng rồi đệm 13 hàng trống), quần short
    Người lớn dựng trên khung 60 hàng rồi KÉO DÀI (stretch: chèn bản sao hàng ở ngực/đùi/cẳng chân) thành 68 hàng,
@@ -178,10 +178,10 @@ export const SPECS = {
     top: "uniformShirt", bottom: "trousers", neckwear: null, shoes: "leather", sleeve: "rolled", pocket: "plain", glasses: true, lines: true,
     colors: { ...SHIRT_BLUE, ...CHARCOAL, ...SHOE_BLACK, ...SOCK },
   },
-  /* teacherTri: Thầy Trí ~40 tuổi, giảng viên: hói (còn vành tóc xám hai bên), thấp ngang teen,
+  /* teacherTri: Thầy Trí ~40 tuổi, giảng viên: tóc xám ngắn gọn, thấp ngang teen,
      sơ mi sọc xanh-trắng tay dài, quần tây tối, giày nâu, kính */
   tri: {
-    id: "tri", body: "manShort", skin: "peach", hair: { style: "bald", color: "grey" },
+    id: "tri", body: "manShort", skin: "peach", hair: { style: "crew", color: "grey" },
     top: "uniformShirt", stripes: 2, bottom: "trousers", neckwear: null, shoes: "leather", sleeve: "long", glasses: true,
     colors: { ...STRIPE_BLUEWHITE, ...CHARCOAL, ...SHOE_BROWN, ...SOCK },
   },
@@ -735,7 +735,7 @@ const HAIR_STYLES = {
     const tuft = prof([[0.0 + dy, 20.4, 22.6], [1.6 + dy, 19.6, 23.4]])
     return { back: [], front: [{ mat: "hair", sample: cap, casts: true, tone: hairTone }, { mat: "hair", sample: ridged(tuft, lockPhase, 0.4), tone: hairTone }] }
   },
-  /* hói: đỉnh trọc, chỉ còn vành tóc mỏng hai bên thái dương kéo ra sau gáy (Thầy Trí) */
+  /* hói: đỉnh trọc, chỉ còn vành tóc mỏng hai bên thái dương kéo ra sau gáy */
   bald(dy) {
     const bottom = {}
     for (const [x, v] of [[11, 8], [12, 9], [13, 10], [22, 10], [23, 9], [24, 8]]) bottom[x] = v + dy
