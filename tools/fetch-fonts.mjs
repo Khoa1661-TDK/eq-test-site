@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /**
- * fetch-fonts.mjs — tự host font pixel có hỗ trợ tiếng Việt.
- * Handjet (dot-matrix, biến thiên) cho tiêu đề/nhãn/nút/lựa chọn.
- * VT323 (monospace terminal) cho văn bản hội thoại.
+ * fetch-fonts.mjs — tự host font có hỗ trợ tiếng Việt.
+ * Be Vietnam Pro (400/500/700/800) — font chính cho chữ nội dung và tiêu đề.
+ * Handjet (dot-matrix, biến thiên) — chỉ cho wordmark, HUD, nhãn nhỏ in hoa.
+ * VT323 (monospace terminal) — chỉ cho mã/nhãn trang trí nhỏ.
  * Chỉ lấy các subset vietnamese / latin-ext / latin.
  */
 import fs from "node:fs"
@@ -17,7 +18,7 @@ fs.mkdirSync(FONT_DIR, { recursive: true })
 const UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
 const URL_CSS =
-  "https://fonts.googleapis.com/css2?family=Handjet:wght@400..800&family=VT323&display=swap"
+  "https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700;800&family=Handjet:wght@400..800&family=VT323&display=swap"
 
 const KEEP = ["vietnamese", "latin-ext", "latin"]
 
@@ -38,7 +39,10 @@ for (const { subset, body } of blocks) {
   const style = (body.match(/font-style:\s*([^;]+);/) || [, "normal"])[1].trim()
   const src = body.match(/url\((https:[^)]+\.woff2)\)/)[1]
   const range = body.match(/unicode-range:\s*([^;]+);/)[1].trim()
-  const file = `${family.toLowerCase().replace(/\s+/g, "-")}-${subset}.woff2`
+  // Tên file kèm cân nặng: một họ nhiều cân nặng (Be Vietnam Pro) thì mỗi cân
+  // nặng một file, không đè nhau.
+  const wslug = weight.replace(/\s+/g, "-")
+  const file = `${family.toLowerCase().replace(/\s+/g, "-")}-${subset}-${wslug}.woff2`
   const buf = Buffer.from(await (await fetch(src, { headers: { "User-Agent": UA } })).arrayBuffer())
   fs.writeFileSync(path.join(FONT_DIR, file), buf)
   n++

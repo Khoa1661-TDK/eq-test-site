@@ -2,10 +2,10 @@
   "name": "eq-hoc-duong",
   "private": true,
   "type": "module",
-  "description": "MoodQuest — trò chơi pixel luyện trí tuệ cảm xúc cho sinh viên: đánh giá, hiểu, luyện, đánh giá lại.",
+  "description": "VIBECHECK — trò chơi pixel luyện trí tuệ cảm xúc cho sinh viên: 12 tình huống, cuối bài nhận linh vật cảm xúc.",
   "scripts": {
     "start": "node server.mjs",
-    "test": "node test/eq-data.test.mjs && node test/scoring.test.mjs && node test/wording.test.mjs",
+    "test": "node test/eq-data.test.mjs && node test/scoring.test.mjs && node test/wording.test.mjs && node test/mascots.test.mjs",
     "e2e": "node test/playwright/run.mjs && node test/playwright/skip-cutscene.mjs"
   },
   "devDependencies": {

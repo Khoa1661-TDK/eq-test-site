@@ -6,6 +6,19 @@ import { meterCells } from "./meter.js"
 
 export { meterCells }
 
+/** Linh vật pixel vẽ từ lưới 16×16, nét cứng, không mờ. Vài chỗ cần nhỏ hơn
+    (chip màn mở đầu 20px) nên cỡ ảnh là tham số. */
+export function mascotArt(mascot, size = 160) {
+  const rects = []
+  mascot.pixels.forEach((row, y) => {
+    ;[...row].forEach((ch, x) => {
+      if (ch === "." || !mascot.palette[ch]) return
+      rects.push(`<rect x="${x}" y="${y}" width="1" height="1" fill="${mascot.palette[ch]}"/>`)
+    })
+  })
+  return `<svg viewBox="0 0 16 16" width="${size}" height="${size}" shape-rendering="crispEdges" role="img" aria-label="${mascot.name}" fill="none">${rects.join("")}</svg>`
+}
+
 /** Nhãn mức độ của một chiều: dùng chung cho thẻ và bảng kết quả. */
 export function levelChip(dim) {
   const cls = dim.level === "high" ? "chip--olive" : dim.level === "mid" ? "chip--amber" : "chip--ink"
@@ -44,7 +57,16 @@ export function dimRow(dim, { open = false, practiceHref = null } = {}) {
     practiceHref ? el("a", { class: "dim__link", href: practiceHref, text: `Luyện ${dim.name.toLowerCase()} →` }) : null,
   )
 
-  return el("details", { class: "dim", open: open || null }, head, body)
+  return el("details", { class: "dim", open: open || null, attrs: { "data-skill": dim.key } }, head, body)
+}
+
+/** Chữ mức độ định tính cho trang hồ sơ — không điểm số, không xếp loại con người. */
+export const LEVEL_WORD = { high: "nổi bật", mid: "đang ổn", low: "nên để ý" }
+
+/** Thang pixel năm ô, không kèm số: chỉ định tính, dùng cho trang hồ sơ. */
+export function qualMeter(level) {
+  const filled = { high: 5, mid: 3, low: 2 }[level] ?? 0
+  return meterCells(filled, 5, { cells: 5, cls: "meter__cells qualmeter" })
 }
 
 /** Danh sách bài tập của một chiều hướng (3–5 bài). */
@@ -70,7 +92,7 @@ export function exerciseList(dim, { limit = 5 } = {}) {
 
 /** Thẻ một kỹ năng ở trang luyện tập: số tình huống đã luyện / tổng số. */
 export function skillCard(dim, { practised = 0, total = 0, href = null } = {}) {
-  const node = el("a", { class: "skill", href, attrs: { "aria-label": `Luyện ${dim.name}` } })
+  const node = el("a", { class: "skill", href, attrs: { "aria-label": `Luyện ${dim.name}`, "data-skill": dim.key } })
   node.append(
     el(
       "div",

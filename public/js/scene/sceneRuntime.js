@@ -6,8 +6,20 @@
    liếc nhìn) để nhân vật không bao giờ đứng chết.
 
    ============================================================== HỢP ĐỒNG CẢNH
-   API: createSceneRuntime(mount, scene, { onAnswer(id), onDone(), onSkip() })
+   API: createSceneRuntime(mount, scene, { onAnswer(id), onDone(), onSkip(), lastLabel })
         → { start(), skip(), destroy() }
+
+   BẤM ĐỂ ĐỌC — hợp đồng điều nhịp (mọi bước đều do người chơi quyết định):
+   Một hàng đợi bấm duy nhất; MỘT lần bấm đi tiếp ĐÚNG MỘT thứ, theo ưu tiên:
+   1) kết thúc máy gõ chữ đang gõ; 2) trả lời một dòng hội thoại đang chờ;
+   3) trả lời một bóng thoại/bóng nghĩ (say/think) đang chờ trên timeline.
+   Timeline DỪNG ở mỗi sự kiện say/think (bóng đứng yên, không tự tắt) cho tới khi được
+   bấm; các mốc `at` sau đó tính lại từ lúc bấm. Sau hậu quả, onDone KHÔNG tự chạy —
+   hiện nút "Câu tiếp theo ▶" (hoặc `lastLabel` nếu người gọi truyền) và chỉ chạy onDone
+   khi bấm nút / Enter / Space. Nút "Tiếp ▶" (kèm gợi ý phím Space) hiện ở khung thoại
+   bất cứ lúc nào có thứ đang chờ bấm, ẩn khi lựa chọn đang mở. Bấm đúp / Space hai lần
+   liền trong 320ms vẫn tua hết đoạn đang diễn (trước lựa chọn: tới thẳng câu hỏi;
+   sau lựa chọn: tới hết hậu quả rồi dừng lại chờ bấm nút tiếp).
 
    scene = {
      label,            // nhãn chữ hoa ở đầu khung thoại
@@ -117,8 +129,8 @@ const ACTIONS = {
   stepBack(c, { target }, api) { c.stepBack(api.charX(target)) },
 
   /* lời + biểu cảm */
-  say(c, ev, api) { api.speak(c, ev.text, { ms: ev.ms }) },
-  think(c, ev, api) { api.speak(c, ev.text, { think: true, ms: ev.ms }) },
+  say(c, ev, api) { api.speak(c, ev.text, { ms: ev.ms, hold: ev.hold }) },
+  think(c, ev, api) { api.speak(c, ev.text, { think: true, ms: ev.ms, hold: ev.hold }) },
   emote(c, ev, api) { api.emote(c, ev.kind) },
 }
 
@@ -139,7 +151,7 @@ const SCENE_ACTIONS = {
 
 const DOUBLE_TAP_MS = 320
 
-export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip } = {}) {
+export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip, lastLabel } = {}) {
   const timers = []
   let destroyed = false
   let rAF = 0
@@ -149,7 +161,7 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
   let chosen = false
   let consequencePlaying = false
   /* Tua nhanh: bấm đúp / nhấn Space hai lần liền → đoạn đang diễn chạy hết ngay
-     (trước lựa chọn: tới thẳng câu hỏi; sau lựa chọn: tới hết hậu quả). */
+     (trước lựa chọn: tới thẳng câu hỏi; sau lựa chọn: tới hết hậu quả rồi dừng ở nút tiếp). */
   let fastForward = false
   let lastTap = 0
   const pendingDelays = new Set()
@@ -160,6 +172,10 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
   let consoleSpeaker = null
   let saySpeaker = null // người vừa `say`, chỉ hiện chân dung khi khung thoại không đang đọc một dòng thoại
   let sayUntil = 0
+  /* Hàng đợi bấm (xem hợp đồng đầu tệp): bóng thoại/bóng nghĩ đang chờ người chơi bấm,
+     và trạng thái "hậu quả đã xong, chờ bấm câu tiếp theo". */
+  let bubbleHold = null // { node, speaker, resolve }
+  let nextPending = false
 
   const isRM = () => prefersReducedMotion()
 
@@ -260,7 +276,23 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
     onSelect(opt) { choose(opt.id) },
   })
   const choiceSlot = el("div", { class: "choices-slot" }, choices.el)
+  /* Nút bấm để đi tiếp: "Tiếp ▶" khi có thứ đang chờ (kèm gợi ý phím Space),
+     "Câu tiếp theo ▶"/lastLabel khi hậu quả đã xong. Bấm nút = tap(). */
+  const tapLabel = el("span", { class: "scn-tap__label", text: "Tiếp ▶" })
+  const tapKbd = el("span", { class: "scn-tap__kbd", text: "Space", attrs: { "aria-hidden": "true" } })
+  const tapBtn = el("button", { class: "scn-tap__btn", attrs: { type: "button" } }, tapLabel, tapKbd)
+  const tapRow = el("div", { class: "scn-tap", attrs: { hidden: true } }, tapBtn)
+  tapBtn.addEventListener("click", () => tap())
+  consoleApi.mountSlot(tapRow)
   consoleApi.mountSlot(choiceSlot)
+
+  /** Hiện nút khi có thứ đang chờ bấm; đổi nhãn khi tới lượt "câu tiếp theo". */
+  function syncTapButton() {
+    const waiting = dialogueState === "waiting" || bubbleHold !== null || nextPending
+    tapRow.hidden = !waiting
+    tapLabel.textContent = nextPending ? `${lastLabel || "Câu tiếp theo"} ▶` : "Tiếp ▶"
+    tapKbd.hidden = nextPending
+  }
 
   const board = el("div", { class: "scn-board" }, consoleApi.el, choiceSlot)
   mount.append(stageWrap, board)
@@ -345,15 +377,26 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
     rAF = requestAnimationFrame(tick)
   }
 
-  /* ------------------------------------------------------------- timeline player */
+  /* ------------------------------------------------------------- timeline player
+     say/think DỪNG timeline: bóng đứng chờ tới khi hàng đợi bấm giải toả (tap), rồi
+     các mốc `at` tiếp theo tính lại từ lúc bấm. fastForward / skipToEnd → không dừng. */
   async function playTimeline(events) {
-    const t0 = performance.now()
+    let t0 = performance.now()
     for (const ev of events) {
       if (destroyed) return
       const wait = t0 + ev.at - performance.now()
       if (wait > 0 && !fastForward) await delay(wait)
       if (destroyed) return
-      runEvent(ev)
+      const pauses = (ev.do === "say" || ev.do === "think") && !fastForward
+      runEvent(pauses ? { ...ev, hold: true } : ev)
+      if (pauses && bubbleHold) {
+        await new Promise((resolve) => {
+          bubbleHold.resolve = resolve
+          syncTapButton()
+        })
+        if (destroyed) return
+        t0 = performance.now() // mốc mới: các nhịp sau tính từ lúc người chơi bấm
+      }
     }
   }
 
@@ -419,6 +462,7 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
         consoleApi.setCue(true)
         dialogueState = "waiting"
         if (speaker) speaker.setDialogueTalk(false)
+        syncTapButton()
       }
       tw.type(text, { msPerChar: rateFor(text) })
       consoleApi.setHint(hint)
@@ -439,6 +483,7 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
       const tw = consoleApi.typewriter
       tw.onDone = () => {
         dialogueState = "idle"
+        syncTapButton()
         resolve()
       }
       tw.type(text, { msPerChar: rateFor(text) })
@@ -455,8 +500,25 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
       dialogueState = "idle"
       const r = resolveDialogue
       resolveDialogue = null
+      syncTapButton()
       r && r()
     }
+  }
+
+  /** Bấm trả lời một bóng thoại đang chờ: bóng lui, hàng đợi được giải toả, timeline đi tiếp. */
+  function resolveBubbleHold() {
+    const h = bubbleHold
+    if (!h) return
+    bubbleHold = null
+    h.node.classList.add("is-out")
+    later(320, () => { h.node.remove(); bubbleBoxes.delete(h.node) })
+    if (h.speaker) {
+      sayUntil = performance.now() + 320
+      syncPortrait(performance.now())
+      later(340, () => syncPortrait(performance.now()))
+    }
+    syncTapButton()
+    h.resolve && h.resolve()
   }
 
   /** Tua tới cuối đoạn đang diễn. Không làm gì khi đang chờ người chơi chọn. */
@@ -466,18 +528,38 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
     fastForward = true
     if (dialogueState === "typing") consoleApi.typewriter.finish()
     if (dialogueState === "waiting") advanceDialogue()
+    if (bubbleHold) resolveBubbleHold()
     for (const done of [...pendingDelays]) done()
+    syncTapButton()
   }
 
-  /** Một lần bấm đi tiếp một dòng; bấm lần hai thật nhanh thì tua hết đoạn. */
+  /* MỘT lần bấm đi tiếp ĐÚNG MỘT thứ, theo ưu tiên:
+     1) gõ chữ đang gõ → kết thúc ngay; 2) dòng thoại đang chờ → trả lời;
+     3) bóng thoại đang chờ → trả lời; 4) nút "câu tiếp theo" → onDone. */
+  function runTap() {
+    if (consoleApi.typewriter.typing) {
+      consoleApi.typewriter.finish()
+    } else if (dialogueState === "waiting") {
+      advanceDialogue()
+    } else if (bubbleHold) {
+      resolveBubbleHold()
+    } else if (nextPending) {
+      nextPending = false
+      syncTapButton()
+      onDone && onDone()
+    }
+  }
+
+  /** Một lần bấm đi tiếp một thứ; bấm lần hai thật nhanh thì tua hết đoạn. */
   function tap() {
+    sound.tap()
     const now = performance.now()
     if (now - lastTap < DOUBLE_TAP_MS) {
       lastTap = 0
       skipToEnd()
     } else {
       lastTap = now
-      advanceDialogue()
+      runTap()
     }
   }
 
@@ -500,7 +582,7 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
     // Enter trên một nút/lựa chọn đang được focus là việc của nút đó.
     if (e.key === "Enter" && e.target?.closest?.("button, a, .choice")) return
     if (e.key === "Enter" || e.key === " " || e.code === "Space") {
-      if (!choicesShown || consequencePlaying) {
+      if (!choicesShown || consequencePlaying || nextPending) {
         // Space trên một nút đang được focus cũng là việc của nút đó (trừ lựa chọn vừa bấm, đã khoá).
         const btn = e.target?.closest?.("button, a, .choice")
         if (btn && !(consequencePlaying && btn.closest(".choice"))) return
@@ -547,6 +629,7 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
     } else {
       choices.reveal()
     }
+    syncTapButton() // lựa chọn đang mở → không có gì chờ bấm, ẩn nút
     sound.confirm()
   }
 
@@ -557,6 +640,10 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
     choices.lock(true)
     choices.confirm(id)
     sound.confirm()
+    /* Trên điện thoại, sau khi bấm lựa chọn, sân khấu dễ nằm ngoài khung nhìn —
+       kéo cả container cảnh vào lại để người chơi KHÔNG lỡ đoạn hậu quả đang diễn
+       (scroll-margin-top trong scene.css chừa chỗ cho thanh trên dính). */
+    mount.scrollIntoView({ block: "start", behavior: prefersReducedMotion() ? "auto" : "smooth" })
     stage.dataset.decision = "off"
     zoomReset(500)
     onAnswer && onAnswer(id)
@@ -573,7 +660,16 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
   function finish() {
     consequencePlaying = false
     if (destroyed) return
-    after(300, () => { onDone && onDone() })
+    sound.softEnd()
+    /* onDone KHÔNG tự chạy — hiện nút "Câu tiếp theo ▶"/lastLabel và chờ người chơi bấm. */
+    after(300, () => {
+      nextPending = true
+      syncTapButton()
+      /* Kéo nút "Tiếp ▶" vào đúng rìa khung nhìn nếu nó đang khuất — block:"nearest"
+         chỉ cuộn vừa đủ, nên sân khấu phía trên vẫn còn thấy. */
+      tapBtn.scrollIntoView({ block: "nearest", behavior: prefersReducedMotion() ? "auto" : "smooth" })
+      tapBtn.focus({ preventScroll: true }) // Enter/Space trên nút = bấm nút
+    })
   }
 
   /* ------------------------------------------------------------- bóng thoại + biểu cảm */
@@ -599,7 +695,7 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
     later(1450, () => node.remove())
   }
 
-  function speak(c, text, { think = false, ms } = {}) {
+  function speak(c, text, { think = false, ms, hold = false } = {}) {
     if (!text || fastForward) return
     c.dropSay()
     // Mỗi lúc chỉ MỘT bóng thoại trên sân khấu: bóng cũ của người khác lui đi trước,
@@ -647,6 +743,17 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
       sayUntil = performance.now() + life
       syncPortrait(performance.now())
       later(life + 20, () => syncPortrait(performance.now()))
+    }
+    if (hold) {
+      /* BÓNG ĐỨNG CHỜ BẤM: không tự tắt; đăng ký vào hàng đợi bấm.
+         resolve sẽ được tap() gọi khi người chơi bấm đúng bóng này. */
+      bubbleHold = { node, speaker: think ? null : c, resolve: null }
+      if (!think) {
+        sayUntil = Infinity // chân dung người nói ở lại tới lúc bóng được bấm
+        syncPortrait(performance.now())
+      }
+      syncTapButton()
+      return // KHÔNG lên lịch is-out — bóng ở lại cho tới khi được bấm
     }
     later(life, () => node.classList.add("is-out"))
     later(life + 320, () => { node.remove(); bubbleBoxes.delete(node) })
@@ -845,11 +952,18 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip }
   return {
     start,
     skip() {
-      if (!choicesShown) advanceDialogue()
+      if (!choicesShown) runTap()
       onSkip && onSkip()
     },
     destroy() {
       destroyed = true
+      /* Mở khoá hàng đợi bấm để timeline không treo lời hứa dở khi bị destroy giữa lúc chờ. */
+      if (bubbleHold) {
+        const h = bubbleHold
+        bubbleHold = null
+        h.resolve && h.resolve()
+      }
+      nextPending = false
       cancelAnimationFrame(rAF)
       ro.disconnect()
       offMotion && offMotion()

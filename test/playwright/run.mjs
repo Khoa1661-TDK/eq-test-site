@@ -15,6 +15,7 @@ import { resolve } from "node:path"
 import { createServer } from "node:net"
 
 import { FORMS, ITEM_BY_ID, HISTORY_KEY, strongestChoice, weightedPoints } from "../../public/js/core/eqScoring.js"
+import { MASCOTS } from "../../public/js/data/mascots.js"
 
 const ROOT = resolve(fileURLToPath(new URL("../..", import.meta.url)))
 const REPORTS = resolve(ROOT, "reports")
@@ -89,6 +90,26 @@ async function pickByText(page, scope, text) {
   await target.click()
 }
 
+/* Bấm nút "câu tiếp theo ▶" trong khung thoại — cảnh giờ dừng ở đó chờ người chơi bấm
+   (hợp đồng mới); hậu quả nhiều bóng say thì cần bấm nhiều nhịp. Bấm đều đều cho tới
+   khi bấm đúng NÚT TIẾP (nhãn khác "Tiếp ▶" = onDone vừa chạy) hoặc điều kiện sớm hơn. */
+async function clickNextButton(page, untilSel) {
+  for (let i = 0; i < 120; i += 1) {
+    const done = await page.evaluate((sel) => {
+      const row = document.querySelector(".scene-stage-host .scn-tap:not([hidden])")
+      if (row) {
+        const label = row.querySelector(".scn-tap__label")?.textContent || ""
+        row.querySelector(".scn-tap__btn")?.click()
+        if (label !== "Tiếp ▶") return true
+      }
+      return sel ? Boolean(document.querySelector(sel)) : false
+    }, untilSel)
+    if (done) return true
+    await page.waitForTimeout(150)
+  }
+  return false
+}
+
 /** Chơi một cảnh động: bấm sân khấu cho tới khi hiện lựa chọn, rồi chọn theo nội dung. */
 async function playScene(page, item, choice) {
   for (let i = 0; i < 120; i += 1) {
@@ -98,6 +119,8 @@ async function playScene(page, item, choice) {
   }
   check(`cảnh «${item.title}» hiện lựa chọn`, await choicesOpen(page, ".scene-stage-host"))
   await pickByText(page, ".scene-stage-host", choice.text)
+  // bấm nút "câu tiếp theo" (và mọi nhịp bấm bóng say dọc hậu quả) cho cảnh được phép đi tiếp
+  check(`cảnh «${item.title}» hiện nút câu tiếp theo`, await clickNextButton(page, ".stage .scene"))
 }
 
 /** Trả lời một tình huống chữ: bấm khung thoại tới khi có lựa chọn. */
@@ -163,13 +186,18 @@ await shot(page, "flow-01-landing")
 console.log("— đánh giá lần 1 (đề A, chọn mạnh nhất) —")
 await finishSeeded(page, seededCurrent("A", strongestChoice), strongestChoice)
 check("tới trang kết quả", (await page.locator(".result").count()) > 0)
-await page.waitForSelector(".dim")
-check("hồ sơ có đúng 6 kỹ năng", (await page.locator(".dim").count()) === 6, `${await page.locator(".dim").count()}`)
-check("chọn mạnh nhất ở mọi tình huống → trung bình 100", (await page.locator(".verdict__score").innerText()).trim() === "100")
+await page.waitForSelector(".syswin")
+check("cửa sổ hồ sơ hiện giữa trang", (await page.locator(".result__window .syswin").count()) === 1)
 const resultText = await page.locator(".result").innerText()
+const mascotNames = MASCOTS.map((m) => m.name)
+const shownName = (await page.locator(".mascot__name").first().innerText()).trim()
+check("linh vật đúng một trong bảy tên", mascotNames.includes(shownName), shownName)
+const resultLower = resultText.toLowerCase()
+check("có đủ hộp Điểm mạnh và Điểm cần để ý", resultLower.includes("điểm mạnh") && resultLower.includes("điểm cần để ý"))
+check("nhìn lại đủ 12 lựa chọn", (await page.locator(".lookback__item").count()) === 12, `${await page.locator(".lookback__item").count()}`)
+check("trang kết quả không có % và không có /100", !resultText.includes("%") && !resultText.includes("/100"))
 check("trang kết quả không chứa ngôn ngữ xếp kiểu người", !BANNED.test(resultText), resultText.match(BANNED)?.[0])
-check("lần đầu: chưa có phần so với lần trước", !resultText.includes("So với lần trước"))
-check("có ít nhất một bằng chứng tình huống", (await page.locator(".evidence__item").count()) >= 1)
+check("lần đầu: chưa có phần so với lần trước", !resultLower.includes("so với lần trước"))
 await shot(page, "flow-02-result-A", true)
 
 console.log("— luyện tập —")
@@ -200,21 +228,23 @@ for (let i = 0; i < 120 && !(await choicesOpen(page, ".scene-stage-host")); i +=
   await page.waitForTimeout(120)
 }
 await page.locator(".scene-stage-host .choice").first().click()
+await clickNextButton(page, ".scene-tip") // cảnh dừng ở nút "Xem phản hồi ▶" chờ người chơi bấm
 await page.waitForSelector(".scene-tip", { timeout: 15000 })
 check("sau lựa chọn có khung phản hồi", (await page.locator(".scene-tip").count()) === 1)
 await shot(page, "flow-05-scene-feedback")
 
-console.log("— đánh giá lại (đề B, chọn yếu nhất) —")
+console.log("— đánh giá lại (đề A, chọn yếu nhất) —")
 await page.goto(`${BASE}/assessment`, { waitUntil: "networkidle" })
-check("màn mở đầu báo đây là đánh giá lại", (await page.locator(".quiz-intro").innerText()).includes("Đánh giá lại"))
-check("lần đánh giá lại dùng đề B", (await page.locator(".quiz-intro").innerText()).includes("đề B"))
-await finishSeeded(page, seededCurrent("B", weakest), weakest)
-await page.waitForSelector(".dim")
+const introText = (await page.locator(".quiz-intro").innerText()).toLowerCase()
+check("màn mở đầu báo đây là đánh giá lại", introText.includes("đánh giá lại"))
+check("lần đánh giá lại dùng lại đúng 12 tình huống cũ", introText.includes("làm lại đúng 12 tình huống đó"))
+await finishSeeded(page, seededCurrent("A", weakest), weakest)
+await page.waitForSelector(".syswin")
 const retakeText = await page.locator(".result").innerText()
-check("có phần so với lần trước", retakeText.includes("So với lần trước"))
-check("có nhãn thay đổi", (await page.locator(".changes .chip").count()) >= 1)
-check("có kỹ năng giảm khi chọn yếu nhất", /giảm/i.test(retakeText))
-await shot(page, "flow-06-result-B-compare", true)
+check("có phần so với lần trước", retakeText.toLowerCase().includes("so với lần trước"))
+check("có hàng so sánh đổi khác", (await page.locator(".compare__row").count()) >= 1)
+check("có kỹ năng dao động khi chọn yếu nhất", /dao động/i.test(retakeText))
+await shot(page, "flow-06-result-A-compare", true)
 
 let o = await overflow(page)
 check("màn rộng: không tràn ngang", o.scrollW <= o.innerW, `${o.scrollW}/${o.innerW}`)
@@ -234,7 +264,7 @@ for (const [path, name] of [["/", "flow-m1-landing"], ["/practice", "flow-m2-pra
   await shot(mp, name)
 }
 await finishSeeded(mp, seededCurrent("A", strongestChoice), strongestChoice)
-await mp.waitForSelector(".dim")
+await mp.waitForSelector(".syswin")
 o = await overflow(mp)
 check("điện thoại /result: không tràn ngang", o.scrollW <= o.innerW, `${o.scrollW}/${o.innerW}`)
 await shot(mp, "flow-m3-result")

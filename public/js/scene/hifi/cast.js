@@ -7,6 +7,7 @@
    Kích thước theo thân hình (chân luôn chạm hàng cuối của khung nên cùng một đường chân y≈186):
      teen (friend, friend2, classmate, classmate2, player)   36 x 60 ô  (72 x 120 px)
      người lớn (teacher, teacherF, mom)                       36 x 68 ô  (72 x 136 px), cao hơn teen ~13%
+     người lớn thấp (teacherTri)                              36 x 60 ô, ngang teen (không kéo dài hàng)
      bé (kid)                                                 36 x 60 ô, dáng thấp ~47 hàng, 13 hàng trên cùng để trống
 
    Tên khung: <mood>-idle / <mood>-talk (neutral happy sad annoyed concerned defensive), neutral-react,
@@ -23,6 +24,7 @@ const CAST_SPECS = {
   player: SPECS.ban, // "Bạn": áo len ô-liu, tóc ngắn trung tính
   teacherF: SPECS.hanh, // cô Hạnh (giảng viên): blazer navy, búi tóc thấp
   teacher: SPECS.thay, // thầy (giảng viên): kính, tóc muối tiêu, sơ mi xanh
+  teacherTri: SPECS.tri, // Thầy Trí (giảng viên): hói, thấp ngang teen, sơ mi sọc xanh-trắng, kính
   mom: SPECS.me, // mẹ: áo ấm, tóc ngang vai
   kid: SPECS.bin, // em nhỏ ~9 tuổi
 }

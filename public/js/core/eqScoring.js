@@ -30,7 +30,7 @@ export const PRIMARY_WEIGHT = 1
 export const SECONDARY_WEIGHT = 0.5
 export const BAND_HIGH = 70
 export const BAND_MID = 45
-export const EVIDENCE_FLOOR = 3
+export const EVIDENCE_FLOOR = 2
 export const CHANGE_THRESHOLD = 10
 export const STRENGTH_MIN = 55
 export const STRENGTH_ABOVE_MEAN = 8
@@ -360,7 +360,7 @@ export function saveHistory(history) {
   })
 }
 
-/** Đề cho lượt kế tiếp: luân phiên A → B → A … theo lần hoàn thành gần nhất. */
+/** Đề cho lượt kế tiếp: theo lần hoàn thành gần nhất; bộ hiện tại chỉ có một đề nên luôn là đề A. */
 export function nextForm(history = loadHistory()) {
   const last = history.attempts.at(-1)
   if (!last) return FORM_ORDER[0]
@@ -475,6 +475,19 @@ export function practiceSince(since = latestAttempt()?.finishedAt ?? 0) {
     if (rep.strongest) out[rep.skill].choseStrongest += 1
   }
   return out
+}
+
+/** Đếm số lựa chọn theo từng mẫu chiến lược — helper thuần cho data/mascots.js. */
+export function patternCounts(answers = {}) {
+  const counts = {}
+  let answered = 0
+  for (const [id, choiceId] of Object.entries(answers ?? {})) {
+    const choice = ITEM_BY_ID[id]?.choices.find((c) => c.id === choiceId)
+    if (!choice) continue
+    answered += 1
+    if (choice.pattern) counts[choice.pattern] = (counts[choice.pattern] ?? 0) + 1
+  }
+  return { answered, counts }
 }
 
 /** Hàng đợi luyện cho một kỹ năng: đúng kỹ năng chính, có mẫu chiến lược hay lặp lại, chưa luyện trước. */

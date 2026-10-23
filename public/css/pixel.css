@@ -84,10 +84,9 @@
 .btn {
   --frame: var(--ink);
   --fill: var(--paper);
-  font-family: var(--font-pixel);
-  font-weight: 600;
+  font-family: var(--font-text);
+  font-weight: 700;
   font-size: 17px;
-  letter-spacing: 0.09em;
   text-transform: uppercase;
   text-align: center;
   transition: none;
@@ -108,7 +107,7 @@
 
 @media (hover: hover) {
   .btn:hover {
-    --fill: var(--amber);
+    --fill: var(--yellow-tint);
   }
 }
 
@@ -117,30 +116,38 @@
   transform: translate(5px, 5px);
 }
 
+/* Nút chính: cam FPT với khung cam đậm — cảm giác "nút bấm" của đồ chơi nhựa.
+   Chữ mực trên cam vẫn ≥ 4.5:1; chữ trắng chỉ dành cho shade đậm. */
 .btn--primary {
-  --fill: var(--ink);
+  --fill: var(--orange);
+  --frame: var(--orange-dark);
 }
 .btn--primary > .pxf-in {
-  color: var(--paper);
+  color: var(--ink);
 }
 @media (hover: hover) {
   .btn--primary:hover {
-    --fill: var(--olive);
+    --fill: var(--orange-dark);
+  }
+  .btn--primary:hover > .pxf-in {
+    color: var(--paper);
   }
 }
 
+/* Nút phụ: xanh da trời, khung xanh đậm, cùng kiểu "nút bấm". */
 .btn--accent {
-  --fill: var(--olive);
+  --fill: var(--blue);
+  --frame: var(--blue-dark);
 }
 .btn--accent > .pxf-in {
-  color: var(--paper);
+  color: var(--ink);
 }
 @media (hover: hover) {
   .btn--accent:hover {
-    --fill: var(--amber);
+    --fill: var(--blue-dark);
   }
   .btn--accent:hover > .pxf-in {
-    color: var(--ink);
+    color: var(--paper);
   }
 }
 
@@ -160,7 +167,7 @@
 }
 .btn--ghost > .pxf-in {
   color: var(--ink);
-  font-size: 15px;
+  font-size: 16px;
   padding: 8px 14px 6px;
   min-height: 38px;
 }
@@ -188,13 +195,32 @@
   color: var(--paper);
 }
 .chip--amber {
-  --fill: var(--amber);
+  --fill: var(--yellow-tint);
 }
 .chip--ink {
   --fill: var(--ink);
 }
 .chip--ink > .pxf-in {
   color: var(--paper);
+}
+/* Chip đủ sáu màu bảng màu: chữ mực trên nền tươi (riêng vàng dùng tint nhạt). */
+.chip--orange {
+  --fill: var(--orange);
+}
+.chip--blue {
+  --fill: var(--blue);
+}
+.chip--mint {
+  --fill: var(--mint);
+}
+.chip--yellow {
+  --fill: var(--yellow-tint);
+}
+.chip--pink {
+  --fill: var(--pink);
+}
+.chip--lavender {
+  --fill: var(--lavender);
 }
 
 /* ----------------------------------------------------- thanh tiến độ pixel */
@@ -209,7 +235,7 @@
 .bar__fill {
   height: 100%;
   width: 0%;
-  background: var(--olive);
+  background: var(--orange);
   transition: width 260ms steps(6, end);
 }
 

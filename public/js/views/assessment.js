@@ -112,21 +112,25 @@ export function renderAssessment(mount, { navigate }) {
   resumeBtn.style.display = "none"
   resumeBtn.addEventListener("click", () => start({ fresh: false }))
 
-  const notes = [
-    el("p", {
-      class: "prose",
-      text: `${total} tình huống rất đời thường của sinh viên, trong đó có cả cảnh động: nhân vật sẽ diễn lại chuyện xảy ra sau lựa chọn của bạn.`,
-    }),
-    el("p", { class: "prose", text: "Cách nào cũng có lý. Hãy chọn cách gần với điều bạn thật sự sẽ làm, đừng chọn cách bạn nghĩ là “đúng”." }),
-    el("p", { class: "prose", text: "Trong lúc làm, bạn sẽ không thấy điểm. Cuối bài, bạn sẽ thấy sáu kỹ năng kèm những tình huống giải thích vì sao, và cách luyện kỹ năng cần luyện nhất." }),
+  /* Ba luật chơi, mỗi dòng một biểu tượng: ngắn gọn, không nhắc điểm. */
+  const RULES = [
+    ["—", "Không có đáp án đúng sai, chọn điều bạn thật sự sẽ làm"],
+    ["▶", "Bấm Tiếp hoặc Space để đi từng bước, cứ đọc thong thả"],
+    ["＋", "Cuối bài: linh vật, điểm mạnh và điểm cần để ý của bạn"],
   ]
+  const rulesList = el("ul", { class: "quiz-intro__rules" })
+  for (const [icon, text] of RULES) {
+    rulesList.append(el("li", {}, el("span", { class: "quiz-intro__icon", text: icon, attrs: { "aria-hidden": "true" } }), el("span", { text })))
+  }
+
+  const notes = []
   if (isRetake) {
     const days = Math.floor((Date.now() - (last.finishedAt || 0)) / DAY)
     const reps = Object.values(practiceSince(last.finishedAt || 0)).reduce((sum, r) => sum + r.practised, 0)
     notes.push(
       el("p", {
         class: "prose",
-        text: `Lần này bạn làm bộ tình huống khác (đề ${saved.form}) để đo kỹ năng chứ không đo trí nhớ. Cuối bài, bạn sẽ thấy từng kỹ năng thay đổi ra sao so với lần trước.`,
+        text: "Lần này bạn làm lại đúng 12 tình huống đó, xáo thứ tự, để đo kỹ năng chứ không đo trí nhớ. Cuối bài, bạn sẽ thấy từng kỹ năng thay đổi ra sao so với lần trước.",
       }),
     )
     if (days < RETAKE_WAIT_DAYS || reps < RETAKE_PRACTICE_REPS) {
@@ -138,15 +142,13 @@ export function renderAssessment(mount, { navigate }) {
       )
     }
   }
-  notes.push(
-    el("p", { class: "prose muted", text: "Mất khoảng 10–15 phút. Đây là công cụ học tập và tự rèn luyện, không phải thang đo tâm lý đã được kiểm định và không dùng để chẩn đoán." }),
-  )
 
   const intro = frame(
     el(
       "div",
       { class: "quiz-intro__in" },
       el("h2", { class: "px-head", text: isRetake ? "Đánh giá lại" : "Trước khi bắt đầu" }),
+      rulesList,
       el("div", { class: "quiz-intro__note" }, ...notes),
       el("div", { class: "quiz-intro__actions" }, resumeBtn, startBtn, soundToggle()),
     ),
@@ -183,6 +185,7 @@ export function renderAssessment(mount, { navigate }) {
     intro.remove()
     hud.style.display = ""
     sound.open()
+    sound.startMusic()
     updateHud()
     showItem("next")
     window.scrollTo({ top: 0, behavior: "auto" })
@@ -209,6 +212,7 @@ export function renderAssessment(mount, { navigate }) {
         onDone() {
           advance()
         },
+        lastLabel: index >= list().length - 1 ? "Xem kết quả" : null,
       })
       runtime.start()
       return
@@ -303,6 +307,7 @@ export function renderAssessment(mount, { navigate }) {
     destroy() {
       stopRuntime()
       scene.destroy()
+      sound.stopMusic()
       mount.textContent = ""
     },
   }

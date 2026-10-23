@@ -12,10 +12,9 @@
   padding: 8px 14px;
   background: var(--ink);
   color: var(--paper);
-  font-family: var(--font-pixel);
+  font-family: var(--font-text);
   font-weight: 600;
   font-size: 17px;
-  letter-spacing: 0.08em;
   text-transform: uppercase;
   text-decoration: none;
 }
@@ -68,7 +67,9 @@
   display: block;
 }
 
+/* Wordmark: một trong vài chỗ cuối cùng còn dùng chữ pixel. */
 .brand__name {
+  font-family: var(--font-pixel);
   font-size: 26px;
   font-weight: 800;
   letter-spacing: 0.06em;
@@ -110,10 +111,54 @@
 
 /* ------------------------------------------------------------------ hero */
 .hero {
+  position: relative;
+  isolation: isolate;
   padding: var(--gap-8) 0 var(--gap-7);
 }
 
+/* Nền chơi vui toàn CSS: vài blob màu pastel nhạt ở góc + chấm confetti pixel.
+   Trang trí LUÔN nằm sau chữ (z-index -1 trong ngữ cảnh xếp chồng riêng của
+   hero — see isolation) và opacity đủ thấp để tiêu đề giữ đúng màu mực. */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(closest-side, var(--pink-tint), transparent) right 3% top 4% / 240px 240px no-repeat,
+    radial-gradient(closest-side, var(--blue-tint), transparent) right 14% bottom 6% / 200px 200px no-repeat,
+    radial-gradient(closest-side, var(--yellow-tint), transparent) left 2% top 8% / 190px 190px no-repeat,
+    radial-gradient(closest-side, var(--mint-tint), transparent) left 22% bottom 2% / 170px 170px no-repeat,
+    radial-gradient(closest-side, var(--lavender-tint), transparent) right 30% top 0% / 150px 150px no-repeat;
+  opacity: 0.5;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 26px;
+  right: 7%;
+  width: 10px;
+  height: 10px;
+  background: var(--orange);
+  box-shadow:
+    26px 18px 0 var(--blue),
+    -18px 44px 0 var(--mint),
+    44px -10px 0 var(--yellow),
+    74px 26px 0 var(--pink),
+    -44px -4px 0 var(--lavender),
+    14px 70px 0 var(--lavender),
+    62px 74px 0 var(--orange),
+    -64px 34px 0 var(--blue);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
 .hero__grid {
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
   gap: var(--gap-7);
@@ -121,10 +166,10 @@
 }
 
 .hero__title {
-  font-family: var(--font-pixel);
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-weight: 800;
   font-size: clamp(42px, 7.4vw, 88px);
-  line-height: 0.94;
+  line-height: 1.05;
   margin-bottom: var(--gap-4);
 }
 
@@ -138,16 +183,16 @@
 }
 
 .hero__tag {
-  font-family: var(--font-term);
+  font-family: var(--font-text);
   font-size: clamp(20px, 2.6vw, 26px);
-  line-height: 1.3;
+  line-height: 1.5;
   color: var(--ink);
   margin-bottom: var(--gap-4);
 }
 
 .hero__tag b {
-  background: var(--amber);
-  box-shadow: 6px 0 0 var(--amber), -2px 0 0 var(--amber);
+  background: var(--yellow-tint);
+  box-shadow: 6px 0 0 var(--yellow-tint), -2px 0 0 var(--yellow-tint);
   font-weight: 400;
 }
 
@@ -176,6 +221,37 @@
   letter-spacing: 0.06em;
   max-width: 46ch;
   line-height: 1.5;
+}
+
+/* Hàng chip linh vật ở màn mở đầu: ảnh pixel + tên, chỉ để nhìn, không phải nút bấm.
+   Chữ mực (≥ 4.5:1) trên tint nhạt pha từ màu của linh vật (--mc do JS gắn),
+   viền đậm hơn nền một bậc cho ra hình con chip. */
+.hero__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-3);
+  margin-top: var(--gap-5);
+}
+
+.hero__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 8px;
+  background: color-mix(in srgb, var(--mc, var(--paper-3)) 14%, #fffdf7);
+  border: 2px solid color-mix(in srgb, var(--mc, var(--ink)) 55%, #1d1b2e);
+}
+
+.hero__chip__art svg {
+  width: 20px;
+  height: 20px;
+}
+
+.hero__chip__name {
+  font-family: var(--font-text);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--ink);
 }
 
 /* bảng thông số */
@@ -242,10 +318,10 @@
 }
 
 .band__title {
-  font-family: var(--font-pixel);
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-weight: 800;
   font-size: clamp(30px, 4.4vw, 48px);
-  line-height: 1;
+  line-height: 1.1;
   margin-bottom: var(--gap-3);
 }
 
@@ -303,9 +379,9 @@
 }
 
 .ledger__v {
-  font-family: var(--font-term);
+  font-family: var(--font-text);
   font-size: 19px;
-  line-height: 1.4;
+  line-height: 1.5;
   color: color-mix(in srgb, var(--paper) 82%, transparent);
 }
 
@@ -313,7 +389,7 @@
   margin-top: var(--gap-6);
   border: 3px solid var(--amber);
   padding: 18px 20px;
-  font-family: var(--font-term);
+  font-family: var(--font-text);
   font-size: 20px;
   line-height: 1.5;
   max-width: 72ch;
@@ -387,9 +463,9 @@
 }
 
 .rank__intro {
-  font-family: var(--font-term);
+  font-family: var(--font-text);
   font-size: 18px;
-  line-height: 1.3;
+  line-height: 1.5;
   color: var(--ink-2);
   overflow: hidden;
   display: -webkit-box;
@@ -629,6 +705,12 @@
   transition: none;
 }
 
+/* Dải trên màu riêng theo kỹ năng (data-skill → biến --skill-c ở tokens.css);
+   áp dụng cho cả thẻ liên kết lẫn thẻ khung trong lưới trang chủ. */
+.skills [data-skill] {
+  border-top: 8px solid var(--skill-c, var(--paper-3));
+}
+
 .skill__in {
   display: grid;
   gap: var(--gap-2);
@@ -647,14 +729,14 @@
   font-size: 22px;
   line-height: 1;
   letter-spacing: 0.06em;
-  color: var(--olive);
+  color: var(--skill-c-dark, var(--olive));
 }
 
 .skill__name {
-  font-family: var(--font-pixel);
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-weight: 800;
   font-size: 21px;
-  line-height: 1.05;
+  line-height: 1.15;
   color: var(--ink);
 }
 

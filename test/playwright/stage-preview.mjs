@@ -92,13 +92,17 @@ async function play(id, letterIndex, { capture }) {
   const choiceId = `${id}_${letter}`
   const text = SCENARIO_BY_ID[id].choices.find((c) => c.id === choiceId)?.text ?? ""
   if (opened) await page.locator(".scene-stage-host .choice", { hasText: text.slice(0, 30) }).first().click()
-  for (let i = 0; i < 50; i += 1) {
+  for (let i = 0; i < 100; i += 1) {
     if (i === 10) {
       const f = `${REPORTS}/stage-${id}-3-${letter}.png`
       await page.screenshot({ path: f })
       shots.push(f)
     }
-    if (await page.evaluate(() => window.__pv.done)) break
+    // hậu quả giờ dừng ở bóng say chờ bấm, và onDone chỉ chạy khi bấm nút "câu tiếp theo"
+    if (await page.evaluate(() => {
+      document.querySelector(".scene-stage-host .scn-tap:not([hidden]) .scn-tap__btn")?.click()
+      return window.__pv.done
+    })) break
     await page.waitForTimeout(150)
   }
   if (!(await page.evaluate(() => window.__pv.done))) failures.push(`${id} ${letter}: hậu quả không kết thúc`)

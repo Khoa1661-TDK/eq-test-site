@@ -167,6 +167,7 @@ export function renderPractice(mount, { navigate, skill = null }) {
         onDone() {
           if (picked) showFeedback(item, picked)
         },
+        lastLabel: "Xem phản hồi",
       })
       runtime.start()
       return
@@ -251,6 +252,7 @@ export function renderPractice(mount, { navigate, skill = null }) {
     )
   } else {
     sound.open()
+    sound.startMusic()
     showCurrent()
   }
   document.title = isRandom ? "Luyện EQ — tình huống ngẫu nhiên" : `Luyện EQ — ${dim?.name ?? ""}`
@@ -259,6 +261,7 @@ export function renderPractice(mount, { navigate, skill = null }) {
     destroy() {
       stopRuntime()
       scene.destroy()
+      sound.stopMusic()
       mount.textContent = ""
     },
   }

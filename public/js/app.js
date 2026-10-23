@@ -27,7 +27,7 @@ function fixLinks(root = document) {
 const SKILLS = EQ_DIMENSIONS.map((dim) => dim.key)
 
 const TITLES = {
-  "/": "MoodQuest — Luyện 6 kỹ năng cảm xúc qua từng tình huống",
+  "/": "VIBECHECK — Thông minh hơn cùng cảm xúc",
   "/assessment": "Đánh giá EQ",
   "/result": "Hồ sơ EQ",
   "/practice": "Luyện EQ",

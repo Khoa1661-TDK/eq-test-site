@@ -1,60 +1,31 @@
-/* forms.js — hai đề đánh giá song song (A, B) và kho luyện tập.
-   Lần làm lại luôn dùng đề còn lại (A → B → A …), còn luyện tập không bao giờ
-   lấy tình huống của hai đề, để lần đánh giá lại đo kỹ năng chứ không đo trí nhớ.
+/* forms.js — bộ tình huống đánh giá và kho luyện tập.
 
-   Mỗi đề: 18 tình huống chữ (mỗi kỹ năng chính 3 tình huống, ghép cặp theo độ khó giữa
-   hai đề) và 2 cảnh động. Danh sách được cố định: một tình huống đã xuất bản không đổi
-   đề, để các lần làm cũ vẫn chấm lại được. Tạo bằng cách ghép cặp theo tỉ lệ điểm trung
-   bình của một lựa chọn ngẫu nhiên so với lựa chọn mạnh nhất. */
+   Đánh giá gồm đúng một bộ 12 tình huống đại học (UN_01 … UN_12): mỗi kỹ năng đúng 2
+   tình huống chính. Lần làm lại dùng lại đúng 12 tình huống đó, xáo thứ tự, nên kết quả
+   so sánh được mà vẫn đo kỹ năng chứ không đo trí nhớ từng câu.
+
+   Luyện tập lấy từ phần ngân hàng còn lại (tình huống chữ cũ và cảnh động), không bao giờ
+   lấy 12 tình huống của bộ đánh giá. Danh sách được cố định: một tình huống đã xuất bản
+   không đổi đề, để các lần làm cũ vẫn chấm lại được. */
 
 export const FORMS = {
   A: [
-    "EU_02",
-    "AW_02",
-    "AW_04",
-    "ER_03",
-    "ER_02",
-    "ER_01",
-    "EM_01",
-    "EM_02",
-    "EM_05",
-    "SO_05",
-    "SO_04",
-    "EM_04",
-    "CM_02",
-    "RS_05",
-    "CM_01",
-    "RL_02",
-    "RL_05",
-    "RS_04",
-    "scene-idea-credit",
-    "scene-quiet-teammate",
-  ],
-  B: [
-    "EU_05",
-    "AW_01",
-    "AW_06",
-    "ER_05",
-    "RG_03",
-    "RG_02",
-    "EU_03",
-    "EP_02",
-    "EP_03",
-    "SO_02",
-    "SO_03",
-    "SO_01",
-    "CM_03",
-    "CM_04",
-    "RS_01",
-    "ER_06",
-    "RL_04",
-    "RL_01",
-    "scene-hard-feedback",
-    "scene-public-criticism",
+    "UN_01",
+    "UN_02",
+    "UN_03",
+    "UN_04",
+    "UN_05",
+    "UN_06",
+    "UN_07",
+    "UN_08",
+    "UN_09",
+    "UN_10",
+    "UN_11",
+    "UN_12",
   ],
 }
 
-export const FORM_ORDER = ["A", "B"]
+export const FORM_ORDER = ["A"]
 
 export const PRACTICE_IDS = [
   "EU_04",

@@ -1,5 +1,7 @@
 /* skip-cutscene.mjs — bấm đúp / Space hai lần tua hết đoạn cảnh đang diễn.
-   Trước lựa chọn: lựa chọn hiện ngay. Sau lựa chọn: hậu quả kết thúc ngay. Bấm một lần thì không tua.
+   Trước lựa chọn: lựa chọn hiện ngay. Sau lựa chọn: tua hết hậu quả rồi dừng ở nút
+   "câu tiếp theo" (onDone chỉ chạy khi bấm nút — hợp đồng mới trong sceneRuntime.js).
+   Bấm một lần thì không tua.
 
    Chạy: node test/playwright/skip-cutscene.mjs */
 
@@ -74,7 +76,11 @@ for (const [id, how] of [["AW_01", "click"], ["EP_02", "space"], ["NX_02", "clic
     await page.locator(".scene-stage-host .choice").first().click()
     await page.waitForTimeout(400)
     if (how === "space") { await page.keyboard.press("Space"); await page.keyboard.press("Space") } else await doubleClick(page)
-    const tDone = await waitFor(page, () => page.evaluate(() => window.__pv.done), 2000)
+    // hậu quả tua xong giờ DỪNG lại chờ bấm nút "câu tiếp theo" → bấm nút đó rồi mới tính onDone
+    const tDone = await waitFor(page, async () => {
+      await page.evaluate(() => document.querySelector(".scene-stage-host .scn-tap:not([hidden]) .scn-tap__btn")?.click())
+      return page.evaluate(() => window.__pv.done)
+    }, 2000)
     if (tDone < 0) failures.push(`${id}: ${how} hai lần không tua hết hậu quả`)
     console.log(`  ${id} (${how}): lựa chọn sau ${tChoices}ms, hậu quả xong sau ${tDone}ms`)
   }

@@ -9,7 +9,7 @@ const SOFT_PAUSE = new Set([",", ";", ":", "—", "–"])
 const HARD_PAUSE = new Set([".", "!", "?", "…"])
 const SOFT_MS = 62
 const HARD_MS = 138
-const DEFAULT_MS_PER_CHAR = 26
+const DEFAULT_MS_PER_CHAR = 39
 
 export class TypewriterText {
   constructor(el, { onTick, onDone } = {}) {
@@ -129,10 +129,11 @@ export class TypewriterText {
   }
 }
 
-/** Nhịp gõ phù hợp độ dài: đoạn dài vẫn không gây sốt ruột. */
+/** Nhịp gõ phù hợp độ dài: đoạn dài vẫn không gây sốt ruột.
+    (Chậm hơn ~1.5× so với trước để người chơi kịp đọc — cảnh giờ bấm mới đi tiếp.) */
 export function rateFor(text) {
   const n = text?.length ?? 0
-  if (n > 260) return 15
-  if (n > 150) return 19
+  if (n > 260) return 23
+  if (n > 150) return 29
   return DEFAULT_MS_PER_CHAR
 }

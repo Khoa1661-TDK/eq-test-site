@@ -1,7 +1,7 @@
 /* sprites.js — nhân vật chi tiết (hi-fi) + biểu cảm + người qua lại cho hệ thống cảnh tình huống EQ.
 
    NHÂN VẬT không còn là lưới gõ tay: mọi id mà cảnh dùng (player, classmate, classmate2, friend,
-   friend2, teacher, teacherF, mom, kid) lấy từ HIFI_CAST trong hifi/cast.js:
+   friend2, teacher, teacherF, teacherTri, mom, kid) lấy từ HIFI_CAST trong hifi/cast.js:
      HIFI_CAST[id] = { frames, palette, cols, rows, cell }   (36 x 60 ô, 2 px/ô => 72 x 120 px)
    Tên khung (xem hifi/characterKit.js):
      <mood>-idle / <mood>-talk   mood: neutral happy sad annoyed concerned defensive

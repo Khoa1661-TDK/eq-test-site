@@ -43,6 +43,14 @@
   max-width: var(--scene);
   margin: 0 auto;
   padding: 18px 18px 0;
+  /* Chừa chỗ cho thanh trên dính khi JS scrollIntoView container này sau mỗi
+     lựa chọn (điện thoại: thanh trên có thể xuống hai hàng nên lề rộng hơn). */
+  scroll-margin-top: 92px;
+}
+@media (max-width: 700px) {
+  .scene-stage-host {
+    scroll-margin-top: 136px;
+  }
 }
 
 .scn-stage-wrap {
@@ -50,7 +58,7 @@
   width: 100%;
   overflow: hidden;
   border: 3px solid var(--ink);
-  background: #e9e5d9;
+  background: var(--paper-2);
   box-shadow: 6px 6px 0 rgba(22, 24, 28, 0.18);
 }
 
@@ -207,7 +215,7 @@
   font-weight: 700;
   font-size: 16px;
   color: var(--ink);
-  background: var(--amber);
+  background: var(--yellow-tint);
   border: 2px solid var(--ink);
   border-radius: 2px;
 }
@@ -276,14 +284,14 @@
   width: max-content;
   max-width: 150px;
   padding: 4px 6px 5px;
-  background: #fffdf6;
+  background: var(--paper);
   color: var(--ink);
   border: 2px solid var(--ink);
   border-radius: 3px;
   box-shadow: 2px 2px 0 rgba(22, 24, 28, 0.2);
-  font-family: var(--font-term);
-  font-size: 13px;
-  line-height: 1.08;
+  font-family: var(--font-text);
+  font-size: 14px;
+  line-height: 1.3;
   text-align: left;
   overflow-wrap: anywhere;
   transform-origin: var(--tail, 50%) 100%;
@@ -299,13 +307,13 @@
   bottom: -6px;
   width: 6px;
   height: 6px;
-  background: #fffdf6;
+  background: var(--paper);
   border-right: 2px solid var(--ink);
   border-bottom: 2px solid var(--ink);
   transform: rotate(45deg);
 }
 .scn-say.is-think {
-  background: #f1f5fa;
+  background: var(--blue-tint);
   border-radius: 9px;
   padding: 4px 8px 5px;
   font-style: italic;
@@ -315,7 +323,7 @@
   height: 5px;
   bottom: -9px;
   left: calc(var(--tail, 20px) - 2px);
-  background: #f1f5fa;
+  background: var(--blue-tint);
   border: 2px solid var(--ink);
   border-radius: 50%;
   transform: none;
@@ -392,7 +400,7 @@
   display: flex;
   flex-direction: column;
   padding: 2px;
-  background: #16181c;
+  background: var(--ink);
   border-radius: 6px;
   box-shadow: 3px 3px 0 rgba(22, 24, 28, 0.25);
   transform: translateX(calc(100% + 12px));
@@ -406,8 +414,8 @@
   align-items: center;
   gap: 4px;
   padding: 3px 5px;
-  background: #2f4a3a;
-  color: #f4efe2;
+  background: var(--mint-dark);
+  color: var(--console-text);
   border-radius: 4px 4px 0 0;
   font-family: var(--font-pixel);
   font-weight: 700;
@@ -418,7 +426,7 @@
   flex: none;
   width: 5px;
   height: 5px;
-  background: #9fd07a;
+  background: var(--mint);
   border-radius: 50%;
 }
 .scn-phone__title {
@@ -434,7 +442,7 @@
   gap: 3px;
   min-height: 48px;
   padding: 4px 3px;
-  background: #e9e5d9;
+  background: var(--paper-2);
   border-radius: 0 0 4px 4px;
   overflow: hidden;
 }
@@ -442,19 +450,19 @@
   align-self: flex-start;
   max-width: 94%;
   padding: 2px 4px 3px;
-  background: #fffdf6;
+  background: var(--paper);
   color: var(--ink);
   border: 1px solid var(--ink);
   border-radius: 3px;
-  font-family: var(--font-term);
-  font-size: 13px;
-  line-height: 1.05;
+  font-family: var(--font-text);
+  font-size: 14px;
+  line-height: 1.3;
   overflow-wrap: anywhere;
   animation: scn-chat-in 180ms steps(3, end) both;
 }
 .scn-chat-msg.is-me {
   align-self: flex-end;
-  background: #cddcae;
+  background: var(--mint-tint);
   text-align: right;
 }
 .scn-chat-msg__from {
@@ -463,7 +471,7 @@
   font-weight: 700;
   font-size: 10px;
   line-height: 1;
-  color: #4f6033;
+  color: var(--olive);
 }
 .scn-chat-msg.is-typing .scn-chat-msg__text {
   animation: scn-typing 900ms steps(2, end) infinite;
@@ -569,6 +577,44 @@
   cursor: pointer;
 }
 
+/* ------------------------------------------------------------------ nút bấm để đi tiếp
+   Hiện khi có thứ đang chờ bấm (dòng thoại, bóng thoại, "câu tiếp theo" — xem hợp đồng
+   đầu sceneRuntime.js); ẩn khi lựa chọn đang mở. Bấm nút = bấm vào khung thoại. */
+.scn-tap {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.scn-tap[hidden] {
+  display: none;
+}
+.scn-tap__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 13px;
+  background: var(--yellow-tint);
+  border: 2px solid var(--ink);
+  color: var(--ink);
+  font-family: var(--font-text);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.scn-tap__btn:hover {
+  background: var(--paper);
+}
+.scn-tap__kbd {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 10px;
+  padding: 2px 5px;
+  background: rgba(22, 24, 28, 0.18);
+  border: 1px solid var(--ink);
+  color: var(--ink);
+}
+
 /* ------------------------------------------------------------------ chân dung người nói
    Hàng [chân dung | chữ] bọc đoạn chữ của khung thoại (sceneRuntime.js). Chân dung là phần đầu
    (20×18 ô) của chính nhân vật đang nói, vẽ pixelated ~4 px/ô trong một khung pixel nhỏ viền hổ phách
@@ -635,7 +681,7 @@
 }
 @media (hover: hover) {
   .scn-board .choice:hover {
-    background: var(--amber);
+    background: var(--yellow-tint);
     border-color: var(--ink);
     color: var(--ink);
   }
@@ -654,7 +700,7 @@
   color: var(--ink);
 }
 .scn-board .choice.is-active {
-  background: var(--amber);
+  background: var(--yellow-tint);
   border-color: var(--ink);
   color: var(--ink);
 }
@@ -686,9 +732,9 @@
   margin: 0 0 6px;
 }
 .scene-tip__body {
-  font-family: var(--font-term);
+  font-family: var(--font-text);
   font-size: 20px;
-  line-height: 1.3;
+  line-height: 1.5;
   color: var(--ink-2);
   margin: 0 0 8px;
 }
@@ -708,13 +754,15 @@
   justify-items: start;
 }
 .scene-done__title {
-  font-family: var(--font-pixel);
+  font-family: var(--font-display);
+  font-weight: 800;
   font-size: 26px;
   margin: 0;
 }
 .scene-done__sub {
-  font-family: var(--font-term);
+  font-family: var(--font-text);
   font-size: 20px;
+  line-height: 1.5;
   color: var(--ink-2);
   margin: 0 0 8px;
 }
@@ -797,10 +845,10 @@
   margin: 0 0 4px;
 }
 .story-title {
-  font-family: var(--font-pixel);
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-weight: 800;
   font-size: clamp(28px, 5vw, 40px);
-  line-height: 1.05;
+  line-height: 1.15;
   margin: 0 0 var(--gap-3);
 }
 .story-intro .prose + .prose {
@@ -831,8 +879,8 @@
   align-items: start;
 }
 .story-card__title {
-  font-family: var(--font-pixel);
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-weight: 800;
   font-size: 24px;
   margin: 0 0 var(--gap-3);
 }
@@ -844,8 +892,8 @@
   border-top: 3px solid var(--paper-3);
 }
 .story-card__name {
-  font-family: var(--font-pixel);
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-weight: 800;
   font-size: 20px;
   margin: 0 0 4px;
 }
@@ -862,9 +910,18 @@
   display: grid;
   gap: 6px;
 }
+/* Ô vuông màu riêng của kỹ năng (data-skill → biến --skill-c ở tokens.css). */
+.story-skill[data-skill] .story-skill__name::before {
+  content: "";
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 8px;
+  background: var(--skill-c, var(--amber));
+}
 .story-skill__name {
-  font-family: var(--font-pixel);
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-weight: 800;
   font-size: 20px;
 }
 .story-skill__short {
@@ -877,7 +934,7 @@
 .story-skill__tip {
   margin: 4px 0 0;
   font-size: 14px;
-  line-height: 1.45;
+  line-height: 1.5;
   background: var(--paper-2);
   border: 2px solid var(--paper-3);
   padding: 7px 10px;

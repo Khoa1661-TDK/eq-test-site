@@ -162,7 +162,8 @@ for (let i = 0; i < 70; i += 1) {
   seen.zoom = Math.max(seen.zoom, s.zoom)
   seen.extras = Math.max(seen.extras, s.extras)
   if (i === 12) await page.screenshot({ path: `${REPORTS}/scene-lab-1.png` })
-  if (s.choices > 0) break
+  // bóng say giờ DỪNG timeline chờ bấm → phải bấm đủ để cả timeline chạy xong rồi mới tính chuyện lựa chọn
+  if (s.choices > 0 && seen.zoom >= 1.15 && seen.tint && seen.chatMsgs === 2 && seen.chatMe && seen.slump && seen.hop && seen.sweat) break
   if (i % 3 === 2) await click()
   await page.waitForTimeout(140)
 }
@@ -190,11 +191,15 @@ if (choiceCount) await q(".choice").first().click()
 let afterSay = ""
 let heart = false
 for (let i = 0; i < 40; i += 1) {
-  const s = await page.evaluate(() => ({
-    say: [...document.querySelectorAll(".scene-stage-host .scn-say")].map((n) => n.textContent).join(" | "),
-    heart: Boolean(document.querySelector('.scene-stage-host .scn-emote[data-kind="heart"]')),
-    done: window.__lab.done,
-  }))
+  const s = await page.evaluate(() => {
+    // hậu quả giờ dừng ở bóng say chờ bấm, và onDone chỉ chạy khi bấm nút "câu tiếp theo"
+    document.querySelector(".scene-stage-host .scn-tap:not([hidden]) .scn-tap__btn")?.click()
+    return {
+      say: [...document.querySelectorAll(".scene-stage-host .scn-say")].map((n) => n.textContent).join(" | "),
+      heart: Boolean(document.querySelector('.scene-stage-host .scn-emote[data-kind="heart"]')),
+      done: window.__lab.done,
+    }
+  })
   if (s.say) afterSay += ` ${s.say}`
   heart ||= s.heart
   if (i === 10) await page.screenshot({ path: `${REPORTS}/scene-lab-3-consequence.png` })

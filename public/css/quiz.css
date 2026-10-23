@@ -49,9 +49,9 @@
   font-size: 14px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--ink-3);
-  background: var(--paper-2);
-  border: 2px solid var(--paper-3);
+  color: var(--ink);
+  background: var(--yellow-tint);
+  border: 2px solid var(--yellow-dark);
   padding: 4px 8px 2px;
 }
 
@@ -182,12 +182,12 @@
 }
 
 .console__text {
-  font-family: var(--font-term);
+  font-family: var(--font-text);
   font-size: 22px;
-  line-height: 1.42;
+  line-height: 1.55;
   color: var(--console-text);
   /* Sàn 2 dòng: khung chỉ cao vừa đủ; đoạn dài hơn sẽ tự nới chiều cao. */
-  min-height: calc(22px * 1.42 * 2);
+  min-height: calc(22px * 1.55 * 2);
   word-break: break-word;
   overflow-wrap: anywhere;
 }
@@ -266,9 +266,9 @@
   border: 2px solid color-mix(in srgb, var(--paper) 22%, transparent);
   background: color-mix(in srgb, var(--paper) 4%, transparent);
   color: var(--console-text);
-  font-family: var(--font-term);
+  font-family: var(--font-text);
   font-size: 19px;
-  line-height: 1.32;
+  line-height: 1.5;
   transition: none;
   opacity: 0;
   transform: translateY(5px);
@@ -309,8 +309,8 @@
 
 /* trạng thái được trỏ tới (chuột hoặc bàn phím) */
 .choice.is-active {
-  border-color: var(--amber);
-  background: var(--amber);
+  border-color: var(--yellow-dark);
+  background: var(--yellow-tint);
   color: var(--ink);
 }
 .choice.is-active .choice__cursor {
@@ -329,8 +329,8 @@
 
 @media (hover: hover) {
   .choice:hover {
-    border-color: var(--amber);
-    background: var(--amber);
+    border-color: var(--yellow-dark);
+    background: var(--yellow-tint);
     color: var(--ink);
   }
   .choice:hover .choice__cursor {
@@ -366,7 +366,7 @@
    luôn đọc được (trước đây chặng giữa dùng nền tối làm chữ biến mất). */
 @keyframes choice-flash {
   0% {
-    background: var(--amber);
+    background: var(--yellow-tint);
   }
   50%,
   100% {
@@ -445,16 +445,44 @@
 }
 
 .quiz-intro h2 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(30px, 5vw, 46px);
+  line-height: 1.15;
+}
+
+/* Ba luật chơi của màn mở đầu: mỗi dòng một biểu tượng pixel, ngắn gọn. */
+.quiz-intro__rules {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--gap-3);
+}
+
+.quiz-intro__rules li {
+  display: flex;
+  align-items: baseline;
+  gap: var(--gap-3);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.quiz-intro__icon {
+  flex: none;
   font-family: var(--font-pixel);
   font-weight: 700;
-  font-size: clamp(30px, 5vw, 46px);
+  color: var(--olive);
 }
 
 /* Ghi chú trong màn mở đầu: nét kẻ ngang, không vệt màu bên trái. Khối đã nằm
-   trong khung pixel nên không lồng thêm hộp. */
+   trong khung pixel nên không lồng thêm hộp. Rỗng thì không kẻ. */
 .quiz-intro__note {
   display: grid;
   gap: 6px;
+}
+
+.quiz-intro__note:not(:empty) {
   border-top: 2px solid var(--paper-3);
   padding-top: var(--gap-3);
 }
@@ -493,7 +521,7 @@
 
   .console__text {
     font-size: 19px;
-    min-height: calc(19px * 1.44 * 2);
+    min-height: calc(19px * 1.55 * 2);
   }
 }
 
@@ -535,8 +563,7 @@
 
   .console__text {
     font-size: 18px;
-    line-height: 1.45;
-    min-height: calc(18px * 1.45 * 2);
+    min-height: calc(18px * 1.55 * 2);
   }
 
   .choice {

@@ -28,9 +28,10 @@
    DÀN NHÂN VẬT (cast.js dùng các SPECS bên dưới):
      linh, minh                sinh viên đã duyệt (đồ thường ngày: áo thun, jean; Minh khoác áo denim)
      mai, duc                  sinh viên nữ đuôi ngựa nâu / sinh viên nam vạm vỡ da rám tóc gai
-     ban                       "Bạn": áo thun + cardigan ô-liu (jacket), tóc ngắn trung tính, dáng trung tính
+     ban                       "Bạn": áo thun cam FPT (logo ba khối), jean tối, giày trắng, tóc ngắn trung tính, dáng trung tính
      hanh                      giảng viên ~35t: blazer navy, áo sage, quần tối, búi thấp
      thay                      giảng viên ~45t: sơ mi xanh xắn tay (sleeve "rolled"), kính (glasses), tóc muối tiêu, nếp cười (lines)
+     tri                       Thầy Trí ~40t: hói vành tóc xám, THẤP ngang teen (không stretch), sơ mi sọc xanh-trắng (stripes), quần tối, giày nâu, kính
      me                        mẹ ~45t: áo ấm tay lỡ (sleeve "threeq"), quần vải nâu, tóc ngang vai
      bin                       em ~9t: dáng trẻ con (BODIES.kid dựng trên 47 hàng rồi đệm 13 hàng trống), quần short
    Người lớn dựng trên khung 60 hàng rồi KÉO DÀI (stretch: chèn bản sao hàng ở ngực/đùi/cẳng chân) thành 68 hàng,
@@ -61,7 +62,7 @@ const ROLES = [
   "belt", "buckle", "badge0", "badge1",
   "eyeW", "iris", "pupil", "lash", "spec", "brow",
   "lip", "lipD", "mouthIn", "teeth", "tongue", "blush", "tear",
-  "jkt0", "jkt1", "jkt2", "jkt3", "jktO", "frame",
+  "jkt0", "jkt1", "jkt2", "jkt3", "jktO", "frame", "badge2",
 ]
 const CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 export const ROLE_CHAR = Object.fromEntries(ROLES.map((r, i) => [r, CHARS[i]]))
@@ -129,6 +130,12 @@ const SHIRT_SAGE = { top0: "#e3efe6", top1: "#b8d3c0", top2: "#8ab09a", top3: "#
 const LANYARD = { acc0: "#8fd0e8", acc1: "#4aa3c9", acc2: "#2f7ba0", accO: "#12364d" }
 const BLACKJEANS = { bot0: "#7a7f94", bot1: "#52566b", bot2: "#3a3d52", bot3: "#272a3b", botO: "#0e0f19" }
 
+/* áo thun FPT của "Bạn": cam FPT, logo ba khối nhỏ (xanh dương, cam đậm, xanh lá) */
+const TEE_ORANGE = { top0: "#ffcf9e", top1: "#f37021", top2: "#c85a17", top3: "#98410f", topO: "#4a2010" }
+const LOGO_FPT = { badge0: "#0066b3", badge1: "#b34d12", badge2: "#6cb33f" }
+/* sọc sơ mi Thầy Trí: dải trắng + dải xanh nhạt (tone +2 là dải sọc) */
+const STRIPE_BLUEWHITE = { top0: "#ffffff", top1: "#d7e8f7", top2: "#a9c6e4", top3: "#7fa2c6", topO: "#34476b" }
+
 /* ============================================================ đặc tả nhân vật (bối cảnh đại học: đồ thường ngày) */
 export const SPECS = {
   linh: {
@@ -153,11 +160,11 @@ export const SPECS = {
     top: "tee", bottom: "trousers", neckwear: null, shoes: "sneaker",
     colors: { ...TEE_RUST, ...KHAKI, ...SHOE_BLACK, ...SOCK },
   },
-  /* player "Bạn": áo thun + cardigan ô-liu (nhận ra ở mọi cảnh), quần jean, tóc ngắn trung tính */
+  /* player "Bạn": áo thun cam FPT (logo ba khối), quần jean tối, giày thể thao trắng, tóc ngắn trung tính */
   ban: {
     id: "ban", body: "neutral", skin: "peach", hair: { style: "neutralCut", color: "walnut" },
-    top: "tee", bottom: "jeans", neckwear: null, shoes: "sneaker", jacket: "cardigan", sleeve: "long", logo: false,
-    colors: { ...TEE_LAV, ...JEANS, ...SHOE_WHITE, ...SOCK, ...CARDI_OLIVE },
+    top: "tee", bottom: "jeans", neckwear: null, shoes: "sneaker", logo: "fpt",
+    colors: { ...TEE_ORANGE, ...BLACKJEANS, ...SHOE_WHITE, ...SOCK, ...LOGO_FPT },
   },
   /* teacherF: cô Hạnh ~35 tuổi, giảng viên: áo blazer xanh navy, áo trong màu sage, quần tối, búi tóc thấp */
   hanh: {
@@ -170,6 +177,13 @@ export const SPECS = {
     id: "thay", body: "man", skin: "peach", hair: { style: "combed", color: "grey" },
     top: "uniformShirt", bottom: "trousers", neckwear: null, shoes: "leather", sleeve: "rolled", pocket: "plain", glasses: true, lines: true,
     colors: { ...SHIRT_BLUE, ...CHARCOAL, ...SHOE_BLACK, ...SOCK },
+  },
+  /* teacherTri: Thầy Trí ~40 tuổi, giảng viên: hói (còn vành tóc xám hai bên), thấp ngang teen,
+     sơ mi sọc xanh-trắng tay dài, quần tây tối, giày nâu, kính */
+  tri: {
+    id: "tri", body: "manShort", skin: "peach", hair: { style: "bald", color: "grey" },
+    top: "uniformShirt", stripes: 2, bottom: "trousers", neckwear: null, shoes: "leather", sleeve: "long", glasses: true,
+    colors: { ...STRIPE_BLUEWHITE, ...CHARCOAL, ...SHOE_BROWN, ...SOCK },
   },
   /* mom: mẹ ~45 tuổi, áo ấm ở nhà, quần vải, tóc ngang vai, dép */
   me: {
@@ -421,6 +435,8 @@ BODIES.man = {
   pelvis: [[27.2, 6.0], [29.0, 6.2], [31.0, 6.2], [33.6, 5.9]],
   stretch: [[18, 2], [40, 3], [49, 3]],
 }
+/* Thầy Trí: người lớn nhưng THẤP — giữ khung 60 hàng như teen (không kéo dài), chân vẫn ở hàng cuối khung */
+BODIES.manShort = { ...BODIES.man, stretch: null }
 BODIES.woman = {
   ...BODIES.girl,
   neckR: 1.85,
@@ -719,6 +735,13 @@ const HAIR_STYLES = {
     const tuft = prof([[0.0 + dy, 20.4, 22.6], [1.6 + dy, 19.6, 23.4]])
     return { back: [], front: [{ mat: "hair", sample: cap, casts: true, tone: hairTone }, { mat: "hair", sample: ridged(tuft, lockPhase, 0.4), tone: hairTone }] }
   },
+  /* hói: đỉnh trọc, chỉ còn vành tóc mỏng hai bên thái dương kéo ra sau gáy (Thầy Trí) */
+  bald(dy) {
+    const bottom = {}
+    for (const [x, v] of [[11, 8], [12, 9], [13, 10], [22, 10], [23, 9], [24, 8]]) bottom[x] = v + dy
+    const cap = ridged(capShape(6.5 + dy, 6.4, 5.8, bottom), radial(16.0, 0.4, 8), 0.28)
+    return { back: [], front: [{ mat: "hair", sample: cap, casts: true, tone: hairTone }] }
+  },
   /* tóc cua ngắn gọn (nam) */
   crew(dy) {
     const bottom = {}
@@ -824,7 +847,7 @@ function buildFigure(spec, poseName, expr, opts = {}) {
   const lastHw = body.torso[body.torso.length - 1][1]
   if (spec.top === "tee") tk.push([body.hem ?? 31.5, CX - lastHw - 0.3, CX + lastHw + 0.3])
   if (spec.tunic) for (const [y, hw] of spec.tunic) tk.push([y, CX - hw, CX + hw])
-  push({ mat: "top", sample: prof(tk, 0.28, 21 + ty, 8), casts: true, tone: spec.tunic ? tunicTone(spec) : undefined, cells: shirtDetails(spec, lift, body) })
+  push({ mat: "top", sample: prof(tk, 0.28, 21 + ty, 8), casts: true, tone: spec.tunic ? tunicTone(spec) : stripesTone(spec), cells: shirtDetails(spec, lift, body) })
   if (!skirt && !shorts && spec.top === "uniformShirt") {
     push({ mat: "belt", sample: prof([[27.6, CX - 5.8, CX + 5.8], [29.0, CX - 5.9, CX + 5.9]]), cells: [[CX - 1, 28, "buckle"], [CX, 28, "buckle"]] })
   }
@@ -851,11 +874,11 @@ function buildFigure(spec, poseName, expr, opts = {}) {
         mat: spec.jacket ? "jkt" : "top",
         sample: chain([[a.sh[0], a.sh[1] - 0.2, R.shoulder.r + 0.45], [a.el[0], a.el[1], R.elbow.r + 0.55], [end[0], end[1], endR]]),
         casts: true,
-        tone: (x, y, t) => (Math.hypot(x + 0.5 - end[0], y + 0.5 - end[1]) < 1.35 ? Math.min(3, t + 1) : t),
+        tone: stripesTone(spec, (x, y, t) => (Math.hypot(x + 0.5 - end[0], y + 0.5 - end[1]) < 1.35 ? Math.min(3, t + 1) : t)),
       })
     } else {
       const sEnd = spec.sleeveEnd ?? body.sleeveEnd
-      push({ mat: "top", sample: sleeveShape(a, body, sEnd), casts: true, tone: (x, y, t) => (y >= Math.floor(sEnd) ? Math.min(3, t + 1) : t) })
+      push({ mat: "top", sample: sleeveShape(a, body, sEnd), casts: true, tone: stripesTone(spec, (x, y, t) => (y >= Math.floor(sEnd) ? Math.min(3, t + 1) : t)) })
     }
   }
 
@@ -925,6 +948,11 @@ function shirtDetails(spec, lift, body = {}) {
     /* áo dài: nẹp cài chéo từ cổ xuống nách phải rồi xuống thân, ba nút bấm nhỏ */
     for (const [x, y] of [[CX, 15], [CX, 16], [CX + 1, 17], [CX + 2, 18], [CX + 3, 19], [CX + 3, 20], [CX + 4, 21], [CX + 4, 22], [CX + 4, 23]]) c.push([x, ys(y), 3])
     for (const [x, y] of [[CX + 1, 16], [CX + 2, 17], [CX + 3, 18]]) c.push([x, ys(y), 0])
+  } else if (spec.logo === "fpt") {
+    /* áo thun FPT: logo ba khối 2x2 trước ngực (xanh dương, cam đậm, xanh lá) */
+    for (const [x0, role] of [[CX - 4, "badge0"], [CX - 1, "badge1"], [CX + 2, "badge2"]]) {
+      for (const [dx, y] of [[0, 20], [1, 20], [0, 21], [1, 21]]) c.push([x0 + dx, ys(y), role])
+    }
   } else if (spec.logo !== false) {
     /* áo thun: logo nhỏ trước ngực */
     for (const [x, y, v] of [[CX - 2, 20, "badge0"], [CX - 1, 20, "badge1"], [CX, 20, "badge1"], [CX + 1, 20, "badge0"], [CX - 1, 21, "badge0"], [CX, 21, "badge0"]]) c.push([x, ys(y), v])
@@ -943,6 +971,18 @@ function shirtDetails(spec, lift, body = {}) {
     else c.push([21, ys(19), "buckle"], [21, ys(20), "belt"], [21, ys(21), 1])
   }
   return c
+}
+
+/** Sọc dọc cho sơ mi (spec.stripes = số ô mỗi dải): dải sọc tối hơn nền hai nấc.
+    base là tone gốc của part (có thể undefined); trả về số = tone, chuỗi = màu raw. */
+function stripesTone(spec, base) {
+  if (!spec.stripes) return base
+  const w = spec.stripes
+  return (x, y, t, n, I) => {
+    const t0 = base ? base(x, y, t, n, I) : t
+    if (t0 === DROP) return DROP
+    return Math.floor(x / w) % 2 ? Math.min(3, t0 + 2) : t0
+  }
 }
 
 /** Áo dài: nếp vải dọc ở vạt trước và gấu áo tối hơn một nấc. */

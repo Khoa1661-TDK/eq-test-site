@@ -5,12 +5,44 @@
    Giọng thoại: mỗi ký tự hiện ra một tiếng "blip" vuông rất ngắn, cao độ NHẢY
    giữa các ký tự (không trượt trong từng tiếng) nên nghe như đang nói. Tiếng gắt
    kiểu chip 8-bit có được nhờ hai xung vuông lệch nhau vài Hz chồng lên nhau.
-   Mỗi biểu cảm của nhân vật có một hồ sơ giọng riêng (cao/thấp/nhanh/chậm). */
+   Mỗi biểu cảm của nhân vật có một hồ sơ giọng riêng (cao/thấp/nhanh/chậm).
+
+   note(): nốt có bao ADSR, trộn vuông ↔ tam giác — dùng cho các tiếng "sống"
+   (tick, arpeggio, chuông, jingle). Nhạc nền: vòng 8 nhịp ~100 BPM lên lịch
+   nhìn trước (không lệch bằng setInterval), chỉ chạy lúc âm thanh đang bật. */
 
 const KEY = "sbti_sound"
 const VOICE_GAP = 34 /* ms — giãn nhịp để không bao giờ thành tiếng rè liên hồi */
 const VOICE_TONE = 5000 /* Hz — chỉ cắt hài âm rất cao, giữ độ gắt đặc trưng */
 const VOICE_DETUNE = 0.0135 /* hai xung lệch nhau ~1,35% -> tiếng đục, gắt, không "sạch" */
+
+/* Nhạc nền: vòng 8 nhịp, thang năm cung nhẹ nhàng. [beat bắt đầu, nốt MIDI, độ dài beat].
+   Lên lịch nhìn trước: mỗi nhịp tick chỉ ghi nốt cho VÙNG THỜI GIAN TƯƠNG LAI tính theo
+   đồng hồ AudioContext, nên nhịp không bao giờ lệch dù setInterval có trễ. */
+const MUSIC_BPM = 100
+const MUSIC_TICK_MS = 120
+const MUSIC_LOOKAHEAD = 0.5
+const MUSIC_GAIN = 0.06
+const MUSIC_LOOP_BEATS = 32
+const MUSIC_MELODY = [
+  [0, 72, 1.5], [2, 76, 0.5], [3, 79, 1],
+  [4, 81, 2], [6, 79, 2],
+  [8, 76, 1.5], [10, 74, 0.5], [11, 76, 1],
+  [12, 74, 2], [14, 72, 2],
+  [16, 76, 2], [18, 79, 2],
+  [20, 81, 1.5], [22, 79, 0.5], [23, 76, 1],
+  [24, 74, 2], [26, 76, 2],
+  [28, 72, 3], [31, 76, 1],
+]
+const MUSIC_BASS = [
+  [0, 48, 4], [4, 43, 4], [8, 45, 4], [12, 48, 4],
+  [16, 48, 4], [20, 45, 4], [24, 43, 4], [28, 48, 4],
+]
+
+/** Nốt nhạc nền: MIDI → tần số, bao ADSR mềm; mix 0 = tam giác hẳn cho trầm trầm. */
+function musicNote(midi, t0, durSec, gain, mix) {
+  return { freq: 440 * 2 ** ((midi - 69) / 12), t0, dur: durSec, gain, mix, attack: 0.02, decay: 0.15, sustain: 0.5, release: 0.2 }
+}
 
 /** Hồ sơ giọng theo biểu cảm của nhân vật. */
 const VOICES = {
@@ -31,6 +63,9 @@ class SoundEngine {
     this._voice = VOICES.neutral
     this._drift = 0
     this._listeners = new Set()
+    this._music = null // { loopStart, melodyAt, bassAt, timer } khi vòng nhạc đang chạy
+    this._musicGain = null
+    this._musicWanted = false
   }
 
   subscribe(fn) {
@@ -47,7 +82,12 @@ class SoundEngine {
     } catch {
       /* chế độ riêng tư: bỏ qua */
     }
-    if (this.enabled) this.blip({ freq: 660, dur: 0.05, gain: 0.03 })
+    if (this.enabled) {
+      this.blip({ freq: 660, dur: 0.05, gain: 0.03 })
+      if (this._musicWanted) this._startMusicLoop()
+    } else {
+      this._stopMusicLoop()
+    }
   }
 
   toggle() {
@@ -114,6 +154,41 @@ class SoundEngine {
     }
   }
 
+  /** Nốt có bao ADSR, trộn vuông ↔ tam giác theo mix (1 = vuông hẳn, 0 = tam giác hẳn). */
+  note({ freq, dur = 0.12, gain = 0.03, mix = 1, attack = 0.004, decay = 0.05, sustain = 0.5, release = 0.06, when = 0, dest = null }) {
+    const ctx = this._ensure()
+    if (!ctx) return
+    this._playNote(ctx, dest || this.master, { freq, t0: ctx.currentTime + when, dur, gain, mix, attack, decay, sustain, release })
+  }
+
+  _playNote(ctx, dest, { freq, t0, dur, gain, mix, attack, decay, sustain, release }) {
+    if (!dest) return
+    const env = ctx.createGain()
+    const sus = Math.max(0.0001, gain * sustain)
+    env.gain.setValueAtTime(0.0001, t0)
+    env.gain.linearRampToValueAtTime(Math.max(0.0002, gain), t0 + attack)
+    env.gain.exponentialRampToValueAtTime(sus, t0 + attack + decay)
+    const off = Math.max(t0 + attack + decay + 0.001, t0 + dur)
+    env.gain.setValueAtTime(sus, off)
+    env.gain.exponentialRampToValueAtTime(0.0001, off + release)
+    const stop = off + release + 0.02
+    const voice = (type, weight) => {
+      if (weight <= 0) return
+      const osc = ctx.createOscillator()
+      const g = ctx.createGain()
+      osc.type = type
+      osc.frequency.setValueAtTime(freq, t0)
+      g.gain.value = weight
+      osc.connect(g)
+      g.connect(env)
+      osc.start(t0)
+      osc.stop(stop)
+    }
+    voice("square", mix)
+    voice("triangle", 1 - mix)
+    env.connect(dest)
+  }
+
   /** Đổi hồ sơ giọng theo biểu cảm đang hiện của nhân vật. */
   setVoice(face) {
     this._voice = VOICES[face] || VOICES.neutral
@@ -138,20 +213,94 @@ class SoundEngine {
 
   /** Di chuyển giữa các lựa chọn: một tiếng "tách" ngắn, phẳng, dứt khoát. */
   move() {
-    this.blip({ freq: 620, dur: 0.024, gain: 0.03, type: "square", tone: 6000 })
+    this.note({ freq: 740, dur: 0.03, gain: 0.03, mix: 0.85, attack: 0.002, decay: 0.02, sustain: 0.25, release: 0.03 })
   }
 
-  /** Chọn xong: hai nốt đi lên (quãng năm) — tiếng xác nhận kiểu menu game. */
+  /** Chọn xong: ba nốt rải đi lên (Đô trưởng) — tiếng xác nhận vui. */
   confirm() {
-    this.blip({ freq: 660, dur: 0.04, gain: 0.032, type: "square", tone: 6000 })
-    this.blip({ freq: 990, dur: 0.09, gain: 0.03, type: "square", tone: 6000, when: 0.05 })
+    this.note({ freq: 523.25, dur: 0.07, gain: 0.032, mix: 0.6 })
+    this.note({ freq: 659.25, dur: 0.07, gain: 0.032, mix: 0.6, when: 0.07 })
+    this.note({ freq: 783.99, dur: 0.16, gain: 0.032, mix: 0.6, when: 0.14 })
   }
 
-  /** Mở màn chơi: ba bậc đi lên. */
+  /** Mở màn chơi: bốn nốt chuông đi lên (rải Sol trưởng). */
   open() {
-    this.blip({ freq: 440, dur: 0.045, gain: 0.03, type: "square", tone: 6000 })
-    this.blip({ freq: 587, dur: 0.045, gain: 0.03, type: "square", tone: 6000, when: 0.06 })
-    this.blip({ freq: 784, dur: 0.09, gain: 0.03, type: "square", tone: 6000, when: 0.12 })
+    this.note({ freq: 392, dur: 0.08, gain: 0.028, mix: 0.3, when: 0 })
+    this.note({ freq: 493.88, dur: 0.08, gain: 0.028, mix: 0.3, when: 0.08 })
+    this.note({ freq: 587.33, dur: 0.08, gain: 0.028, mix: 0.3, when: 0.16 })
+    this.note({ freq: 783.99, dur: 0.2, gain: 0.028, mix: 0.3, when: 0.24 })
+  }
+
+  /** Bấm "Tiếp ▶": một tiếng "bốp" ngắn, tròn. */
+  tap() {
+    this.note({ freq: 560, dur: 0.035, gain: 0.035, mix: 0.5, attack: 0.002, decay: 0.03, sustain: 0.3, release: 0.04 })
+  }
+
+  /** Hậu quả kết thúc: hai nốt mềm đi xuống. */
+  softEnd() {
+    this.note({ freq: 783.99, dur: 0.1, gain: 0.024, mix: 0.15, attack: 0.01, decay: 0.08, sustain: 0.4, release: 0.12 })
+    this.note({ freq: 587.33, dur: 0.24, gain: 0.024, mix: 0.15, attack: 0.01, decay: 0.08, sustain: 0.4, release: 0.2, when: 0.14 })
+  }
+
+  /** Trang kết quả hiện ra: khúc jingle "chiến thắng" ngắn. */
+  result() {
+    const notes = [523.25, 659.25, 783.99, 1046.5, 783.99, 1318.51]
+    notes.forEach((freq, i) => {
+      this.note({ freq, dur: i === notes.length - 1 ? 0.3 : 0.09, gain: 0.03, mix: 0.45, when: i * 0.09 })
+    })
+  }
+
+  /** Xin vòng nhạc nền (chỉ chạy khi âm thanh đang bật; nhớ ý định để bật lại sau). */
+  startMusic() {
+    this._musicWanted = true
+    if (this.enabled) this._startMusicLoop()
+  }
+
+  /** Tắt hẳn nhạc nền (rời trang / huỷ). */
+  stopMusic() {
+    this._musicWanted = false
+    this._stopMusicLoop()
+  }
+
+  _stopMusicLoop() {
+    if (this._music) clearInterval(this._music.timer)
+    this._music = null
+  }
+
+  _startMusicLoop() {
+    if (this._music) return
+    const ctx = this._ensure()
+    if (!ctx) return
+    if (!this._musicGain) {
+      this._musicGain = ctx.createGain()
+      this._musicGain.gain.value = MUSIC_GAIN
+      this._musicGain.connect(ctx.destination)
+    }
+    const beatSec = 60 / MUSIC_BPM
+    const state = { loopStart: ctx.currentTime + 0.2, melodyAt: 0, bassAt: 0, timer: 0 }
+    this._music = state
+    const tick = () => {
+      if (!this._music || !this.enabled) return
+      const horizon = ctx.currentTime + MUSIC_LOOKAHEAD
+      while (state.melodyAt < MUSIC_MELODY.length && state.loopStart + MUSIC_MELODY[state.melodyAt][0] * beatSec < horizon) {
+        const [beat, midi, dur] = MUSIC_MELODY[state.melodyAt]
+        this._playNote(ctx, this._musicGain, musicNote(midi, state.loopStart + beat * beatSec, dur * beatSec, 0.55, 0.35))
+        state.melodyAt += 1
+      }
+      while (state.bassAt < MUSIC_BASS.length && state.loopStart + MUSIC_BASS[state.bassAt][0] * beatSec < horizon) {
+        const [beat, midi, dur] = MUSIC_BASS[state.bassAt]
+        this._playNote(ctx, this._musicGain, musicNote(midi, state.loopStart + beat * beatSec, dur * beatSec, 0.45, 0))
+        state.bassAt += 1
+      }
+      if (state.melodyAt >= MUSIC_MELODY.length && state.bassAt >= MUSIC_BASS.length) {
+        // hết vòng: quay về đầu, dịch mốc thời gian (không trừ khoảng trễ của tick → không lệch nhịp)
+        state.loopStart += MUSIC_LOOP_BEATS * beatSec
+        state.melodyAt = 0
+        state.bassAt = 0
+      }
+    }
+    tick()
+    state.timer = setInterval(tick, MUSIC_TICK_MS)
   }
 }
 

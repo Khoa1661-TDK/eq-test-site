@@ -101,6 +101,7 @@ export function renderSceneView(mount, { navigate } = {}) {
         setProgress(i + 1)
         showFeedback()
       },
+      lastLabel: "Xem phản hồi",
     })
     runtime.start()
   }
@@ -153,7 +154,7 @@ export function renderSceneView(mount, { navigate } = {}) {
       const skill = EQ_BY_KEY[scene.domain]
       return el(
         "li",
-        { class: "story-skill" },
+        { class: "story-skill", attrs: { "data-skill": scene.domain } },
         el(
           "div",
           { class: "meter__head" },

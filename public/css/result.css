@@ -1,8 +1,8 @@
 /* ============================================================================
    result.css — hồ sơ EQ (/result): điểm tổng, năm kỹ năng, mạnh/cần luyện,
    bài tập và cách chấm.
-   Nguyên tắc chữ: chữ pixel chỉ dùng cho mã, tên, số và nhãn; mọi đoạn văn
-   tiếng Việt dài dùng --font-text (đủ dấu, hàng thoáng, KHÔNG giãn chữ).
+   Nguyên tắc chữ: mọi thứ người đọc — tiêu đề, tên, đoạn văn — dùng
+   --font-text / --font-display; chữ pixel chỉ còn cho mã, số và nhãn nhỏ.
    ========================================================================== */
 
 /* --------------------------------------------------------- khung trang ----- */
@@ -69,10 +69,10 @@
 }
 
 .verdict__name {
-  font-family: var(--font-pixel);
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-weight: 800;
   font-size: clamp(26px, 3.4vw, 42px);
-  line-height: 1;
+  line-height: 1.1;
   color: var(--ink);
   margin-bottom: var(--gap-3);
 }
@@ -144,11 +144,13 @@
   padding: var(--gap-4) var(--gap-4) var(--gap-5);
   background: var(--paper);
   border: 3px solid var(--paper-3);
+  border-top: 8px solid var(--mint-dark);
   color: var(--ink);
 }
 
 .pair__col--focus {
-  border-color: var(--amber);
+  border-color: var(--crimson);
+  border-top-color: var(--pink);
 }
 
 .pair__title {
@@ -165,10 +167,10 @@
 }
 
 .pair__name {
-  font-family: var(--font-pixel);
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-weight: 800;
   font-size: 24px;
-  line-height: 1.05;
+  line-height: 1.15;
   color: var(--ink);
 }
 
@@ -218,8 +220,9 @@
   background: var(--paper);
 }
 
+/* Mã kỹ năng đổi sang tint nhạt màu riêng của nó (data-skill → tokens.css). */
 .dim[open] .dim__code {
-  background: var(--amber);
+  background: var(--skill-c-tint, var(--yellow-tint));
   color: var(--ink);
 }
 
@@ -256,10 +259,10 @@
 }
 
 .dim__name {
-  font-family: var(--font-pixel);
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-weight: 800;
   font-size: 21px;
-  line-height: 1.05;
+  line-height: 1.15;
   color: var(--ink);
   min-width: 0;
   overflow-wrap: break-word;
@@ -355,14 +358,13 @@
 
 .dim__link {
   justify-self: start;
-  font-family: var(--font-pixel);
-  font-weight: 600;
+  font-family: var(--font-text);
+  font-weight: 700;
   font-size: 18px;
-  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--olive);
   text-decoration: none;
-  border-bottom: 3px solid var(--amber);
+  border-bottom: 3px solid var(--yellow-dark);
   padding-bottom: 2px;
 }
 
@@ -414,10 +416,10 @@
 }
 
 .ex__name {
-  font-family: var(--font-pixel);
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-weight: 800;
   font-size: 19px;
-  line-height: 1.1;
+  line-height: 1.2;
   color: var(--ink);
 }
 
@@ -681,8 +683,8 @@
 }
 
 .evidence__title {
-  font-family: var(--font-pixel);
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-weight: 800;
   font-size: 17px;
   color: var(--ink);
 }
@@ -706,7 +708,16 @@
   padding: var(--gap-3) var(--gap-4);
   background: var(--paper);
   border: 3px solid var(--paper-3);
+  border-top-width: 8px;
 }
+
+/* Dải trên của thẻ đổi màu theo vòng bảng màu sáu màu. */
+.change:nth-child(6n + 1) { border-top-color: var(--orange); }
+.change:nth-child(6n + 2) { border-top-color: var(--blue); }
+.change:nth-child(6n + 3) { border-top-color: var(--mint); }
+.change:nth-child(6n + 4) { border-top-color: var(--yellow); }
+.change:nth-child(6n + 5) { border-top-color: var(--pink); }
+.change:nth-child(6n + 6) { border-top-color: var(--lavender); }
 
 .change__head {
   display: flex;
@@ -716,8 +727,8 @@
 }
 
 .change__name {
-  font-family: var(--font-pixel);
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-weight: 800;
   font-size: 20px;
   color: var(--ink);
   flex: 1 1 12ch;
@@ -753,5 +764,378 @@
 @media (max-width: 720px) {
   .pair {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ============================================================================
+   cửa sổ hệ thống — trang HỒ SƠ CẢM XÚC (mẫu mới, không điểm số)
+   Một khung pxf duy nhất giữa trang: thanh tiêu đề cam FPT với ba nút cửa sổ,
+   viền mực dày + bóng lệch cứng do .pxf lo — cảm giác hệ điều hành cũ.
+   Bên trong là nền trắng ngà, chữ mực; mọi chữ ≥ 4.5:1.
+   ========================================================================== */
+/* Cửa sổ tự giới hạn bề ngang nên nhận lề cố định, cùng cách với khung rỗng:
+   nếu dùng công thức lề của .result > *, lề sẽ ăn hết phần max-width ở màn rộng. */
+.result > .result__window {
+  max-width: 780px;
+  margin: var(--gap-5) auto;
+  padding-inline: 22px;
+}
+
+/* Thanh tiêu đề: cam FPT đặc, chữ trắng đậm — đúng chất cửa sổ hệ điều hành cũ. */
+.syswin__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-3);
+  background: var(--orange);
+  padding: 10px var(--gap-4) 8px;
+  border-bottom: 3px solid var(--ink);
+}
+
+.syswin__title {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+/* Ba nút cửa sổ giả lập: ô vuông cứng, không bo góc, đúng ngôn ngữ pixel. */
+.syswin__dots {
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+}
+
+.syswin__dot {
+  display: block;
+  width: 12px;
+  height: 12px;
+  background: #fffdf7;
+  border: 2px solid var(--ink);
+}
+
+.syswin__body {
+  display: grid;
+  gap: var(--gap-5);
+  padding: var(--gap-5);
+  background: #fffdf7;
+  color: var(--ink);
+}
+
+/* ---------------------------------------------------------------- linh vật -- */
+.mascot {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--gap-4);
+  align-items: center;
+}
+
+/* Halo của linh vật: ô nền vuông lấy màu riêng của con vật (JS gắn inline
+   background/viền từ mascot.colors) — ảnh pixel ngồi vừa khít bên trong. */
+.mascot__art {
+  line-height: 0;
+  padding: 12px;
+  border: 3px solid var(--ink);
+}
+
+.mascot__name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 26px;
+  line-height: 1.15;
+  color: var(--ink);
+}
+
+.mascot__tagline {
+  font-family: var(--font-text);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--ink-2);
+  margin-top: 6px;
+}
+
+.mascot__desc {
+  font-family: var(--font-text);
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--ink-2);
+  margin-top: var(--gap-3);
+  max-width: 62ch;
+}
+
+/* ------------------------------------------------------------- hai cột ------- */
+.syswin__cols {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: var(--gap-4);
+}
+
+/* Hai hộp trên nền tint nhạt: "Điểm mạnh" tint bạc hà, "Điểm cần để ý" tint vàng
+   với nhấn hồng — chữ mực và shade đậm ≥ 4.5:1 trên tint. */
+.col {
+  display: grid;
+  align-content: start;
+  gap: var(--gap-3);
+  padding: var(--gap-4);
+  background: var(--mint-tint);
+  border: 2px solid var(--mint-dark);
+}
+
+.col__title {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mint-dark);
+}
+
+.col--watch {
+  background: var(--yellow-tint);
+  border-color: var(--pink-dark);
+}
+
+.col--watch .col__title {
+  color: var(--pink-dark);
+}
+
+/* Tên kỹ năng + thang pixel năm ô + chữ định tính — không số. */
+.col__skills {
+  display: grid;
+  gap: var(--gap-2);
+}
+
+.col__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--gap-2);
+}
+
+.col__name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 17px;
+  line-height: 1.2;
+  color: var(--ink);
+  flex: 1 1 12ch;
+}
+
+.col__word {
+  font-family: var(--font-pixel);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  color: var(--ink-2);
+}
+
+/* Thang pixel trên nền tint: ô tắt lấy giấy tối hơn nền một chút. */
+.syswin .meter__cells i {
+  background: var(--paper-3);
+}
+
+.syswin .meter__cells i.on {
+  background: var(--mint-dark);
+}
+
+.col--watch .meter__cells i.on {
+  background: var(--pink-dark);
+}
+
+/* Ô thang của từng kỹ năng lấy màu riêng (data-skill → tokens.css). */
+.syswin .col__item[data-skill] .meter__cells i.on {
+  background: var(--skill-c-dark, var(--mint-dark));
+}
+
+.col__list {
+  display: grid;
+  gap: var(--gap-2);
+  border-top: 2px solid color-mix(in srgb, var(--ink) 18%, transparent);
+  padding-top: var(--gap-3);
+}
+
+.col__list li {
+  position: relative;
+  font-family: var(--font-text);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  padding-left: 20px;
+}
+
+.col__list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.5em;
+  width: 8px;
+  height: 8px;
+  background: var(--mint-dark);
+}
+
+.col--watch .col__list li::before {
+  background: var(--pink-dark);
+}
+
+.col__tip {
+  font-family: var(--font-text);
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--ink-2);
+  border-top: 2px solid color-mix(in srgb, var(--ink) 18%, transparent);
+  padding-top: var(--gap-3);
+}
+
+.col__tip strong {
+  font-family: var(--font-pixel);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pink-dark);
+}
+
+/* ------------------------------------------------ nhìn lại · so sánh · nút --- */
+.syswin__heading {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin-bottom: var(--gap-2);
+}
+
+.lookback__lead {
+  font-family: var(--font-text);
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  margin-bottom: var(--gap-3);
+}
+
+.lookback__list {
+  display: grid;
+  gap: var(--gap-2);
+}
+
+/* Mỗi lựa chọn là một thẻ sáng với vệt màu bên trái đổi theo vòng bảng màu —
+   cùng ngôn ngữ với thẻ .change ở trên. */
+.lookback__item {
+  display: grid;
+  gap: 4px;
+  padding: var(--gap-3) var(--gap-4);
+  background: #fffdf7;
+  border: 2px solid color-mix(in srgb, var(--ink) 14%, transparent);
+  border-left: 6px solid var(--orange);
+}
+
+.lookback__item:nth-child(6n + 2) { border-left-color: var(--blue-dark); }
+.lookback__item:nth-child(6n + 3) { border-left-color: var(--mint-dark); }
+.lookback__item:nth-child(6n + 4) { border-left-color: var(--yellow-dark); }
+.lookback__item:nth-child(6n + 5) { border-left-color: var(--pink-dark); }
+.lookback__item:nth-child(6n + 6) { border-left-color: var(--lavender-dark); }
+
+.lookback__title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 16px;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.lookback__choice {
+  font-family: var(--font-text);
+  font-size: 15.5px;
+  line-height: 1.62;
+  color: var(--ink-2);
+}
+
+.lookback__choice strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.lookback__next {
+  font-family: var(--font-text);
+  font-size: 15px;
+  line-height: 1.62;
+  color: var(--ink-2);
+}
+
+.lookback__next strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.compare__list {
+  display: grid;
+  gap: 2px;
+}
+
+.compare__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--gap-3);
+  padding: 6px 0;
+  border-top: 2px solid color-mix(in srgb, var(--ink) 14%, transparent);
+}
+
+.compare__name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 16px;
+  color: var(--ink);
+  flex: 1 1 14ch;
+}
+
+.compare__word {
+  font-family: var(--font-pixel);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  color: var(--mint-dark);
+}
+
+.syswin__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-3);
+  align-items: center;
+  margin-top: var(--gap-2);
+}
+
+.syswin__note {
+  font-family: var(--font-text);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink-3);
+  flex-basis: 100%;
+}
+
+/* ------------------------------------------------------------- thu gọn ----- */
+/* Điện thoại: cửa sổ chiếm hết chiều ngang, lề 16px, hai cột xếp thành một. */
+@media (max-width: 620px) {
+  .result > .result__window {
+    padding-inline: 16px;
+  }
+
+  .syswin__cols {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .mascot {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: start;
+  }
+
+  .syswin__body {
+    padding: var(--gap-4);
+  }
+
+  .syswin__actions .btn {
+    width: 100%;
   }
 }
