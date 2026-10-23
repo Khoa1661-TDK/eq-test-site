@@ -294,7 +294,7 @@ function classroomSVG({ STAGE_W, STAGE_H, GROUND_Y }) {
   const FLOOR = ["#e0d6bc", "#d1c6a9", "#c0b495", "#a99d7f", "#908469"]
   const GROUT = ["#b6aa8d", "#a09479", "#8a7e66"]
   const INK = ["#6b7188", "#474c62", "#2f3347", "#1d2031"] // khung cửa sổ, vành đồng hồ, kim
-  const WOOD = ["#b58f68", "#98724f", "#7b5a40", "#5b4332", "#3f2f25"] // gỗ gần (bảng, bàn giáo viên)
+  const WOOD = ["#b58f68", "#98724f", "#7b5a40", "#5b4332", "#3f2f25"] // gỗ gần (bảng, bàn giảng viên)
   const DESK = ["#b09578", "#987b5f", "#80644c", "#644e3e", "#4a3a2e"] // gỗ bàn học: nhạt, bớt tương phản
   const clamp3 = (v) => hfClamp(v, 0, 3)
 

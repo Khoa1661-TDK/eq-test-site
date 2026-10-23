@@ -477,7 +477,7 @@ export function practiceSince(since = latestAttempt()?.finishedAt ?? 0) {
   return out
 }
 
-/** Đếm số lựa chọn theo từng mẫu chiến lược — helper thuần cho data/mascots.js. */
+/** Đếm số lựa chọn theo từng mẫu chiến lược — helper thuần cho data/types.js. */
 export function patternCounts(answers = {}) {
   const counts = {}
   let answered = 0

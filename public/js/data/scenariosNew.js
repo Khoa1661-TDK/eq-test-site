@@ -6,9 +6,9 @@ export const NEW_SCENARIOS = [
     domain: "selfAwareness",
     weights: { selfAwareness: 1, regulation: 0.5 },
     face: "concerned",
-    title: "Bảng xếp hạng của lớp",
+    title: "Bảng xếp hạng GPA của lớp",
     dialogue: [
-      "Mẹ đi họp phụ huynh về, vừa đặt túi xuống đã mở điện thoại ra, trên màn hình là bảng xếp hạng của cả lớp.",
+      "Mẹ đi họp phụ huynh về, vừa đặt túi xuống đã mở điện thoại ra, trên màn hình là bảng xếp hạng GPA của cả lớp.",
       "Từ hạng tám xuống hạng mười bốn là sao hả con? Khang nhà bác Hà hạng chín kìa.",
       "Tối nay bác Hà sang ăn cơm, mẹ chưa biết trả lời bác ấy thế nào đây.",
       "Hàm bạn nghiến chặt lại. Bạn chỉ muốn đóng sầm cửa phòng.",
@@ -110,7 +110,7 @@ export const NEW_SCENARIOS = [
     ],
     practice: {
       signal: "Ngón cái đã nằm trên nút gửi trước khi bạn kịp quyết định gì — khoảnh khắc đó mới đáng để ý, chứ không phải dòng chú thích.",
-      stronger: "Đặt điện thoại xuống một nhịp, rồi lo cho việc tấm ảnh đang bị chuyển đi chứ đừng chạy theo cơn nóng trong người: nhắn bạn kia dừng chuyển ảnh. Nếu ảnh vẫn lan, hãy chụp màn hình một lần rồi đưa cho cô tổng phụ trách hoặc tổ tư vấn học đường, hoặc kể với một người lớn bạn tin, đừng tự đôi co trong nhóm chat.",
+      stronger: "Đặt điện thoại xuống một nhịp, rồi lo cho việc tấm ảnh đang bị chuyển đi chứ đừng chạy theo cơn nóng trong người: nhắn bạn kia dừng chuyển ảnh. Nếu ảnh vẫn lan, hãy chụp màn hình một lần rồi đưa cho phòng tư vấn tâm lý, hoặc kể với một người lớn bạn tin, đừng tự đôi co trong nhóm chat.",
       principle: "Một tấm ảnh chỉ đi tiếp khi có thêm một đôi tay. Việc dễ nhất bạn làm được là trở thành đôi tay cuối cùng.",
     },
   },
@@ -121,7 +121,7 @@ export const NEW_SCENARIOS = [
     face: "happy",
     title: "Ba tuần được kèm Lý",
     dialogue: [
-      "Ba tuần nay, chị Thư khóa trên ở lại mười lăm phút sau giờ học để kèm bạn môn Lý. Hôm nay bài kiểm tra về, bạn được 8, điểm cao nhất của bạn môn này.",
+      "Ba tuần nay, chị Thư khóa trên ở lại mười lăm phút sau giờ học để kèm bạn môn Lý. Hôm nay bài quiz trả về, bạn được 8, điểm cao nhất của bạn môn này.",
       "Hôm nay cậu lại bỏ buổi CLB à?",
       "Tại mấy buổi nay tớ kèm Lý cho đứa em này đó mà.",
       "Bạn đang xếp sách, định nói “em cảm ơn chị” rồi chạy ra bắt xe buýt.",
@@ -140,7 +140,7 @@ export const NEW_SCENARIOS = [
       {
         id: "NX_03_B",
         code: "B",
-        text: "Tối đó bạn đăng lên trang cá nhân dòng “Cảm ơn chị Thư đã cứu môn Lý của em”, kèm ảnh bài kiểm tra 8 điểm, gắn thẻ chị ấy và nhắc luôn ba tuần được kèm riêng.",
+        text: "Tối đó bạn đăng lên trang cá nhân dòng “Cảm ơn chị Thư đã cứu môn Lý của em”, kèm ảnh bài quiz 8 điểm, gắn thẻ chị ấy và nhắc luôn ba tuần được kèm riêng.",
         strategy: "Cảm ơn công khai mà không hỏi chị ấy muốn thế nào",
         consequence: "Bài đăng được rất nhiều tim, còn chị Thư thì cả ngày bị hỏi về nó bởi những người chưa bao giờ ngồi trong lớp học ấy.",
         scores: { empathy: 1, relationship: 2 },
@@ -178,9 +178,9 @@ export const NEW_SCENARIOS = [
     face: "concerned",
     title: "Vòng người giờ giải lao",
     dialogue: [
-      "Giờ giải lao, mấy đứa trong lớp vây quanh Tuấn, người hay nói lắp, và dúi vào tay Tuấn một trang sách giáo khoa.",
+      "Giờ giải lao, mấy đứa trong lớp vây quanh Tuấn, người hay nói lắp, và dúi vào tay Tuấn một trang giáo trình.",
       "Đọc đi, đọc to lên coi nào!",
-      "Hai đứa đã cười trước khi Tuấn kịp mở miệng. Chuyện này xảy ra lần thứ hai trong tháng, lần nào cũng vào giờ giải lao, ở chỗ thầy ngồi cuối lớp không nghe thấy.",
+      "Hai đứa đã cười trước khi Tuấn kịp mở miệng. Chuyện này xảy ra lần thứ hai trong tháng, lần nào cũng vào giờ giải lao, ở tít cuối lớp cho khỏi bị thầy nghe thấy.",
       "Bạn đang đứng trong vòng người đó. Tờ giấy nằm trong tay Tuấn.",
     ],
     prompt: "Tiếng cười đã vang lên trước khi Tuấn mở miệng… bạn thấy gì, rồi làm gì đây?",
@@ -224,7 +224,7 @@ export const NEW_SCENARIOS = [
     ],
     practice: {
       signal: "Cả nhóm cười trước khi Tuấn kịp mở miệng: nhóm đã quyết sẵn Tuấn dùng để làm gì. Đây là thói quen của cả nhóm, không phải tâm trạng nhất thời của ai.",
-      stronger: "Đổi việc cả vòng đang làm thay vì buộc tội ai: nhận lượt đọc về mình, rồi trao cho Tuấn một lượt mà cậu ấy làm tốt. Nếu có lần thứ ba, hãy ghi lại ngày và một câu rồi báo cô tổng phụ trách hoặc tổ tư vấn học đường, vì lúc đó chuyện không còn là chuyện bạn bè tự giải quyết được.",
+      stronger: "Đổi việc cả vòng đang làm thay vì buộc tội ai: nhận lượt đọc về mình, rồi trao cho Tuấn một lượt mà cậu ấy làm tốt. Nếu có lần thứ ba, hãy ghi lại ngày và một câu rồi báo phòng tư vấn tâm lý, vì lúc đó chuyện không còn là chuyện bạn bè tự giải quyết được.",
       principle: "Bênh một người có thể là một hành động chứ không nhất thiết là một bài phát biểu. Hành động chấm dứt trò đó, còn bài phát biểu thì mở ra một cuộc cãi nhau về trò đó.",
     },
   },
@@ -255,7 +255,7 @@ export const NEW_SCENARIOS = [
         code: "B",
         text: "Bạn nói: “Tớ không lấy. Tớ sợ bị đình chỉ thi, mà dù không sợ thì tớ cũng không muốn đi thi bằng đề người ta lén bán.”",
         strategy: "Từ chối một lần, kèm lý do dài của riêng mình",
-        consequence: "Tụi nó nài thêm hai phút rồi thôi. Không ai bảo bạn nói không rõ, nhưng cả buổi hơi giống một tiết giáo dục công dân.",
+        consequence: "Tụi nó nài thêm hai phút rồi thôi. Không ai bảo bạn nói không rõ, nhưng cả buổi hơi giống một buổi học môn Đạo đức nghề nghiệp.",
         scores: { communication: 2, relationship: 2 },
         pattern: "states_need",
       },
@@ -292,7 +292,7 @@ export const NEW_SCENARIOS = [
     title: "Cánh cửa cạnh thư viện",
     dialogue: [
       "Hai tuần nay bạn trằn trọc gần như mỗi đêm, và tuần trước bạn đã khóc trong nhà vệ sinh của trường vào giờ giải lao.",
-      "Cậu qua tổ tư vấn học đường đi, phòng cạnh thư viện đó. Tớ thấy cậu không ổn thật mà.",
+      "Cậu qua phòng tư vấn tâm lý đi, phòng cạnh thư viện đó. Tớ thấy cậu không ổn thật mà.",
       "Ngày nào bạn cũng đi ngang cánh cửa đó hai lần. Bạn chưa vào vì không biết mở lời thế nào, và tin chắc cố vấn học tập sẽ nói lại với mẹ bạn.",
     ],
     prompt: "Cánh cửa ngay đó mà chưa dám gõ… hai tuần tới bạn định làm gì?",

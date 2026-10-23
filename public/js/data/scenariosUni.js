@@ -81,7 +81,7 @@ export const UNI_SCENARIOS = [
         strategy: "Cho cả nhóm xem cơn sốc, ngay lúc nó đang lên đỉnh",
         consequence: "Cả nhóm thức tới khuya vì chuyện của bạn. Giảng viên nhắn riêng bạn một câu ngắn, và tên bạn nằm trong nhóm từ tối nay.",
         scores: { regulation: 0, communication: 0 },
-        pattern: "escalates",
+        pattern: "blames",
       },
       {
         id: "UN_02_B",
@@ -279,7 +279,7 @@ export const UNI_SCENARIOS = [
         strategy: "Nói thẳng điều mình cần, bằng giọng vui",
         consequence: "Cả phòng cười ầm, “mày nói cái gì đấy”, rồi đi đông đủ. Tối nay bạn học, và câu đó thành câu đùa của phòng tới cuối kỳ.",
         scores: { socialAwareness: 2, selfAwareness: 1 },
-        pattern: "states_need",
+        pattern: "sets_boundary",
       },
     ],
     practice: {
@@ -327,7 +327,7 @@ export const UNI_SCENARIOS = [
         strategy: "Nhắn diện rộng thay vì mở lời với một người cụ thể",
         consequence: "Bốn cái like nữa bay vào tin nhắn của bạn. Không ai nhắn lại để chốt ngày, và bạn cũng không tiện hỏi lại.",
         scores: { relationship: 1, empathy: 1 },
-        pattern: "people_pleases",
+        pattern: "misreads_room",
       },
       {
         id: "UN_06_D",
@@ -393,7 +393,7 @@ export const UNI_SCENARIOS = [
         strategy: "Đoán nguyên nhân rồi tự nhận phần về mình",
         consequence: "Bạn nhắn một câu xin lỗi lúc chín giờ tối. Dũng trả lời “mình có giận gì đâu”, và câu chuyện dừng ở đó.",
         scores: { empathy: 1, relationship: 1 },
-        pattern: "assumes",
+        pattern: "repairs",
       },
     ],
     practice: {
@@ -507,7 +507,7 @@ export const UNI_SCENARIOS = [
         strategy: "Bận rộn với nghi ngờ, chưa kịp nghĩ cho phần thuyết trình",
         consequence: "Bạn nói xong hai câu, không ai phản ứng gì. Suốt buổi, câu hỏi “sao mình” vẫn chạy, và đoạn bài thì không ai nhớ bạn nói gì.",
         scores: { regulation: 1, communication: 1 },
-        pattern: "self_blames",
+        pattern: "blames",
       },
     ],
     practice: {
@@ -564,7 +564,7 @@ export const UNI_SCENARIOS = [
         strategy: "Đoán hoàn cảnh rồi tự nhường, phần việc để sau",
         consequence: "Long nhắn “cảm ơn cậu”, rồi tối nay vẫn không ai làm phần đó. Sáng mai bạn ngồi gõ lại từ đầu.",
         scores: { communication: 2, regulation: 1 },
-        pattern: "assumes",
+        pattern: "hints",
       },
     ],
     practice: {
@@ -603,7 +603,7 @@ export const UNI_SCENARIOS = [
         strategy: "Tự do khỏi nhịp của người khác",
         consequence: "Tối nay bạn chơi được hai ván. Lớp mới vẫn chưa ai nhắn cho bạn trước chín giờ sáng, và cuối tuần cũng chưa ai chốt gì.",
         scores: { socialAwareness: 1, selfAwareness: 1 },
-        pattern: "avoids",
+        pattern: "ignores_feeling",
       },
       {
         id: "UN_11_C",
@@ -660,7 +660,7 @@ export const UNI_SCENARIOS = [
         strategy: "Tự lo lấy, không làm phiền ai",
         consequence: "Sáng mai bạn ổn thật. Chỉ là tới lần sốt sau, bạn vẫn lướt danh bạ một vòng rồi tắt màn hình.",
         scores: { relationship: 1, selfAwareness: 1 },
-        pattern: "avoids",
+        pattern: "suppresses",
       },
       {
         id: "UN_12_C",
@@ -674,11 +674,11 @@ export const UNI_SCENARIOS = [
       {
         id: "UN_12_D",
         code: "D",
-        text: "Đăng một cái story: “Sốt nằm một mình nè”, được mười cái like, không ai nhắn.",
-        strategy: "Nói cho nhiều người, không nhắn cho ai cụ thể",
+        text: "Đăng story cà khịa: “Sốt nằm một mình, cảm ơn 800 người bạn nhé”, tag luôn nhóm bạn thân cũ cho tụi nó thấy.",
+        strategy: "Kéo chuyện của mình ra trước mặt nhiều người, tag cả hội bạn cũ cho nặng",
         consequence: "Hai người nhắn hỏi “bạn ổn không”, cả hai đều là người ngoài nhóm. Story của bạn lên top xem trong ba tiếng.",
         scores: { relationship: 1, selfAwareness: 1 },
-        pattern: "people_pleases",
+        pattern: "escalates",
       },
     ],
     practice: {

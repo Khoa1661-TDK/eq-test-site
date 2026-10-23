@@ -16,7 +16,7 @@ export const MORE_SCENARIOS = [
       {
         id: "SO_01_A",
         code: "A",
-        text: "Nhắn: “Hòa ơi, chiều nay có tiết thể dục, cậu nhớ mang giày nhé.”",
+        text: "Nhắn: “Hòa ơi, chiều nay có buổi GDTC, cậu nhớ mang giày thể thao nhé.”",
         strategy: "Chuyển chủ đề, không réo tên câu đùa",
         consequence: "Cả nhóm chuyển theo chủ đề mới, Hòa nhập cuộc được mà không phải giải thích mình có buồn hay không.",
         scores: { socialAwareness: 3, communication: 3 },
@@ -229,13 +229,13 @@ export const MORE_SCENARIOS = [
     domain: "socialAwareness",
     weights: { socialAwareness: 1, communication: 0.5 },
     face: "thinking",
-    title: "Cô vừa họp phụ huynh xong",
+    title: "Cô cố vấn vừa họp lớp xong",
     dialogue: [
-      "Cô chủ nhiệm vừa vào lớp sau buổi họp lớp căng thẳng, trông rõ là mệt.",
+      "Cô cố vấn học tập vừa vào lớp sau buổi họp lớp căng thẳng, trông rõ là mệt.",
       "Bạn định xin cô dời bài kiểm tra sang tuần sau vì hôm đó bạn có trận thi đấu thể thao.",
       "Cô hỏi ngay trước lớp: “Em có chuyện gì không?”",
     ],
-    prompt: "Cô vừa họp phụ huynh xong, mặt mệt đừ, lại hỏi trúng mình. Sao giờ?",
+    prompt: "Cô cố vấn vừa họp lớp xong, mặt mệt đừ, lại hỏi trúng mình. Sao giờ?",
     choices: [
       {
         id: "SO_05_A",
@@ -995,7 +995,7 @@ export const MORE_SCENARIOS = [
       {
         id: "EP_01_D",
         code: "D",
-        text: "Bĩu môi, quay đi, rồi ra chơi kể với người khác: “Lạ ghê, ban nãy còn vui vẻ mà.”",
+        text: "Bĩu môi, quay đi, rồi lảng ra ngoài kể với người khác: “Lạ ghê, ban nãy còn vui vẻ mà.”",
         strategy: "Coi câu gắt là chuyện lạ để đem đi kể",
         consequence: "Chuyện về Lan lan ra, còn Lan ngồi đó với một ngày nặng nề mà không ai hỏi han.",
         scores: { empathy: 1, communication: 1 },
@@ -1042,7 +1042,7 @@ export const MORE_SCENARIOS = [
       {
         id: "EP_02_C",
         code: "C",
-        text: "Rủ Minh ra gặp cô tổng phụ trách hoặc tổ tư vấn học đường, mình đi cùng nhưng không nói thay.",
+        text: "Rủ Minh qua phòng tư vấn tâm lý, mình đi cùng nhưng không nói thay.",
         strategy: "Nối Minh với người lớn có thể giúp, đi cùng nhưng không nói thay",
         consequence: "Minh biết mình không phải gánh một mình, nhưng nếu chưa sẵn sàng thì bước này có thể hơi sớm.",
         scores: { empathy: 2, relationship: 3 },
@@ -1060,7 +1060,7 @@ export const MORE_SCENARIOS = [
     ],
     practice: {
       signal: "Nụ cười không nhìn ai — có những ngày người ta cười để người khác đỡ phải lo.",
-      stronger: "Một câu không đòi hỏi: “Cậu không cần phải gượng đâu. Lúc nào muốn nói, tớ ở đây.” Nếu Minh ăn ngủ khác hẳn hay nói không muốn đến lớp, rủ Minh gặp cô tổng phụ trách hoặc tổ tư vấn học đường, và đi cùng chứ đừng nói thay.",
+      stronger: "Một câu không đòi hỏi: “Cậu không cần phải gượng đâu. Lúc nào muốn nói, tớ ở đây.” Nếu Minh ăn ngủ khác hẳn hay nói không muốn đến lớp, rủ Minh qua phòng tư vấn tâm lý, và đi cùng chứ đừng nói thay.",
       principle: "Nỗi đau không cần được sửa, nó cần được phép có mặt; cánh cửa mở mà không hẹn giờ thì người ta mới dám bước qua.",
     },
   },
@@ -1098,7 +1098,7 @@ export const MORE_SCENARIOS = [
       {
         id: "EP_03_C",
         code: "C",
-        text: "Chụp màn hình mấy bình luận, báo cô tổng phụ trách hoặc tổ tư vấn học đường.",
+        text: "Chụp màn hình mấy bình luận, báo phòng tư vấn tâm lý.",
         strategy: "Nhờ người lớn can thiệp khi lời đùa cứ nhiều thêm",
         consequence: "Người lớn biết chuyện và có thể giúp cả Thanh lẫn mấy bạn đùa, nhưng Thanh chưa biết có bạn đứng về phía mình.",
         scores: { empathy: 2, socialAwareness: 2 },
@@ -1116,7 +1116,7 @@ export const MORE_SCENARIOS = [
     ],
     practice: {
       signal: "Một status nặng nề, một loạt bình luận nhẹ tênh — cả người đăng lẫn người đọc đều đang bị không khí chung cuốn theo.",
-      stronger: "Một câu riêng cho người đang đau (“tớ ở đây”). Nếu mấy bình luận đùa cứ nhiều thêm, nhắc cả nhóm nhẹ nhàng, và đưa cho cô tổng phụ trách hoặc tổ tư vấn học đường xem.",
+      stronger: "Một câu riêng cho người đang đau (“tớ ở đây”). Nếu mấy bình luận đùa cứ nhiều thêm, nhắc cả nhóm nhẹ nhàng, và đưa cho phòng tư vấn tâm lý xem.",
       principle: "Không khí của nhóm quyết định cách mọi người đối xử với nỗi đau của một người; chỉnh lại không khí là cách chỉnh nhẹ nhàng nhất.",
     },
   },

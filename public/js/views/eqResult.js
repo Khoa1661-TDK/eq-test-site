@@ -1,11 +1,13 @@
-/* eqResult.js — trang HỒ SƠ CẢM XÚC: một cửa sổ hệ thống duy nhất, linh vật theo
-   nhóm lựa chọn nổi bật nhất, hai cột điểm mạnh / điểm cần để ý, và phần nhìn lại
-   từng lựa chọn kèm điều thường xảy ra tiếp theo. Không chấm điểm, không xếp loại:
-   trang chỉ mô tả việc bạn LÀM trong từng tình huống và hậu quả thường gặp của nó. */
+/* eqResult.js — trang HỒ SƠ CẢM XÚC: một cửa sổ hệ thống duy nhất, thẻ kiểu cảm
+   xúc (16 kiểu, quyết định theo mẫu lựa chọn — xem data/types.js), hai cột điểm
+   mạnh / điểm cần để ý, phần nhìn lại từng lựa chọn, và lưới 16 kiểu ở cuối trang.
+   Không chấm điểm, không xếp loại: trang chỉ mô tả việc bạn LÀM trong từng tình
+   huống và hậu quả thường gặp của nó. */
 
 import { copyText, el, frame } from "../core/dom.js"
 import { sound } from "../core/sound.js"
-import { pickMascot } from "../data/mascots.js"
+import { MASCOTS_BY_KEY } from "../data/mascots.js"
+import { TYPES, pickType } from "../data/types.js"
 import { attempts, clearAllData, compareResults, ITEM_BY_ID, scoreAttempt } from "../core/eqScoring.js"
 import { LEVEL_WORD, qualMeter, mascotArt } from "../ui/parts.js"
 
@@ -46,7 +48,8 @@ export function renderEqResult(mount, { navigate }) {
     return { destroy: () => mount.replaceChildren() }
   }
 
-  const mascot = pickMascot(result, current.answers)
+  const { type, alt } = pickType(current.answers)
+  const mascot = MASCOTS_BY_KEY[type.mascot]
 
   /* ------------------------------------------------------------- cửa sổ ----- */
   const bar = el(
@@ -62,23 +65,27 @@ export function renderEqResult(mount, { navigate }) {
     ),
   )
 
-  /* Linh vật: ảnh pixel đặt trên ô nền màu riêng của nó (halo) + tên + một câu
-     tagline + vài dòng mô tả ấm áp. */
+  /* Thẻ kiểu: mã lớn, tên tiếng Anh, một câu mô tả, ảnh pixel ngồi bên phải,
+     và dòng "chất kiểu nhì" khi có. Nền pastel + chữ mực theo bảng màu riêng
+     của kiểu (--tc-bg, --tc-ink). */
   const hero = el(
     "section",
-    { class: "mascot" },
-    el("div", { class: "mascot__art", html: mascotArt(mascot), style: { background: mascot.colors.bg, borderColor: mascot.colors.main } }),
+    { class: "typecard" },
     el(
       "div",
-      { class: "mascot__text" },
-      el("h1", { class: "mascot__name", text: mascot.name }),
-      el("p", { class: "mascot__tagline", text: mascot.tagline }),
-      el("p", { class: "mascot__desc", text: mascot.description }),
+      { class: "typecard__main" },
+      el("h1", { class: "typecard__code", text: type.code }),
+      el("p", { class: "typecard__title", text: type.title }),
+      el("p", { class: "typecard__desc", text: type.desc }),
+      alt ? el("p", { class: "typecard__alt" }, el("span", { text: "Bạn cũng có chút chất " }), el("strong", { text: alt.code })) : null,
     ),
+    el("div", { class: "typecard__art", html: mascotArt(mascot, 96, `${type.code} — ${type.title}`) }),
   )
+  hero.style.setProperty("--tc-bg", type.colors.bg)
+  hero.style.setProperty("--tc-ink", type.colors.ink)
 
-  /* Hai cột: hai kỹ năng nổi bật nhất + ba điều nên giữ; hai kỹ năng
-     cần thêm chú ý + hai điều nên để ý; mẹo thực tế của linh vật. */
+  /* Hai cột: hai kỹ năng nổi bật nhất + hai điểm mạnh của kiểu; hai kỹ năng
+     cần thêm chú ý + hai điều nên để ý; mẹo thực tế của kiểu. */
   const colItem = (dim) =>
     el(
       "li",
@@ -94,15 +101,15 @@ export function renderEqResult(mount, { navigate }) {
     { class: "col" },
     el("h2", { class: "col__title", text: "Điểm mạnh" }),
     el("ul", { class: "col__skills" }, result.strengths.map(colItem)),
-    colLines(mascot.strengths),
+    colLines(type.strengths),
   )
   const watchCol = el(
     "div",
     { class: "col col--watch" },
     el("h2", { class: "col__title", text: "Điểm cần để ý" }),
     el("ul", { class: "col__skills" }, result.growth.map(colItem)),
-    colLines(mascot.watchOuts),
-    el("p", { class: "col__tip" }, el("strong", { text: "Mẹo: " }), mascot.tip),
+    colLines(type.watchOuts),
+    el("p", { class: "col__tip" }, el("strong", { text: "Mẹo: " }), type.tip),
   )
 
   /* Nhìn lại: từng tình huống, lựa chọn của bạn, và điều thường xảy ra
@@ -158,7 +165,7 @@ export function renderEqResult(mount, { navigate }) {
   const share = el("button", { class: "btn btn--ghost", attrs: { type: "button" } }, el("span", { class: "pxf-in", text: "Chia sẻ" }))
   share.addEventListener("click", async () => {
     const label = share.querySelector(".pxf-in")
-    const ok = await copyText(`Mình là ${mascot.name} trên VIBECHECK`)
+    const ok = await copyText(`Mình là ${type.code} — ${type.title} trên VIBECHECK`)
     if (!ok) return
     label.textContent = "Đã sao chép!"
     setTimeout(() => (label.textContent = "Chia sẻ"), 1600)
@@ -182,7 +189,32 @@ export function renderEqResult(mount, { navigate }) {
     }),
   )
 
-  const body = el("div", { class: "syswin__body" }, hero, el("div", { class: "syswin__cols" }, strengthCol, watchCol), lookback, compare, actions)
+  /* Lưới 16 kiểu ở cuối trang: mỗi thẻ một màu riêng, thẻ của bạn có viền
+     mực và nhãn "Bạn". */
+  const typeGrid = el(
+    "section",
+    { class: "typegrid" },
+    el("h2", { class: "syswin__heading", text: "16 kiểu trong VIBECHECK" }),
+    el(
+      "div",
+      { class: "typegrid__list" },
+      TYPES.map((t) => {
+        const card = el(
+          "div",
+          { class: t.key === type.key ? "typegrid__card is-you" : "typegrid__card" },
+          t.key === type.key ? el("span", { class: "typegrid__badge", text: "Bạn" }) : null,
+          el("p", { class: "typegrid__code", text: t.code }),
+          el("p", { class: "typegrid__title", text: t.title }),
+          el("p", { class: "typegrid__desc", text: t.desc }),
+        )
+        card.style.setProperty("--tc-bg", t.colors.bg)
+        card.style.setProperty("--tc-ink", t.colors.ink)
+        return card
+      }),
+    ),
+  )
+
+  const body = el("div", { class: "syswin__body" }, hero, el("div", { class: "syswin__cols" }, strengthCol, watchCol), lookback, compare, actions, typeGrid)
   const win = el("div", { class: "syswin" }, bar, body)
   view.append(frame(win, { size: "lg", cls: "result__window", fill: "#fffdf7" }))
 

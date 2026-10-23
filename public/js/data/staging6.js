@@ -318,8 +318,8 @@ export const STAGING_6 = {
 
   EP_01: {
     environment: "classroom",
-    label: "GIỜ RA CHƠI · LỚP 11A2",
-    place: "LỚP 11A2",
+    label: "GIỜ GIẢI LAO · GIẢNG ĐƯỜNG B2",
+    place: "GIẢNG ĐƯỜNG B2",
     cast: [
       { id: "player", x: 110, mood: "neutral", name: "Bạn" },
       { id: "classmate", x: 40, mood: "neutral", name: "Hưng" },
@@ -385,8 +385,8 @@ export const STAGING_6 = {
 
   EP_02: {
     environment: "classroom",
-    label: "SÁNG · LỚP 11A2",
-    place: "LỚP 11A2",
+    label: "SÁNG · GIẢNG ĐƯỜNG B2",
+    place: "GIẢNG ĐƯỜNG B2",
     cast: [
       { id: "player", x: 150, mood: "neutral", name: "Bạn" },
       { id: "friend", x: 40, mood: "neutral", name: "Hà" },
@@ -430,7 +430,7 @@ export const STAGING_6 = {
       ],
       C: [
         { at: 100, char: "player", do: "walkTo", x: 210 },
-        { at: 700, char: "player", do: "say", text: "Cậu muốn qua gặp cô tổng phụ trách không?" },
+        { at: 700, char: "player", do: "say", text: "Cậu muốn qua phòng tư vấn tâm lý không?" },
         { at: 2000, char: "player", do: "say", text: "Tớ đi cùng, không nói thay cậu đâu." },
         { at: 3100, char: "classmate", do: "lookAt", target: "player" },
         { at: 3300, char: "classmate", do: "emote", kind: "ellipsis" },
@@ -453,7 +453,7 @@ export const STAGING_6 = {
 
   EP_03: {
     environment: "corridor",
-    label: "SÁNG · HÀNH LANG LỚP 11A2",
+    label: "SÁNG · HÀNH LANG GIẢNG ĐƯỜNG B2",
     place: "HÀNH LANG",
     chatTitle: "Bình luận dưới status",
     cast: [
@@ -495,7 +495,7 @@ export const STAGING_6 = {
         { at: 4300, char: "player", do: "emote", kind: "ellipsis" },
       ],
       C: [
-        { at: 100, char: "player", do: "think", text: "Chụp lại mấy bình luận này, rồi báo cô tổng phụ trách." },
+        { at: 100, char: "player", do: "think", text: "Chụp lại mấy bình luận này, rồi báo phòng tư vấn tâm lý." },
         { at: 1500, do: "chat", from: "Bạn", text: "(chụp màn hình mấy bình luận)", me: true },
         { at: 2700, do: "chatClose" },
         { at: 2900, char: "player", do: "leave", dir: "right" },

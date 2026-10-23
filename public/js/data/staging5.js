@@ -2,8 +2,8 @@
 export const STAGING_5 = {
   SO_05: {
     environment: "classroom",
-    label: "SAU HỌP PHỤ HUYNH · LỚP 11A2",
-    place: "LỚP 11A2",
+    label: "SAU BUỔI HỌP LỚP · GIẢNG ĐƯỜNG B2",
+    place: "GIẢNG ĐƯỜNG B2",
     cast: [
       { id: "player", x: 100, mood: "neutral", name: "Bạn" },
       { id: "friend", x: 175, mood: "neutral", name: "Linh" },
@@ -433,7 +433,7 @@ export const STAGING_5 = {
 
   CM_02: {
     environment: "schoolyard",
-    label: "GIỜ RA CHƠI · SÂN TRƯỜNG",
+    label: "GIỜ GIẢI LAO · SÂN TRƯỜNG",
     place: "SÂN TRƯỜNG",
     cast: [
       { id: "player", x: 95, mood: "neutral", name: "Bạn" },

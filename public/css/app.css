@@ -223,9 +223,9 @@
   line-height: 1.5;
 }
 
-/* Hàng chip linh vật ở màn mở đầu: ảnh pixel + tên, chỉ để nhìn, không phải nút bấm.
-   Chữ mực (≥ 4.5:1) trên tint nhạt pha từ màu của linh vật (--mc do JS gắn),
-   viền đậm hơn nền một bậc cho ra hình con chip. */
+/* Hàng chip 16 kiểu ở màn mở đầu: mỗi chip một mã, chỉ để nhìn, không phải nút
+   bấm. Nền pastel và chữ mực lấy từ bảng màu riêng của kiểu (--mc, --mi do JS
+   gắn), viền đậm hơn nền một bậc cho ra hình con chip. */
 .hero__chips {
   display: flex;
   flex-wrap: wrap;
@@ -236,22 +236,20 @@
 .hero__chip {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 12px 6px 8px;
-  background: color-mix(in srgb, var(--mc, var(--paper-3)) 14%, #fffdf7);
-  border: 2px solid color-mix(in srgb, var(--mc, var(--ink)) 55%, #1d1b2e);
-}
-
-.hero__chip__art svg {
-  width: 20px;
-  height: 20px;
-}
-
-.hero__chip__name {
+  padding: 6px 12px;
+  background: var(--mc, var(--paper-3));
+  border: 2px solid color-mix(in srgb, var(--mi, var(--ink)) 55%, #1d1b2e);
   font-family: var(--font-text);
-  font-weight: 600;
+  font-weight: 700;
   font-size: 14px;
-  color: var(--ink);
+  color: var(--mi, var(--ink));
+}
+
+.hero__chips-note {
+  margin-top: var(--gap-4);
+  font-family: var(--font-text);
+  font-size: 15px;
+  color: var(--ink-2);
 }
 
 /* bảng thông số */

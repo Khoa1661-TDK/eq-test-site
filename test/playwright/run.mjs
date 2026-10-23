@@ -15,7 +15,7 @@ import { resolve } from "node:path"
 import { createServer } from "node:net"
 
 import { FORMS, ITEM_BY_ID, HISTORY_KEY, strongestChoice, weightedPoints } from "../../public/js/core/eqScoring.js"
-import { MASCOTS } from "../../public/js/data/mascots.js"
+import { TYPES } from "../../public/js/data/types.js"
 
 const ROOT = resolve(fileURLToPath(new URL("../..", import.meta.url)))
 const REPORTS = resolve(ROOT, "reports")
@@ -189,9 +189,10 @@ check("tới trang kết quả", (await page.locator(".result").count()) > 0)
 await page.waitForSelector(".syswin")
 check("cửa sổ hồ sơ hiện giữa trang", (await page.locator(".result__window .syswin").count()) === 1)
 const resultText = await page.locator(".result").innerText()
-const mascotNames = MASCOTS.map((m) => m.name)
-const shownName = (await page.locator(".mascot__name").first().innerText()).trim()
-check("linh vật đúng một trong bảy tên", mascotNames.includes(shownName), shownName)
+const typeCodes = TYPES.map((t) => t.code)
+const shownCode = (await page.locator(".typecard__code").first().innerText()).trim()
+check("kiểu đúng một trong 16 mã", typeCodes.includes(shownCode), shownCode)
+check("lưới 16 kiểu hiện ở cuối trang", (await page.locator(".typegrid__card").count()) === 16, `${await page.locator(".typegrid__card").count()}`)
 const resultLower = resultText.toLowerCase()
 check("có đủ hộp Điểm mạnh và Điểm cần để ý", resultLower.includes("điểm mạnh") && resultLower.includes("điểm cần để ý"))
 check("nhìn lại đủ 12 lựa chọn", (await page.locator(".lookback__item").count()) === 12, `${await page.locator(".lookback__item").count()}`)

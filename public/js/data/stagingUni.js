@@ -737,7 +737,7 @@ export const STAGING_UNI = {
         { at: 3900, do: "tint", tone: "dim" },
       ],
       D: [
-        { at: 100, do: "chat", from: "Bạn", text: "Sốt nằm một mình nè", me: true },
+        { at: 100, do: "chat", from: "Bạn", text: "Sốt nằm một mình, cảm ơn 800 người bạn nhé 🙂", me: true },
         { at: 1100, do: "typing", from: "Bạn bè" },
         { at: 1700, do: "chat", from: "Bạn bè", text: "Bạn ổn không?" },
         { at: 2600, char: "player", do: "emote", kind: "ellipsis" },

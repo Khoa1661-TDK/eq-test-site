@@ -2,8 +2,8 @@
 export const STAGING_1 = {
   AW_01: {
     environment: "classroom",
-    label: "TIẾT VĂN · LỚP 11A2",
-    place: "LỚP 11A2",
+    label: "BUỔI HỌC MÔN VĂN · GIẢNG ĐƯỜNG B2",
+    place: "GIẢNG ĐƯỜNG B2",
     cast: [
       { id: "player", x: 110, mood: "neutral", name: "Bạn" },
       { id: "classmate", x: 186, mood: "neutral", name: "Minh" },
@@ -182,8 +182,8 @@ export const STAGING_1 = {
 
   AW_04: {
     environment: "classroom",
-    label: "GIỜ SINH HOẠT · LỚP 11A2",
-    place: "LỚP 11A2",
+    label: "BUỔI HỌP LỚP · GIẢNG ĐƯỜNG B2",
+    place: "GIẢNG ĐƯỜNG B2",
     cast: [
       { id: "friend", x: 45, mood: "happy", name: "Mai" },
       { id: "player", x: 115, mood: "happy", name: "Bạn" },
@@ -311,9 +311,9 @@ export const STAGING_1 = {
 
   AW_06: {
     environment: "bedroom",
-    label: "TỐI · NHÓM LỚP 11A2",
+    label: "TỐI · NHÓM LỚP MÌNH",
     place: "NHÓM LỚP",
-    chatTitle: "Nhóm lớp 11A2",
+    chatTitle: "Nhóm lớp mình",
     cast: [
       { id: "player", x: 95, mood: "neutral", name: "Bạn" },
       { id: "kid", x: 170, mood: "neutral", name: "Bin" },
@@ -372,8 +372,8 @@ export const STAGING_1 = {
 
   EU_01: {
     environment: "classroom",
-    label: "SAU GIỜ HỌC · LỚP 11A2",
-    place: "LỚP 11A2",
+    label: "SAU GIỜ HỌC · GIẢNG ĐƯỜNG B2",
+    place: "GIẢNG ĐƯỜNG B2",
     cast: [
       { id: "player", x: 105, mood: "neutral", name: "Bạn" },
       { id: "friend", x: 185, mood: "happy", name: "Chi" },

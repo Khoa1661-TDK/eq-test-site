@@ -323,7 +323,7 @@ export function emoteSVG(kind) {
 }
 
 /* ================================================================== người qua lại (EXTRAS)
-   Học sinh tí hon ~10x16 ô làm phông phía sau: đứng, đi (hai nhịp), ngồi. Ba biến thể đồng phục.
+   Sinh viên tí hon ~10x16 ô làm phông phía sau: đứng, đi (hai nhịp), ngồi. Ba biến thể áo.
    Khoá: o viền, h tóc, s da, E mắt, S áo, T quần/váy. */
 const EXTRA_FRAMES = {
   stand: [

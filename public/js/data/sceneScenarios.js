@@ -1,4 +1,4 @@
-/* sceneScenarios.js — các kịch bản EQ trong bối cảnh TRƯỜNG PHỔ THÔNG VIỆT NAM.
+/* sceneScenarios.js — các kịch bản EQ trong bối cảnh TRƯỜNG ĐẠI HỌC VIỆT NAM.
    Mỗi scene có:
    - id, label, title, environment ("classroom" | "schoolyard")
    - domain: kỹ năng chính của scene (một trong 6 kỹ năng của eqDimensions.js)
@@ -18,7 +18,7 @@ export const SCENE_SCENARIOS = [
   /* ------------------------------------------------ 1. Ý tưởng bị "mượn" trong họp nhóm */
   {
     id: "scene-idea-credit",
-    label: "THỨ HAI · LỚP 11A2",
+    label: "THỨ HAI · GIẢNG ĐƯỜNG B2",
     title: "Ý tưởng của bạn trong buổi họp nhóm",
     prompt: "Ủa alo, ý của mình mà ta? Giờ xử sao đây?",
     environment: "classroom",
@@ -30,7 +30,7 @@ export const SCENE_SCENARIOS = [
       { id: "teacherF", name: "Cô Hạnh", x: 272, mood: "neutral" },
     ],
     dialogue: [
-      { who: "narrator", text: "Giờ sinh hoạt, cả nhóm họp để chốt đề tài dự án, cô Hạnh ngồi nghe ngay bên cạnh." },
+      { who: "narrator", text: "Buổi họp nhóm để chốt đề tài dự án, cô Hạnh ngồi nghe ngay bên cạnh." },
       { who: "classmate", text: "Tớ đề xuất tụi mình làm về việc thu gom đồ dùng cũ cho khu phố nhé." },
       { who: "narrator", text: "Bạn sững người. Đó đúng là ý bạn đã nói với nhóm hôm qua." },
     ],
@@ -73,7 +73,7 @@ export const SCENE_SCENARIOS = [
         code: "C",
         text: "Đứng bật dậy, cắt ngang ngay trước mặt cô Hạnh: “Đó là ý của tớ! Minh lấy ý của tớ mà không hỏi!”",
         strategy: "Cắt ngang và đổ lỗi ngay trước mặt cô.",
-        consequence: "Cả lớp im bặt, cô Hạnh gõ thước xuống bàn, Minh đỏ mặt.",
+        consequence: "Cả lớp im bặt, cô Hạnh gõ bút xuống bàn, Minh đỏ mặt.",
         pattern: "escalates",
         scores: { communication: 0, socialAwareness: 1 },
       },
@@ -309,7 +309,7 @@ export const SCENE_SCENARIOS = [
   /* ------------------------------------------------ 4. Bạn thân nhận feedback nặng */
   {
     id: "scene-hard-feedback",
-    label: "THỨ SÁU · LỚP 11A2",
+    label: "THỨ SÁU · GIẢNG ĐƯỜNG B2",
     title: "Slide của Linh có hai con số sai",
     prompt: "Slide của bạn thân sai số rõ mồn một… nói sao cho khéo đây?",
     environment: "classroom",
@@ -448,7 +448,7 @@ export const SCENE_SCENARIOS = [
         code: "B",
         text: "Ngẩng lên ngay: “Nhóm em làm cả tuần rồi mà cô, sao cô lại nói vậy ạ?”",
         strategy: "Bênh nhóm ngay trước mặt cô.",
-        consequence: "Cô Hạnh gõ thước xuống bàn, cả lớp im phăng phắc, mặt bạn nóng bừng.",
+        consequence: "Cô Hạnh gõ bút xuống bàn, cả lớp im phăng phắc, mặt bạn nóng bừng.",
         pattern: "escalates",
         scores: { selfAwareness: 1, regulation: 2 },
       },
@@ -693,10 +693,10 @@ export const SCENE_SCENARIOS = [
     },
   },
 
-  /* ------------------------------------------------ 8. Bảng điểm thi thử */
+  /* ------------------------------------------------ 8. Điểm cao nhất lớp */
   {
     id: "scene-exam-board",
-    label: "THỨ NĂM · LỚP 11A2",
+    label: "THỨ NĂM · GIẢNG ĐƯỜNG B2",
     title: "Bạn được điểm cao, Minh lặng đi",
     prompt: "Mình điểm cao mà bạn cùng bàn lặng thinh… làm gì nè?",
     environment: "classroom",
@@ -709,12 +709,12 @@ export const SCENE_SCENARIOS = [
       { id: "teacherF", name: "Cô Hạnh", x: 296, mood: "neutral" },
     ],
     dialogue: [
-      { who: "narrator", text: "Vào giờ học, cô Hạnh đọc điểm bài kiểm tra." },
+      { who: "narrator", text: "Vào giờ học, cô Hạnh đọc điểm bài quiz." },
       { who: "narrator", text: "Cả lớp vỗ tay chúc mừng bạn. Ngay bên cạnh, Minh, bạn cùng bàn, ngồi lặng đi, tay ôm chặt cuốn sách." },
     ],
     timeline: [
       { at: 0, do: "face", char: "teacherF", dir: "left" },
-      { at: 300, do: "say", char: "teacherF", text: "Điểm cao nhất bài kiểm tra lần này là của em." },
+      { at: 300, do: "say", char: "teacherF", text: "Điểm cao nhất bài quiz lần này là của em." },
       { at: 1800, do: "surprised", char: "player" },
       { at: 2300, do: "emote", char: "friend", kind: "sparkle" },
       { at: 2800, do: "hop", char: "friend" },

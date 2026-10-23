@@ -129,8 +129,8 @@ export const STAGING_7 = {
 
   NX_03: {
     environment: "classroom",
-    label: "SAU GIỜ HỌC · LỚP 11A2",
-    place: "LỚP 11A2",
+    label: "SAU GIỜ HỌC · GIẢNG ĐƯỜNG B2",
+    place: "GIẢNG ĐƯỜNG B2",
     chatTitle: "Tin nhắn riêng",
     cast: [
       { id: "player", x: 90, mood: "happy", name: "Bạn" },
@@ -195,8 +195,8 @@ export const STAGING_7 = {
 
   NX_04: {
     environment: "classroom",
-    label: "GIỜ RA CHƠI · LỚP 11A2",
-    place: "LỚP 11A2",
+    label: "GIỜ GIẢI LAO · GIẢNG ĐƯỜNG B2",
+    place: "GIẢNG ĐƯỜNG B2",
     cast: [
       { id: "player", x: 70, mood: "concerned", name: "Bạn" },
       { id: "classmate", x: 150, mood: "defensive", name: "Tuấn" },
@@ -334,7 +334,7 @@ export const STAGING_7 = {
 
   NX_06: {
     environment: "corridor",
-    label: "GIỜ RA CHƠI · HÀNH LANG THƯ VIỆN",
+    label: "GIỜ GIẢI LAO · HÀNH LANG THƯ VIỆN",
     place: "HÀNH LANG",
     chatTitle: "Tin nhắn riêng",
     cast: [
@@ -369,7 +369,7 @@ export const STAGING_7 = {
         { at: 4200, do: "tint", tone: "dim" },
       ],
       B: [
-        { at: 100, char: "player", do: "say", text: "Ra chơi đi cùng tớ sang phòng tư vấn được không?" },
+        { at: 100, char: "player", do: "say", text: "Giải lao, đi cùng tớ sang phòng tư vấn được không?" },
         { at: 1100, char: "friend", do: "happy" },
         { at: 1300, char: "friend", do: "say", text: "Được chứ! Tớ đi với cậu." },
         { at: 2200, char: "player", do: "walkTo", x: 190 },

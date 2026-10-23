@@ -116,7 +116,7 @@ export function renderAssessment(mount, { navigate }) {
   const RULES = [
     ["—", "Không có đáp án đúng sai, chọn điều bạn thật sự sẽ làm"],
     ["▶", "Bấm Tiếp hoặc Space để đi từng bước, cứ đọc thong thả"],
-    ["＋", "Cuối bài: linh vật, điểm mạnh và điểm cần để ý của bạn"],
+    ["＋", "Cuối bài: kiểu cảm xúc của bạn + điểm mạnh, điểm cần để ý"],
   ]
   const rulesList = el("ul", { class: "quiz-intro__rules" })
   for (const [icon, text] of RULES) {

@@ -7,9 +7,9 @@
    Mỗi mục, theo mã tình huống:
    {
      environment: "classroom" | "schoolyard" | "canteen" | "corridor" | "bedroom" | "library",
-     label: "TIẾT VĂN · LỚP 11A2",          // nhãn chữ hoa ở khung thoại
-     place: "LỚP 11A2",                     // tên người kể khi câu thoại là của người dẫn chuyện
-     chatTitle?: "Nhóm lớp 11A2",           // tên nhóm trên điện thoại, nếu cảnh có tin nhắn
+     label: "BUỔI HỌC MÔN VĂN · GIẢNG ĐƯỜNG B2", // nhãn chữ hoa ở khung thoại
+     place: "GIẢNG ĐƯỜNG B2",                // tên người kể khi câu thoại là của người dẫn chuyện
+     chatTitle?: "Nhóm lớp mình",            // tên nhóm trên điện thoại, nếu cảnh có tin nhắn
      cast: [{ id, x, mood, name }],          // luôn có "player"; id là nhân vật trong sprites.js
      speakers: ["narrator", "teacherF", …],  // mỗi câu trong dialogue của tình huống: ai nói
      timeline: [ …sự kiện…, { at, do: "decisionPoint" } ],

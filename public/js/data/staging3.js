@@ -68,8 +68,8 @@ export const STAGING_3 = {
 
   EM_01: {
     environment: "classroom",
-    label: "GIỜ RA CHƠI · LỚP 11A2",
-    place: "LỚP 11A2",
+    label: "GIỜ GIẢI LAO · GIẢNG ĐƯỜNG B2",
+    place: "GIẢNG ĐƯỜNG B2",
     cast: [
       { id: "player", x: 110, mood: "neutral", name: "Bạn" },
       { id: "friend", x: 190, mood: "sad", name: "Mai" },
@@ -191,8 +191,8 @@ export const STAGING_3 = {
 
   EM_03: {
     environment: "classroom",
-    label: "HOẠT ĐỘNG NHÓM · LỚP 11A2",
-    place: "LỚP 11A2",
+    label: "HOẠT ĐỘNG NHÓM · GIẢNG ĐƯỜNG B2",
+    place: "GIẢNG ĐƯỜNG B2",
     cast: [
       { id: "player", x: 100, mood: "neutral", name: "Bạn" },
       { id: "classmate", x: 185, mood: "annoyed", name: "Dũng" },
@@ -252,9 +252,9 @@ export const STAGING_3 = {
 
   EM_04: {
     environment: "classroom",
-    label: "GIỜ RA CHƠI · LỚP 11A2",
-    place: "LỚP 11A2",
-    chatTitle: "Nhóm lớp 11A2",
+    label: "GIỜ GIẢI LAO · GIẢNG ĐƯỜNG B2",
+    place: "GIẢNG ĐƯỜNG B2",
+    chatTitle: "Nhóm lớp mình",
     cast: [
       { id: "player", x: 85, mood: "neutral", name: "Bạn" },
       { id: "friend", x: 205, mood: "happy", name: "Vy" },
@@ -312,8 +312,8 @@ export const STAGING_3 = {
 
   EM_05: {
     environment: "classroom",
-    label: "TRẢ BÀI KIỂM TRA · LỚP 11A2",
-    place: "LỚP 11A2",
+    label: "TRẢ BÀI QUIZ · GIẢNG ĐƯỜNG B2",
+    place: "GIẢNG ĐƯỜNG B2",
     cast: [
       { id: "player", x: 110, mood: "neutral", name: "Bạn" },
       { id: "friend", x: 200, mood: "sad", name: "Ngọc" },
@@ -372,9 +372,9 @@ export const STAGING_3 = {
 
   RS_01: {
     environment: "classroom",
-    label: "THUYẾT TRÌNH NHÓM · LỚP 11A2",
-    place: "LỚP 11A2",
-    chatTitle: "Nhóm lớp 11A2",
+    label: "THUYẾT TRÌNH NHÓM · GIẢNG ĐƯỜNG B2",
+    place: "GIẢNG ĐƯỜNG B2",
+    chatTitle: "Nhóm lớp mình",
     cast: [
       { id: "player", x: 85, mood: "neutral", name: "Bạn" },
       { id: "classmate", x: 150, mood: "defensive", name: "Hùng" },

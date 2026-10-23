@@ -64,7 +64,7 @@ export const STAGING_2 = {
     environment: "street",
     label: "TAN HỌC · VỈA HÈ CỔNG TRƯỜNG",
     place: "NGOÀI CỔNG TRƯỜNG",
-    chatTitle: "Nhóm lớp 11A2",
+    chatTitle: "Nhóm lớp mình",
     cast: [
       { id: "player", x: 95, mood: "neutral", name: "Bạn" },
       { id: "friend", x: 170, mood: "concerned", name: "Hân" },
@@ -258,8 +258,8 @@ export const STAGING_2 = {
 
   ER_02: {
     environment: "classroom",
-    label: "TIẾT TOÁN · TRẢ BÀI",
-    place: "LỚP 11A2",
+    label: "BUỔI HỌC MÔN TOÁN · TRẢ BÀI",
+    place: "GIẢNG ĐƯỜNG B2",
     cast: [
       { id: "player", x: 100, mood: "happy", name: "Bạn" },
       { id: "friend", x: 185, mood: "neutral", name: "Hà" },

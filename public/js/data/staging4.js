@@ -2,7 +2,7 @@
 export const STAGING_4 = {
   RS_03: {
     environment: "schoolyard",
-    label: "SÂN TRƯỜNG · GIỜ RA CHƠI",
+    label: "SÂN TRƯỜNG · GIỜ GIẢI LAO",
     place: "SÂN TRƯỜNG",
     chatTitle: "Đạt",
     cast: [
@@ -130,7 +130,7 @@ export const STAGING_4 = {
 
   RS_05: {
     environment: "street",
-    label: "TRƯỚC TIẾT SAU · NGOÀI CỔNG TRƯỜNG",
+    label: "TRƯỚC BUỔI HỌC SAU · NGOÀI CỔNG TRƯỜNG",
     place: "VỈA HÈ",
     cast: [
       { id: "player", x: 95, mood: "neutral", name: "Bạn" },
@@ -194,8 +194,8 @@ export const STAGING_4 = {
 
   RS_06: {
     environment: "classroom",
-    label: "TIẾT HƯỚNG DẪN · LỚP 11A2",
-    place: "LỚP 11A2",
+    label: "BUỔI HƯỚNG DẪN · GIẢNG ĐƯỜNG B2",
+    place: "GIẢNG ĐƯỜNG B2",
     cast: [
       { id: "player", x: 95, mood: "neutral", name: "Bạn" },
       { id: "friend", x: 165, mood: "concerned", name: "Quỳnh" },
@@ -259,13 +259,13 @@ export const STAGING_4 = {
     environment: "street",
     label: "SÁNG · TRẠM XE BUÝT",
     place: "TRẠM XE BUÝT",
-    chatTitle: "Nhóm lớp 11A2",
+    chatTitle: "Nhóm lớp mình",
     cast: [
       { id: "player", x: 150, mood: "neutral", name: "Bạn" },
     ],
     speakers: ["narrator", "narrator", "narrator"],
     timeline: [
-      { at: 200, do: "chat", from: "Vy", text: "Chào mừng Hòa vào nhóm lớp 11A2 nha!" },
+      { at: 200, do: "chat", from: "Vy", text: "Chào mừng Hòa vào nhóm lớp mình nha!" },
       { at: 1100, do: "chat", from: "Quân", text: "Chào Hòa! Có gì cứ hỏi tụi mình nhé!" },
       { at: 2200, do: "chat", from: "Quân", text: "Nghe nói quê Hòa xa lắm, đi bộ chắc mất cả tuần :)))" },
       { at: 3200, do: "chat", from: "Vy", text: "hahaha" },
@@ -277,7 +277,7 @@ export const STAGING_4 = {
     ],
     consequences: {
       A: [
-        { at: 100, do: "chat", from: "player", text: "Hòa ơi, chiều nay có tiết thể dục, cậu nhớ mang giày nhé.", me: true },
+        { at: 100, do: "chat", from: "player", text: "Hòa ơi, chiều nay có buổi GDTC, cậu nhớ mang giày thể thao nhé.", me: true },
         { at: 1300, do: "typing", from: "Hòa" },
         { at: 2000, do: "chat", from: "Hòa", text: "Ừ, cảm ơn cậu! Mình nhớ rồi nhé." },
         { at: 2900, do: "tint", tone: "warm" },
@@ -371,9 +371,9 @@ export const STAGING_4 = {
 
   SO_03: {
     environment: "classroom",
-    label: "HỌP LỚP · LỚP 11A2",
-    place: "LỚP 11A2",
-    chatTitle: "Nhóm lớp 11A2",
+    label: "HỌP LỚP · GIẢNG ĐƯỜNG B2",
+    place: "GIẢNG ĐƯỜNG B2",
+    chatTitle: "Nhóm lớp mình",
     cast: [
       { id: "player", x: 90, mood: "neutral", name: "Bạn" },
       { id: "friend", x: 175, mood: "neutral", name: "Lan" },

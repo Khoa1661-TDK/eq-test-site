@@ -6,9 +6,9 @@ import { meterCells } from "./meter.js"
 
 export { meterCells }
 
-/** Linh vật pixel vẽ từ lưới 16×16, nét cứng, không mờ. Vài chỗ cần nhỏ hơn
-    (chip màn mở đầu 20px) nên cỡ ảnh là tham số. */
-export function mascotArt(mascot, size = 160) {
+/** Linh vật pixel vẽ từ lưới 16×16, nét cứng, không mờ. Cỡ ảnh và nhãn
+    aria-label đều là tham số — chữ của mỗi kiểu nằm bên data/types.js. */
+export function mascotArt(mascot, size = 160, label = "") {
   const rects = []
   mascot.pixels.forEach((row, y) => {
     ;[...row].forEach((ch, x) => {
@@ -16,7 +16,7 @@ export function mascotArt(mascot, size = 160) {
       rects.push(`<rect x="${x}" y="${y}" width="1" height="1" fill="${mascot.palette[ch]}"/>`)
     })
   })
-  return `<svg viewBox="0 0 16 16" width="${size}" height="${size}" shape-rendering="crispEdges" role="img" aria-label="${mascot.name}" fill="none">${rects.join("")}</svg>`
+  return `<svg viewBox="0 0 16 16" width="${size}" height="${size}" shape-rendering="crispEdges" role="img" aria-label="${label}" fill="none">${rects.join("")}</svg>`
 }
 
 /** Nhãn mức độ của một chiều: dùng chung cho thẻ và bảng kết quả. */

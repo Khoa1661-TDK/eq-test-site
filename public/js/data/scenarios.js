@@ -1,5 +1,5 @@
 /**
- * Ngân hàng tình huống EQ cho học sinh / sinh viên.
+ * Ngân hàng tình huống EQ cho sinh viên.
  *
  * Mỗi tình huống là một câu hỏi đánh giá theo tình huống (situational judgement test).
  * Bốn phương án đều hợp lý — không có phương án nào "vì là người tốt nên chọn".
@@ -376,7 +376,7 @@ const BASE_SCENARIOS = [
     title: "Được chọn vào đội tuyển",
     dialogue: [
       "Bạn được chọn vào đội tuyển của trường.",
-      "Cả nhà rất vui, thầy chủ nhiệm bảo đây là cơ hội.",
+      "Cả nhà rất vui, thầy cố vấn bảo đây là cơ hội.",
       "Nhưng bạn lại nghĩ tới những buổi chiều phải bỏ và những tuần không còn thời gian dành cho bạn bè.",
     ],
     prompt: "Vừa mừng vừa lo, nửa muốn nửa không. Bạn hiểu mình đang bị gì vậy?",
