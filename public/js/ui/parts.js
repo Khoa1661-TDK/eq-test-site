@@ -61,7 +61,7 @@ export function dimRow(dim, { open = false, practiceHref = null } = {}) {
 }
 
 /** Chữ mức độ định tính cho trang hồ sơ — không điểm số, không xếp loại con người. */
-export const LEVEL_WORD = { high: "nổi bật", mid: "đang ổn", low: "nên để ý" }
+export const LEVEL_WORD = { high: "mạnh nhất của bạn", mid: "ổn", low: "nên luyện thêm" }
 
 /** Thang pixel năm ô, không kèm số: chỉ định tính, dùng cho trang hồ sơ. */
 export function qualMeter(level) {

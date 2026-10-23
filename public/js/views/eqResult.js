@@ -11,7 +11,7 @@ import { TYPES, pickType } from "../data/types.js"
 import { attempts, clearAllData, compareResults, ITEM_BY_ID, scoreAttempt } from "../core/eqScoring.js"
 import { LEVEL_WORD, qualMeter, mascotArt } from "../ui/parts.js"
 
-const CHANGE_WORD = { improved: "rõ hơn", steady: "giữ nguyên", dipped: "đang dao động" }
+const CHANGE_WORD = { improved: "↑ Tốt hơn lần trước", steady: "= Giống lần trước", dipped: "↓ Lần này chọn khác đi" }
 
 export function renderEqResult(mount, { navigate }) {
   const all = attempts()
@@ -155,7 +155,7 @@ export function renderEqResult(mount, { navigate }) {
         "section",
         { class: "compare" },
         el("h2", { class: "syswin__heading", text: "So với lần trước" }),
-        el("p", { class: "lookback__lead", text: "Chỉ nói là rõ hơn hay giữ nguyên, không có số." }),
+        el("p", { class: "lookback__lead", text: "Mỗi kỹ năng: lần này bạn xử lý tình huống tốt hơn, giống, hay khác đi so với lần làm trước." }),
         el("ul", { class: "compare__list" }, rows),
       )
     }

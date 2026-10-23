@@ -244,7 +244,7 @@ await page.waitForSelector(".syswin")
 const retakeText = await page.locator(".result").innerText()
 check("có phần so với lần trước", retakeText.toLowerCase().includes("so với lần trước"))
 check("có hàng so sánh đổi khác", (await page.locator(".compare__row").count()) >= 1)
-check("có kỹ năng dao động khi chọn yếu nhất", /dao động/i.test(retakeText))
+check("có kỹ năng chọn khác đi khi chọn yếu nhất", /chọn khác đi/i.test(retakeText))
 await shot(page, "flow-06-result-A-compare", true)
 
 let o = await overflow(page)
