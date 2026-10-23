@@ -276,7 +276,7 @@ export const STAGING_UNI = {
     timeline: [
       { at: 0, do: "tint", tone: "warm" },
       { at: 300, char: "friend", do: "bounce" },
-      { at: 600, char: "classmate", do: "say", text: "Tao cái quán mới mở, tối nay đi thử coi." },
+      { at: 600, char: "classmate", do: "say", text: "Tao biết quán mới mở, tối nay đi thử coi." },
       { at: 1000, char: "friend", do: "emote", kind: "exclaim" },
       { at: 1500, char: "player", do: "emote", kind: "ellipsis" },
       { at: 2000, do: "tint", tone: "tense" },
@@ -715,7 +715,7 @@ export const STAGING_UNI = {
       A: [
         { at: 100, do: "chat", from: "Bạn", text: "Tao sốt, nằm một mình. Nhắn lại lúc nào rảnh cũng được.", me: true },
         { at: 1200, do: "typing", from: "Hương" },
-        { at: 1800, do: "chat", from: "Hương", text: "Kiệt chưa? Để tớ qua." },
+        { at: 1800, do: "chat", from: "Hương", text: "Sốt bao nhiêu? Để tao qua." },
         { at: 2700, char: "player", do: "emote", kind: "sparkle" },
         { at: 3100, char: "player", do: "think", text: "Một người là đủ." },
         { at: 3900, do: "tint", tone: "warm" },

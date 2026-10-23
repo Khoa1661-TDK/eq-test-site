@@ -46,6 +46,8 @@
   /* Chừa chỗ cho thanh trên dính khi JS scrollIntoView container này sau mỗi
      lựa chọn (điện thoại: thanh trên có thể xuống hai hàng nên lề rộng hơn). */
   scroll-margin-top: 92px;
+  /* Chạm đúp = tua cảnh, không phải phóng to trang trên điện thoại. */
+  touch-action: manipulation;
 }
 @media (max-width: 700px) {
   .scene-stage-host {

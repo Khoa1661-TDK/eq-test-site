@@ -277,6 +277,8 @@ export function createQuestionScene({ onAnswer, onAdvance, onMove } = {}) {
 
   function onKeyDown(event) {
     if (destroyed || event.defaultPrevented) return
+    // Màn chữ không nằm trên trang (đang chiếu cảnh động) thì phím là việc của cảnh đó.
+    if (!scene.isConnected) return
     if (event.ctrlKey || event.metaKey || event.altKey) return
     const target = event.target
     if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) return
