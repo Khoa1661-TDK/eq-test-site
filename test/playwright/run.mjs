@@ -73,6 +73,7 @@ async function playRound(label, viewport, shotPrefix) {
   await page.locator(".quiz-intro button:visible", { hasText: /Bắt đầu|Làm lại bài test/ }).click()
 
   let maxBottom = 0
+  let minStage = Infinity
   for (let i = 0; i < 10; i += 1) {
     await page.locator(".choice").nth(3).waitFor({ state: "visible" })
     await page.waitForTimeout(400)
@@ -81,10 +82,18 @@ async function playRound(label, viewport, shotPrefix) {
     const bottom = await page.locator(".choice").nth(3).evaluate((n) => n.getBoundingClientRect().bottom)
     check(`câu ${i + 1}: HUD ở mép trên`, (await page.locator(".hud").evaluate((n) => n.getBoundingClientRect().top)) <= 1)
     maxBottom = Math.max(maxBottom, bottom)
+    const fit = await page.evaluate(() => {
+      const hud = document.querySelector(".hud").getBoundingClientRect()
+      const st = document.querySelector(".scn-stage-wrap").getBoundingClientRect()
+      return { stageTop: st.top, stageBottom: st.bottom, stageH: st.height, hudBottom: hud.bottom }
+    })
+    check(`câu ${i + 1}: cảnh nằm trọn trong khung nhìn, dưới HUD`, fit.stageTop >= fit.hudBottom - 1 && fit.stageBottom <= viewport.height, JSON.stringify(fit))
+    minStage = Math.min(minStage, fit.stageH)
     if (i === 0) await page.screenshot({ path: `${REPORTS}/${shotPrefix}-03-question.png` })
     await page.locator(".choice").nth((i * 3) % 4).click()
   }
   check("bốn phương án luôn nằm trong khung nhìn", maxBottom <= viewport.height, `đáy thấp nhất ${Math.round(maxBottom)} / ${viewport.height}`)
+  console.log(`       cảnh nhỏ nhất cao ${Math.round(minStage)}px, đáy phương án thấp nhất ${Math.round(maxBottom)}px / ${viewport.height}`)
 
   await page.waitForURL(/\/result/)
   await page.waitForTimeout(900)
@@ -102,6 +111,17 @@ async function playRound(label, viewport, shotPrefix) {
   await page.screenshot({ path: `${REPORTS}/${shotPrefix}-05-key.png` })
   await page.keyboard.press("Escape")
 
+  // "Luyện kỹ năng này" mở đúng phiên luyện của thành phần cần nâng cấp.
+  await page.locator("a", { hasText: "Luyện kỹ năng này" }).first().click()
+  await page.waitForURL(/\/practice\?skill=/)
+  await page.waitForTimeout(600)
+  const practiceTag = await page.textContent(".hud__tag")
+  check("luyện: mở phiên của một đặc tính", /Luyện: (Tự nhận thức|Làm chủ cảm xúc|Động lực tự thân|Sự thấu cảm|Kỹ năng xã hội)/.test(practiceTag ?? ""), practiceTag)
+  await page.goto(`${BASE}/practice`, { waitUntil: "networkidle" })
+  const practiceText = await page.textContent("main")
+  check("luyện: năm đặc tính EQ, không còn sáu kỹ năng cũ", practiceText.includes("Năm đặc tính EQ") && !/Sáu kỹ năng|Nhận biết xã hội|Quản lý quan hệ/.test(practiceText))
+  await page.screenshot({ path: `${REPORTS}/${shotPrefix}-06-practice.png`, fullPage: true })
+
   check("không có lỗi trong console", errors.length === 0, errors.join(" | "))
   check("không cuộn ngang", (await page.evaluate(() => document.documentElement.scrollWidth)) <= viewport.width)
   await page.close()
@@ -110,6 +130,9 @@ async function playRound(label, viewport, shotPrefix) {
 try {
   await playRound("điện thoại 390", { width: 390, height: 844 }, "flow-m")
   await playRound("màn rộng 1440", { width: 1440, height: 900 }, "flow")
+  await playRound("iPhone Safari 390 (trừ thanh trình duyệt)", { width: 390, height: 664 }, "flow-s")
+  await playRound("điện thoại nhỏ 360", { width: 360, height: 640 }, "flow-xs")
+  await playRound("laptop 1366", { width: 1366, height: 657 }, "flow-l")
 } finally {
   await browser.close()
   server?.kill()

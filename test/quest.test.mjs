@@ -2,7 +2,8 @@
 import assert from "node:assert/strict"
 import { QUEST_BANK } from "../public/js/data/questBank.js"
 import { STAGING_QUEST } from "../public/js/data/stagingQuest.js"
-import { EQ_TRAIT_KEYS } from "../public/js/data/eqTraits.js"
+import { EQ_TRAIT_KEYS, practiceTrait } from "../public/js/data/eqTraits.js"
+import { FORMS, ITEM_BY_ID, PRACTICE_IDS } from "../public/js/core/eqScoring.js"
 import { EQ_PROFILES } from "../public/js/data/eqProfiles.js"
 import { PER_TRAIT, QUEST_LENGTH, drawQuest, scoreQuestAnswers } from "../public/js/core/questScoring.js"
 
@@ -47,5 +48,13 @@ const mixed = scoreQuestAnswers(worst)
 ok(mixed.traits.every((t) => t.score >= 0 && t.score <= 100), "điểm trong 0–100")
 ok(mixed.strengths.length === 2 && mixed.toGrow.length === 2, "hai kỹ năng nổi bật, hai kỹ năng cần nâng cấp")
 ok(!mixed.strengths.some((k) => mixed.toGrow.includes(k)), "nổi bật và cần nâng cấp không trùng nhau")
+
+// Kho luyện xếp theo năm thành phần: mỗi thành phần có ít nhất 4 tình huống chữ.
+const practicePool = [...PRACTICE_IDS, ...FORMS.A].map((id) => ITEM_BY_ID[id]).filter((item) => item?.kind === "text")
+for (const item of practicePool) ok(EQ_TRAIT_KEYS.includes(practiceTrait(item)), `${item.id}: thuộc một thành phần`)
+for (const key of EQ_TRAIT_KEYS) {
+  const n = practicePool.filter((item) => practiceTrait(item) === key).length
+  ok(n >= 4, `luyện ${key}: ít nhất 4 tình huống (có ${n})`)
+}
 
 console.log(`\n✓ E-QUEST: ${checks} phép kiểm đạt, 0 lỗi.`)

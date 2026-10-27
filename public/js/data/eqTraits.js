@@ -8,6 +8,7 @@
 export const EQ_TRAITS = [
   {
     key: "selfAwareness",
+    code: "TN",
     name: "Tự nhận thức",
     en: "Self-awareness",
     color: "#e98aa8",
@@ -15,6 +16,7 @@ export const EQ_TRAITS = [
   },
   {
     key: "selfManagement",
+    code: "LC",
     name: "Làm chủ cảm xúc",
     en: "Self-regulation",
     color: "#e8b06a",
@@ -22,6 +24,7 @@ export const EQ_TRAITS = [
   },
   {
     key: "motivation",
+    code: "ĐL",
     name: "Động lực tự thân",
     en: "Motivation",
     color: "#8fc79a",
@@ -29,6 +32,7 @@ export const EQ_TRAITS = [
   },
   {
     key: "empathy",
+    code: "TC",
     name: "Sự thấu cảm",
     en: "Empathy",
     color: "#8fa8e0",
@@ -36,6 +40,7 @@ export const EQ_TRAITS = [
   },
   {
     key: "socialSkills",
+    code: "XH",
     name: "Kỹ năng xã hội",
     en: "Social skills",
     color: "#b79ae0",
@@ -60,3 +65,20 @@ export const EQ_SOURCES = [
     href: "https://doi.org/10.1037/0003-066X.63.6.503",
   },
 ]
+
+/* Kho luyện tập (data/forms.js PRACTICE_IDS + 12 tình huống đại học UN_ cũ, nay không còn trong bài
+   đánh giá) được xếp theo năm thành phần: kỹ năng chính cũ → thành phần, trừ vài tình huống về
+   ý chí và tự đứng dậy được gán thẳng cho "Động lực tự thân" (mô hình cũ không có kỹ năng này). */
+export const TRAIT_OF_DOMAIN = {
+  selfAwareness: "selfAwareness",
+  regulation: "selfManagement",
+  empathy: "empathy",
+  socialAwareness: "empathy",
+  communication: "socialSkills",
+  relationship: "socialSkills",
+}
+const MOTIVATION_IDS = new Set(["RG_01", "NX_01", "UN_04", "UN_05"])
+
+export function practiceTrait(item) {
+  return MOTIVATION_IDS.has(item.id) ? "motivation" : TRAIT_OF_DOMAIN[item.domain]
+}

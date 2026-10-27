@@ -78,8 +78,8 @@ export const TRAIT_NOTES = {
 
 export const PRACTICE_SKILL = {
   selfAwareness: "selfAwareness",
-  selfManagement: "regulation",
-  motivation: "random",
+  selfManagement: "selfManagement",
+  motivation: "motivation",
   empathy: "empathy",
-  socialSkills: "relationship",
+  socialSkills: "socialSkills",
 }

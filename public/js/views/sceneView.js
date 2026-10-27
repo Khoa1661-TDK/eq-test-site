@@ -77,7 +77,7 @@ export function renderSceneView(mount, { navigate } = {}) {
       }),
       el("p", {
         class: "prose",
-        text: "Sau mỗi cảnh, bạn sẽ thấy lựa chọn của mình dẫn tới đâu và đâu là cách mạnh hơn. Phần này chỉ để luyện: không chấm điểm, chỉ ghi lại bạn đã luyện kỹ năng nào để so sánh ở lần đánh giá sau.",
+        text: "Sau mỗi cảnh, bạn sẽ thấy lựa chọn của mình dẫn tới đâu và đâu là cách mạnh hơn. Phần này chỉ để luyện, không chấm điểm và không ảnh hưởng tới hồ sơ EQ của bạn.",
       }),
       el("p", { class: "story-actions" }, button("Bắt đầu", { primary: true, onClick: () => loadScenario(0) })),
     )
@@ -175,7 +175,7 @@ export function renderSceneView(mount, { navigate } = {}) {
       el("h1", { class: "story-title", text: `Bạn chọn cách mạnh nhất ở ${strongest}/${total} cảnh` }),
       el("p", {
         class: "prose",
-        text: "Phần này chỉ để luyện nên không có điểm. Muốn biết sáu kỹ năng của mình đang ở đâu và tiến bộ tới đâu, hãy làm bài đánh giá, trong đó cũng có cảnh động.",
+        text: "Phần này chỉ để luyện nên không có điểm. Muốn biết năm đặc tính EQ của mình đang ở đâu, hãy làm bài test E-Quest: mười tình huống, cuối bài là hồ sơ EQ của riêng bạn.",
       }),
       frame(el("div", { class: "story-skills-wrap" }, el("h2", { class: "story-card__title", text: "Từng cảnh" }), el("ul", { class: "story-skills" }, rows)), { size: "lg" }),
       el(

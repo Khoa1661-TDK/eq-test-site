@@ -170,6 +170,7 @@ export function renderAssessment(mount, { navigate }) {
     updateHud()
     runtime = createSceneRuntime(sceneHost, toQuestScene(item, startedAt), {
       quick: true,
+      topInset: () => hud.offsetHeight,
       onAnswer(choiceId) {
         answers[item.id] = choiceId
         persist()

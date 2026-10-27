@@ -245,8 +245,9 @@ export function renderEqResult(mount, { navigate }) {
     const door = (side) => el("div", { class: `kfx__door kfx__door--${side}` }, el("i", { class: "kfx__plank" }), el("i", { class: "kfx__plank" }), el("i", { class: "kfx__knob" }))
     const stage = el(
       "div",
-      { class: "kfx__stage", attrs: { "aria-hidden": "true" } },
+      { class: "kfx__stage" },
       el("div", { class: "kfx__light" }),
+      quote,
       el("div", { class: "kfx__doors" }, door("l"), door("r")),
       el("div", { class: "kfx__lock", html: LOCK_SVG }),
       el("div", { class: "kfx__key", html: KEY_SVG }),
@@ -255,7 +256,7 @@ export function renderEqResult(mount, { navigate }) {
     const overlay = el(
       "div",
       { class: `kfx${skip ? " kfx--skip" : ""}`, role: "dialog", attrs: { "aria-modal": "true", "aria-label": "Chìa khóa EQ của bạn" } },
-      el("div", { class: "kfx__panel" }, closeBtn, stage, quote),
+      el("div", { class: "kfx__panel" }, closeBtn, stage),
     )
     overlay.style.setProperty("--kc", color)
     document.body.append(overlay)

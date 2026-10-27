@@ -136,6 +136,23 @@
   --skill-c-tint: var(--skill-relationship-tint);
   --skill-c-dark: var(--skill-relationship-dark);
 }
+/* Năm đặc tính E-Quest (data/eqTraits.js) mượn bảng màu của kỹ năng cũ gần nhất,
+   trùng với linh vật của nhóm (data/eqProfiles.js). */
+[data-skill="selfManagement"] {
+  --skill-c: var(--skill-regulation);
+  --skill-c-tint: var(--skill-regulation-tint);
+  --skill-c-dark: var(--skill-regulation-dark);
+}
+[data-skill="motivation"] {
+  --skill-c: var(--skill-communication);
+  --skill-c-tint: var(--skill-communication-tint);
+  --skill-c-dark: var(--skill-communication-dark);
+}
+[data-skill="socialSkills"] {
+  --skill-c: var(--skill-relationship);
+  --skill-c-tint: var(--skill-relationship-tint);
+  --skill-c-dark: var(--skill-relationship-dark);
+}
 
 /* ------------------------------------------------------------------ reset */
 *,

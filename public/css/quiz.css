@@ -706,3 +706,16 @@
 .quiz-wrap--quest {
   min-height: 100dvh;
 }
+@media (max-width: 700px) {
+  .hud--quest .hud__row {
+    padding: 4px 10px;
+  }
+  .hud--quest .btn--sm,
+  .hud--quest .sound-toggle {
+    min-height: 30px;
+  }
+  .hud--quest .hud__bar {
+    padding: 0 10px;
+    margin-bottom: 5px;
+  }
+}

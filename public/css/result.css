@@ -1269,10 +1269,12 @@ body.kfx-open { overflow: hidden; }
 .kfx { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; background: rgba(18,16,30,.94); padding: 16px; }
 .kfx__panel { position: relative; width: min(100%, 420px); display: grid; justify-items: center; gap: 16px; }
 .kfx__close { position: absolute; top: -4px; right: -4px; z-index: 5; width: 44px; height: 44px; background: #fffdf7; border: 3px solid var(--ink); font: 700 26px/1 var(--font-text); cursor: pointer; }
-.kfx__stage { position: relative; width: 280px; height: 320px; margin-top: 24px; perspective: 900px; }
-.kfx__light { position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, #fff 0%, #fff6c8 28%, var(--kc) 62%, transparent 82%); opacity: 0; border: 4px solid var(--ink); }
-.kfx__doors { position: absolute; inset: 0; display: flex; }
-.kfx__door { position: relative; flex: 1; background: #8a5a34; border: 4px solid var(--ink); overflow: hidden; display: flex; flex-direction: column; justify-content: space-evenly; padding: 10px 8px; backface-visibility: hidden; }
+/* Khung cửa: tường tối viền mực; sau hai cánh là ô cửa sáng chứa câu nói của nhóm.
+   Thứ tự lớp: ánh sáng (0) → câu nói (1) → hai cánh (2) → ổ khóa (3) → chìa (4) → chớp (6). */
+.kfx__stage { position: relative; width: 280px; height: 340px; margin-top: 24px; perspective: 900px; background: #241f38; border: 6px solid var(--ink); box-shadow: 0 0 0 6px #4a3b2a; }
+.kfx__light { position: absolute; inset: 0; z-index: 0; opacity: 0; background: radial-gradient(ellipse at 50% 42%, #fffef6 0%, #fff4cc 48%, color-mix(in srgb, var(--kc) 65%, #fff4cc) 100%); }
+.kfx__doors { position: absolute; inset: 0; z-index: 2; display: flex; transform-style: preserve-3d; }
+.kfx__door { position: relative; flex: 1; background: #8a5a34; border: 4px solid var(--ink); overflow: hidden; display: flex; flex-direction: column; justify-content: space-evenly; padding: 10px 8px; }
 .kfx__door--l { transform-origin: 0 50%; border-right-width: 2px; }
 .kfx__door--r { transform-origin: 100% 50%; border-left-width: 2px; }
 .kfx__plank { display: block; height: 22%; background: #a86f43; border: 3px solid #5b3a20; box-shadow: inset 0 -4px 0 #8a5a34; }
@@ -1282,20 +1284,25 @@ body.kfx-open { overflow: hidden; }
 .kfx__key { position: absolute; left: 50%; top: 50%; z-index: 4; width: 96px; height: 48px; margin: -12px 0 0 -48px; opacity: 0; transform: translate(220px, 180px) rotate(-35deg); }
 .kfx__key svg { width: 96px; height: 48px; display: block; }
 .kfx__lock svg { width: 64px; height: 80px; display: block; }
-.kfx__flash { position: absolute; inset: -40px; z-index: 6; background: #fff; opacity: 0; pointer-events: none; }
-.kfx__quote { text-align: center; color: #fff; opacity: 0; max-width: 360px; min-height: 110px; transform: translateY(10px); }
-.kfx__quote blockquote { font: 700 clamp(17px, 4.6vw, 21px)/1.45 var(--font-display); text-shadow: 0 2px 0 rgba(0,0,0,.4); }
-.kfx__quote figcaption { margin-top: 10px; font-size: 14px; color: var(--yellow); }
+.kfx__flash { position: absolute; inset: 0; z-index: 6; background: #fff; opacity: 0; pointer-events: none; }
+.kfx__quote { position: absolute; inset: 0; z-index: 1; display: grid; place-content: center; gap: 12px; padding: 28px 30px; margin: 0; text-align: center; color: var(--ink); opacity: 0; transform: scale(.94); }
+.kfx__quote blockquote { margin: 0; font: 800 clamp(17px, 4.6vw, 20px)/1.45 var(--font-display); }
+.kfx__quote figcaption { font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-2); }
 
 .kfx--play .kfx__key { animation: kfx-key 2.1s linear .1s forwards; }
 .kfx--play .kfx__lock { animation: kfx-lock .9s cubic-bezier(.5,0,1,.6) 1.2s forwards; }
-.kfx--play .kfx__light { animation: kfx-light .4s ease-out 1.55s forwards; }
-.kfx--play .kfx__door--l { animation: kfx-open-l .9s cubic-bezier(.5,0,.2,1) 1.6s forwards; }
-.kfx--play .kfx__door--r { animation: kfx-open-r .9s cubic-bezier(.5,0,.2,1) 1.6s forwards; }
-.kfx--play .kfx__flash { animation: kfx-flash .7s ease-out 1.65s; }
-.kfx--play .kfx__quote { animation: kfx-quote .7s ease-out 2.4s forwards; }
-.kfx--skip .kfx__stage { height: 0; margin: 0; overflow: hidden; }
-.kfx--skip .kfx__quote { opacity: 1; transform: none; }
+.kfx--play .kfx__light { animation: kfx-light .5s ease-out 1.6s forwards; }
+.kfx--play .kfx__stage { animation: kfx-glow 1.2s ease-out 1.6s forwards; }
+.kfx--play .kfx__door--l { animation: kfx-open-l 1s cubic-bezier(.5,0,.2,1) 1.6s forwards; }
+.kfx--play .kfx__door--r { animation: kfx-open-r 1s cubic-bezier(.5,0,.2,1) 1.6s forwards; }
+.kfx--play .kfx__flash { animation: kfx-flash .6s ease-out 1.65s; }
+.kfx--play .kfx__quote { animation: kfx-quote .7s ease-out 2.3s forwards; }
+/* Giảm chuyển động: hiện thẳng trạng thái cuối — cửa mở, ô cửa sáng, câu nói. */
+.kfx--skip .kfx__lock, .kfx--skip .kfx__key { display: none; }
+.kfx--skip .kfx__light, .kfx--skip .kfx__quote { opacity: 1; transform: none; }
+.kfx--skip .kfx__door--l { transform: rotateY(-80deg); filter: brightness(.7); }
+.kfx--skip .kfx__door--r { transform: rotateY(80deg); filter: brightness(.7); }
+.kfx--skip .kfx__stage { box-shadow: 0 0 0 6px #4a3b2a, 0 0 70px 18px color-mix(in srgb, var(--kc) 70%, #fff4cc); }
 
 @keyframes kfx-key {
   0% { opacity: 0; transform: translate(220px, 180px) rotate(-35deg); }
@@ -1310,7 +1317,8 @@ body.kfx-open { overflow: hidden; }
   100% { transform: translateY(420px) rotate(40deg); opacity: 0; }
 }
 @keyframes kfx-light { to { opacity: 1; } }
-@keyframes kfx-open-l { to { transform: rotateY(-105deg); } }
-@keyframes kfx-open-r { to { transform: rotateY(105deg); } }
-@keyframes kfx-flash { 0% { opacity: 0; } 25% { opacity: .95; } 100% { opacity: 0; } }
+@keyframes kfx-glow { to { box-shadow: 0 0 0 6px #4a3b2a, 0 0 70px 18px color-mix(in srgb, var(--kc) 70%, #fff4cc); } }
+@keyframes kfx-open-l { to { transform: rotateY(-80deg); filter: brightness(.7); } }
+@keyframes kfx-open-r { to { transform: rotateY(80deg); filter: brightness(.7); } }
+@keyframes kfx-flash { 0% { opacity: 0; } 25% { opacity: .85; } 100% { opacity: 0; } }
 @keyframes kfx-quote { to { opacity: 1; transform: none; } }

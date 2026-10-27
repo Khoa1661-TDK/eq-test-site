@@ -2,33 +2,32 @@
    Khác với chế độ đánh giá: sau mỗi lựa chọn, người học được giải thích ngay
    (chiến lược mình vừa dùng, hệ quả thường thấy, cách mạnh hơn, nguyên tắc ghi nhớ).
    Kho luyện tách khỏi hai đề đánh giá, và luyện tập không bao giờ đổi điểm đánh giá:
-   nó chỉ ghi lại số lượt luyện để trang kết quả cho thấy bạn đã luyện gì giữa hai lần đánh giá. */
+   nó chỉ ghi lại số lượt luyện. Các tình huống được xếp theo năm đặc tính EQ (data/eqTraits.js). */
 
 import { el, frame } from "../core/dom.js"
 import { sound, soundToggle } from "../core/sound.js"
 import { createQuestionScene } from "../scene/questionScene.js"
 import { createSceneRuntime } from "../scene/sceneRuntime.js"
 import { isStaged, toScene } from "../scene/staged.js"
-import { EQ_DIMENSIONS, EQ_BY_KEY } from "../data/eqDimensions.js"
-import {
-  ITEM_BY_ID,
-  PRACTICE_IDS,
-  latestAttempt,
-  loadPractice,
-  practiceQueue,
-  recordPractice,
-  scoreAttempt,
-  shuffleIds,
-} from "../core/eqScoring.js"
+import { EQ_TRAITS, EQ_TRAIT_BY_KEY, practiceTrait } from "../data/eqTraits.js"
+import { FORMS, ITEM_BY_ID, PRACTICE_IDS, loadPractice, recordPractice, shuffleIds } from "../core/eqScoring.js"
+import { questAttempts, scoreQuest } from "../core/questScoring.js"
 import { skillCard } from "../ui/parts.js"
 
-const textPool = () => PRACTICE_IDS.map((id) => ITEM_BY_ID[id]).filter((item) => item && item.kind === "text")
+/* Kho luyện: tình huống chữ của kho luyện cũ + 12 tình huống đại học (không còn dùng để đánh giá). */
+const textPool = () => [...PRACTICE_IDS, ...FORMS.A].map((id) => ITEM_BY_ID[id]).filter((item) => item && item.kind === "text")
+
+/** Hàng đợi luyện một thành phần: tình huống chưa luyện lên trước. */
+function traitQueue(trait, practised) {
+  const items = textPool().filter((item) => practiceTrait(item) === trait)
+  return [...items.filter((item) => !practised[item.id]), ...items.filter((item) => practised[item.id])]
+}
 
 export function renderPractice(mount, { navigate, skill = null }) {
   const practised = { ...loadPractice().answers }
-  const latest = scoreAttempt(latestAttempt())
-  const growthKeys = latest ? latest.growth.map((d) => d.key) : []
-  const patternKeys = latest ? latest.patterns.filter((p) => !p.effective).map((p) => p.key) : []
+  // Gợi ý luyện: hai thành phần "cần nâng cấp" của lần làm bài E-Quest gần nhất.
+  const latest = scoreQuest(questAttempts().at(-1) ?? null)
+  const growthKeys = latest ? latest.toGrow : []
 
   const go = (href) => (event) => {
     event.preventDefault()
@@ -48,7 +47,7 @@ export function renderPractice(mount, { navigate, skill = null }) {
         el("p", { class: "band__lead", text: "Chọn một kỹ năng, hoặc làm lần lượt các tình huống ngẫu nhiên." }),
         el("p", { class: "prose", text: "Ở đây không có điểm hay xếp hạng. Sau mỗi lựa chọn, bạn sẽ thấy cách mình vừa chọn, điều thường xảy ra sau đó, một cách mạnh hơn, và một câu để nhớ." }),
         growthKeys.length
-          ? el("p", { class: "prose" }, el("strong", { text: "Gợi ý từ lần đánh giá gần nhất: " }), growthKeys.map((k) => EQ_BY_KEY[k].name.toLowerCase()).join(" và "), ".")
+          ? el("p", { class: "prose" }, el("strong", { text: "Gợi ý từ lần đánh giá gần nhất: " }), growthKeys.map((k) => EQ_TRAIT_BY_KEY[k].name.toLowerCase()).join(" và "), ".")
           : null,
         el("p", { class: "prose muted", text: `Bạn đã luyện ${done}/${pool.length} tình huống trên máy này.` }),
       ),
@@ -60,9 +59,10 @@ export function renderPractice(mount, { navigate, skill = null }) {
     scenesBtn.addEventListener("click", go("/scenes"))
 
     const grid = el("div", { class: "skills" })
-    const ordered = [...EQ_DIMENSIONS].sort((a, b) => Number(growthKeys.includes(b.key)) - Number(growthKeys.includes(a.key)))
-    for (const dim of ordered) {
-      const items = pool.filter((item) => item.domain === dim.key)
+    const ordered = [...EQ_TRAITS].sort((a, b) => Number(growthKeys.includes(b.key)) - Number(growthKeys.includes(a.key)))
+    for (const trait of ordered) {
+      const dim = { ...trait, tagline: trait.summary }
+      const items = pool.filter((item) => practiceTrait(item) === dim.key)
       const taken = items.filter((item) => practised[item.id]).length
       const card = skillCard(dim, { practised: taken, total: items.length, href: `/practice?skill=${dim.key}` })
       if (growthKeys.includes(dim.key)) card.classList.add("skill--focus")
@@ -71,7 +71,7 @@ export function renderPractice(mount, { navigate, skill = null }) {
     }
 
     const band = el("section", { class: "band result__block" })
-    band.append(el("h2", { class: "band__title", text: "Sáu kỹ năng" }), grid)
+    band.append(el("h2", { class: "band__title", text: "Năm đặc tính EQ" }), grid)
     view.append(
       el(
         "section",
@@ -95,10 +95,8 @@ export function renderPractice(mount, { navigate, skill = null }) {
 
   /* ------------------------------------------------------ phiên luyện tập */
   const isRandom = skill === "random"
-  const dim = isRandom ? null : EQ_BY_KEY[skill]
-  const queue = isRandom
-    ? shuffleIds(textPool().map((item) => item.id)).map((id) => ITEM_BY_ID[id])
-    : practiceQueue(skill, { patterns: patternKeys }).filter((item) => item.kind === "text")
+  const dim = isRandom ? null : EQ_TRAIT_BY_KEY[skill]
+  const queue = isRandom ? shuffleIds(textPool().map((item) => item.id)).map((id) => ITEM_BY_ID[id]) : traitQueue(skill, practised)
   let cursor = 0
 
   const label = isRandom ? "Tình huống ngẫu nhiên" : `Luyện: ${dim?.name ?? ""}`

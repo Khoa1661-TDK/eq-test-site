@@ -966,7 +966,7 @@
 
 /* ------------------------------------------------------------------ chế độ nhanh (E-Quest)
    Cảnh, bối cảnh, câu hỏi và bốn phương án cùng nằm gọn trong một màn hình: không gõ chữ,
-   không nút "Tiếp", lựa chọn mở sẵn. Cảnh bị chặn ~25% chiều cao khung nhìn (sceneRuntime.resize). */
+   không nút "Tiếp", lựa chọn mở sẵn. Cảnh được phóng vừa chỗ còn lại (sceneRuntime.resizeQuick). */
 .assess-scene[data-quick="on"] {
   padding-top: 10px;
 }
@@ -1027,8 +1027,34 @@
     padding-block: 7px;
   }
   [data-quick="on"] .console__in {
-    padding: 10px 12px;
+    padding: 9px 12px;
+    gap: 5px;
+  }
+  /* Điện thoại: bỏ nhãn "lúc · nơi" (cảnh đã cho thấy), bỏ con trỏ ">" và thu gọn phương án,
+     để phần cảnh còn chỗ lớn nhất có thể. */
+  [data-quick="on"] .console__top {
+    display: none;
+  }
+  [data-quick="on"] .console__text,
+  [data-quick="on"] .console__hint {
+    font-size: 14.5px;
+    line-height: 1.4;
+  }
+  [data-quick="on"] .choices {
     gap: 6px;
+  }
+  [data-quick="on"] .scn-board .choice {
+    grid-template-columns: 24px minmax(0, 1fr);
+    gap: 8px;
+    padding: 6px 10px;
+    font-size: 14px;
+    line-height: 1.32;
+  }
+  [data-quick="on"] .choice__cursor {
+    display: none;
+  }
+  [data-quick="on"] .choice__code {
+    font-size: 15px;
   }
 }
 [data-quick="on"] .scn-portrait {
@@ -1039,4 +1065,21 @@
 }
 [data-quick="on"] .scn-stage-wrap {
   margin-inline: auto;
+  max-width: 100%;
+}
+/* Màn rộng nằm ngang: cảnh bên trái, câu hỏi + phương án bên phải (bề rộng cố định),
+   nên cảnh được to gấp mấy lần mà vẫn cùng nằm trong một màn hình với câu hỏi. */
+@media (min-width: 960px) and (min-aspect-ratio: 5/4) {
+  .assess-scene[data-quick="on"] {
+    max-width: 1320px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 440px;
+    column-gap: 22px;
+    align-items: start;
+  }
+  .assess-scene[data-quick="on"] .scn-board {
+    padding-top: 0;
+    max-width: none;
+    margin: 0;
+  }
 }

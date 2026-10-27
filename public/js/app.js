@@ -2,7 +2,7 @@
    Kết quả EQ nằm trong sessionStorage (xem core/eqScoring.js), không nằm trên URL. */
 
 import { el, frame, qs, qsa } from "./core/dom.js"
-import { EQ_DIMENSIONS } from "./data/eqDimensions.js"
+import { EQ_TRAIT_KEYS, TRAIT_OF_DOMAIN } from "./data/eqTraits.js"
 import { renderLanding } from "./views/landing.js"
 import { renderAssessment } from "./views/assessment.js"
 import { renderEqResult } from "./views/eqResult.js"
@@ -24,7 +24,6 @@ function fixLinks(root = document) {
     a.setAttribute("href", BASE + href)
   }
 }
-const SKILLS = EQ_DIMENSIONS.map((dim) => dim.key)
 
 const TITLES = {
   "/": "E-Quest — Thông minh hơn cùng cảm xúc",
@@ -66,7 +65,9 @@ function route() {
 
   if (path === "/practice") {
     const asked = url.searchParams.get("skill")
-    const skill = asked === "random" || SKILLS.includes(asked) ? asked : null
+    // Liên kết cũ dùng sáu kỹ năng (vd. ?skill=regulation) vẫn mở đúng thành phần mới.
+    const trait = TRAIT_OF_DOMAIN[asked] ?? asked
+    const skill = trait === "random" || EQ_TRAIT_KEYS.includes(trait) ? trait : null
     document.title = TITLES["/practice"]
     return renderPractice(main, { navigate, skill })
   }

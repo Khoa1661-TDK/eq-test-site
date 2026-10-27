@@ -6,12 +6,13 @@
    liếc nhìn) để nhân vật không bao giờ đứng chết.
 
    ============================================================== HỢP ĐỒNG CẢNH
-   API: createSceneRuntime(mount, scene, { onAnswer(id), onDone(), onSkip(), lastLabel, quick })
+   API: createSceneRuntime(mount, scene, { onAnswer(id), onDone(), onSkip(), lastLabel, quick, topInset() })
         → { start(), skip(), destroy() }
 
    CHẾ ĐỘ NHANH (quick: true — bài đánh giá E-Quest): không gõ hội thoại, không dừng ở bóng thoại,
    không hậu quả. Khung thoại hiện ngay `scene.context` + câu hỏi + lựa chọn trong khi timeline
-   diễn một lần; bấm một lựa chọn là gọi onAnswer rồi onDone ngay.
+   diễn một lần; bấm một lựa chọn là gọi onAnswer rồi onDone ngay. Cảnh được phóng vừa chỗ còn lại
+   (topInset() = chiều cao thanh dính phía trên, xem resizeQuick).
 
    BẤM ĐỂ ĐỌC — hợp đồng điều nhịp (mọi bước đều do người chơi quyết định):
    Một hàng đợi bấm duy nhất; MỘT lần bấm đi tiếp ĐÚNG MỘT thứ, theo ưu tiên:
@@ -94,6 +95,8 @@ const WALK_STEP_MS = 120
 const EMOTE_CELL = 2.5
 const EXTRA_CELL = 2.5
 const MAX_CHAT = 5
+/** Chế độ nhanh: cảnh không bao giờ nhỏ hơn mức này, kể cả khi màn hình quá thấp (khi đó trang cuộn). */
+const QUICK_MIN_SCALE = 0.6
 const GESTURE_MS = { hop: 620, shiver: 1000, bounce: 900, nodYes: 900, shakeNo: 900, lean: 1600, stepBack: 500 }
 
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v))
@@ -155,7 +158,7 @@ const SCENE_ACTIONS = {
 
 const DOUBLE_TAP_MS = 320
 
-export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip, lastLabel, quick = false } = {}) {
+export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip, lastLabel, quick = false, topInset = null } = {}) {
   const timers = []
   let destroyed = false
   let rAF = 0
@@ -945,23 +948,44 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip, 
 
   /* ------------------------------------------------------------- responsive scale */
   function resize() {
-    // Chế độ nhanh: khung cảnh co theo cảnh đã phóng, nên đo bề rộng chỗ chứa chứ không đo chính khung.
-    const host = quick ? mount.clientWidth - parseFloat(getComputedStyle(mount).paddingLeft) - parseFloat(getComputedStyle(mount).paddingRight) : 0
-    const w = (quick ? host : stageWrap.clientWidth) || STAGE_W
+    if (quick) return resizeQuick()
+    const w = stageWrap.clientWidth || STAGE_W
     stageScale = Math.min(1.6, w / STAGE_W)
-    // Chế độ nhanh: cảnh chỉ chiếm khoảng 25% chiều cao màn hình để câu hỏi và lựa chọn cùng nằm trong khung nhìn.
-    if (quick) stageScale = Math.min(stageScale, Math.max(0.8, (window.innerHeight * (window.innerWidth < 700 ? 0.22 : 0.25)) / STAGE_H))
     stage.style.width = `${STAGE_W}px`
     stage.style.height = `${STAGE_H}px`
     stage.style.transform = `scale(${stageScale})`
     stage.style.transformOrigin = "top left"
     // căn giữa stage khi khung rộng hơn mức phóng tối đa
-    stage.style.left = quick ? "0px" : `${Math.max(0, (w - STAGE_W * stageScale) / 2)}px`
+    stage.style.left = `${Math.max(0, (w - STAGE_W * stageScale) / 2)}px`
     stageWrap.style.height = `${STAGE_H * stageScale + 8}px`
-    if (quick) stageWrap.style.maxWidth = `${Math.ceil(STAGE_W * stageScale) + 6}px`
+  }
+
+  /* Chế độ nhanh: cảnh lấy TRỌN chỗ còn lại sau câu hỏi và bốn phương án, để cả hai cùng nằm
+     trong khung nhìn mà cảnh vẫn to nhất có thể. Xếp chồng (điện thoại): chiều cao còn lại =
+     khung nhìn − thanh trên (topInset) − khối câu hỏi. Hai cột (màn rộng, xem scene.css): khối câu
+     hỏi có bề rộng cố định bên phải, cảnh lấy phần bề rộng còn lại. Khung cảnh ôm sát cảnh đã phóng. */
+  function resizeQuick() {
+    const cs = getComputedStyle(mount)
+    const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight)
+    const padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom)
+    const side = cs.display === "grid"
+    const top = typeof topInset === "function" ? topInset() : 0
+    const frameH = 8 + 12 // viền khung cảnh + chút lề dưới
+    const roomH = window.innerHeight - top - padY - frameH - (side ? 0 : board.offsetHeight)
+    const roomW = mount.clientWidth - padX - 6 - (side ? board.offsetWidth + (parseFloat(cs.columnGap) || 0) : 0)
+    stageScale = clamp(Math.min(roomW / STAGE_W, roomH / STAGE_H), QUICK_MIN_SCALE, side ? 2.6 : 1.6)
+    stage.style.width = `${STAGE_W}px`
+    stage.style.height = `${STAGE_H}px`
+    stage.style.transform = `scale(${stageScale})`
+    stage.style.transformOrigin = "top left"
+    stage.style.left = "0px"
+    stageWrap.style.height = `${STAGE_H * stageScale + 8}px`
+    stageWrap.style.width = `${Math.ceil(STAGE_W * stageScale) + 6}px`
   }
   const ro = new ResizeObserver(() => resize())
   ro.observe(quick ? mount : stageWrap)
+  if (quick) ro.observe(board)
+  window.addEventListener("resize", resize)
 
   const offMotion = onMotionChange((reduced) => {
     for (const c of chars.values()) c.resetDecor()
@@ -989,6 +1013,7 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip, 
       nextPending = false
       cancelAnimationFrame(rAF)
       ro.disconnect()
+      window.removeEventListener("resize", resize)
       offMotion && offMotion()
       stage.removeEventListener("click", onStageClick)
       document.removeEventListener("keydown", onKeydown)
