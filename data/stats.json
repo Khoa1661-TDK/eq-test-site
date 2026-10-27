@@ -1,10 +1,10 @@
 {
-  "total": 30,
+  "total": 62,
   "bands": {
-    "high": 19,
-    "mid": 3,
-    "low": 8
+    "high": 34,
+    "mid": 9,
+    "low": 19
   },
-  "updatedAt": "2026-10-23T00:45:15.586Z",
-  "lastSeconds": 21
+  "updatedAt": "2026-10-27T11:16:51.650Z",
+  "lastSeconds": 5
 }

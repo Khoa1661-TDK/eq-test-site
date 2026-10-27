@@ -1,21 +1,17 @@
-/* run.mjs — kiểm tra cả vòng ĐÁNH GIÁ → HIỂU → LUYỆN → ĐÁNH GIÁ LẠI trên trình duyệt thật,
-   ở màn rộng 1440 và điện thoại 390, và chụp ảnh vào reports/ để soi bằng mắt.
+/* run.mjs — kiểm tra vòng E-Quest trên trình duyệt thật, ở điện thoại 390×844 và màn rộng 1440×900:
+   trang chủ → "Trước khi bắt đầu" → 10 tình huống (cảnh + câu hỏi + bốn phương án cùng nằm trong
+   khung nhìn, bấm một lần là sang câu) → hồ sơ EQ (5 thanh, lịch sử, chìa khóa mở cửa) → làm lại.
+   Ảnh chụp lưu vào reports/ để soi bằng mắt.
 
    Chạy: node test/playwright/run.mjs            (tự bật máy chủ trên một cổng trống)
-         node test/playwright/run.mjs --url http://127.0.0.1:8787
+         node test/playwright/run.mjs --url http://127.0.0.1:8787 */
 
-   Để chạy nhanh, phần lớn câu trả lời được nạp sẵn vào localStorage; MỘT cảnh động và MỘT
-   tình huống chữ vẫn được chơi bằng chuột như người thật, rồi bấm "Xem kết quả". */
-
-import { chromium, devices } from "playwright"
+import { chromium } from "playwright"
 import { spawn } from "node:child_process"
 import { mkdir } from "node:fs/promises"
 import { fileURLToPath } from "node:url"
 import { resolve } from "node:path"
 import { createServer } from "node:net"
-
-import { FORMS, ITEM_BY_ID, HISTORY_KEY, strongestChoice, weightedPoints } from "../../public/js/core/eqScoring.js"
-import { TYPES } from "../../public/js/data/types.js"
 
 const ROOT = resolve(fileURLToPath(new URL("../..", import.meta.url)))
 const REPORTS = resolve(ROOT, "reports")
@@ -55,235 +51,72 @@ if (!BASE) {
   }
 }
 
-/* ------------------------------------------------------------ dữ liệu bài làm */
-const weakest = (item) => item.choices.reduce((lo, c) => (weightedPoints(item, c) < weightedPoints(item, lo) ? c : lo))
-
-/** Một bài dở: một cảnh động và một tình huống chữ ở đầu chưa trả lời, phần còn lại đã trả lời. */
-function seededCurrent(form, pick) {
-  const ids = FORMS[form]
-  const scene = ids.find((id) => ITEM_BY_ID[id].kind === "scene")
-  const text = ids.find((id) => ITEM_BY_ID[id].kind === "text")
-  const order = [scene, text, ...ids.filter((id) => id !== scene && id !== text)].filter(Boolean)
-  const answers = {}
-  for (const id of order.slice(2)) answers[id] = pick(ITEM_BY_ID[id]).id
-  return { form, order, answers, index: 0, startedAt: Date.now() }
-}
-
-const BANNED = /kiểu người|bạn là (một )?người(?! thế nào)|tính cách|loại người|\bMBTI\b|\bSBTI\b/i
-
-const overflow = (page) =>
-  page.evaluate(() => ({ scrollW: document.documentElement.scrollWidth, innerW: window.innerWidth }))
-
-async function shot(page, name, fullPage = false) {
-  await page.screenshot({ path: `${REPORTS}/${name}.png`, fullPage })
-}
-
-/* ------------------------------------------------------------ thao tác */
-const choicesOpen = (page, scope) =>
-  page.evaluate((sel) => {
-    const list = document.querySelector(`${sel} .choices`)
-    return Boolean(list && list.classList.contains("is-open") && !list.classList.contains("is-locked") && list.querySelector(".choice"))
-  }, scope)
-
-async function pickByText(page, scope, text) {
-  const target = page.locator(`${scope} .choice`, { hasText: text.slice(0, 40) }).first()
-  await target.click()
-}
-
-/* Bấm nút "câu tiếp theo ▶" trong khung thoại — cảnh giờ dừng ở đó chờ người chơi bấm
-   (hợp đồng mới); hậu quả nhiều bóng say thì cần bấm nhiều nhịp. Bấm đều đều cho tới
-   khi bấm đúng NÚT TIẾP (nhãn khác "Tiếp ▶" = onDone vừa chạy) hoặc điều kiện sớm hơn. */
-async function clickNextButton(page, untilSel) {
-  for (let i = 0; i < 120; i += 1) {
-    const done = await page.evaluate((sel) => {
-      const row = document.querySelector(".scene-stage-host .scn-tap:not([hidden])")
-      if (row) {
-        const label = row.querySelector(".scn-tap__label")?.textContent || ""
-        row.querySelector(".scn-tap__btn")?.click()
-        if (label !== "Tiếp ▶") return true
-      }
-      return sel ? Boolean(document.querySelector(sel)) : false
-    }, untilSel)
-    if (done) return true
-    await page.waitForTimeout(150)
-  }
-  return false
-}
-
-/** Chơi một cảnh động: bấm sân khấu cho tới khi hiện lựa chọn, rồi chọn theo nội dung. */
-async function playScene(page, item, choice) {
-  for (let i = 0; i < 120; i += 1) {
-    if (await choicesOpen(page, ".scene-stage-host")) break
-    await page.evaluate(() => document.querySelector(".scene-stage-host .scn-stage")?.click())
-    await page.waitForTimeout(120)
-  }
-  check(`cảnh «${item.title}» hiện lựa chọn`, await choicesOpen(page, ".scene-stage-host"))
-  await pickByText(page, ".scene-stage-host", choice.text)
-  // bấm nút "câu tiếp theo" (và mọi nhịp bấm bóng say dọc hậu quả) cho cảnh được phép đi tiếp
-  check(`cảnh «${item.title}» hiện nút câu tiếp theo`, await clickNextButton(page, ".stage .scene"))
-}
-
-/** Trả lời một tình huống chữ: bấm khung thoại tới khi có lựa chọn. */
-async function playText(page, item, choice) {
-  for (let i = 0; i < 80; i += 1) {
-    if (await choicesOpen(page, ".stage .scene")) break
-    await page.evaluate(() => document.querySelector(".stage .scene")?.click())
-    await page.waitForTimeout(80)
-  }
-  check(`tình huống «${item.title}» hiện lựa chọn`, await choicesOpen(page, ".stage .scene"))
-  await pickByText(page, ".stage .scene", choice.text)
-}
-
-/** Tình huống chữ có dàn dựng được diễn như cảnh động; còn lại dùng khung thoại. */
-async function playAny(page, item, choice) {
-  for (let i = 0; i < 40; i += 1) {
-    if (await page.locator(".scene-stage-host .scn-stage").count()) return playScene(page, item, choice)
-    if (await page.locator(".stage .scene").count()) return playText(page, item, choice)
-    await page.waitForTimeout(150)
-  }
-  check(`«${item.title}» hiện ra`, false)
-}
-
-async function finishSeeded(page, current, pick) {
-  const [sceneId, textId] = current.order
-  await page.goto(`${BASE}/`, { waitUntil: "domcontentloaded" })
-  await page.evaluate(
-    ([key, cur, prev]) => {
-      const saved = JSON.parse(localStorage.getItem(key) || "null") || { attempts: [], current: null }
-      saved.current = cur
-      if (prev) saved.attempts = prev
-      localStorage.setItem(key, JSON.stringify(saved))
-    },
-    [HISTORY_KEY, current, null],
-  )
-  await page.goto(`${BASE}/assessment`, { waitUntil: "networkidle" })
-  await page.getByText("Tiếp tục bài đang làm").click()
-  const scene = ITEM_BY_ID[sceneId]
-  await playScene(page, scene, pick(scene))
-  const text = ITEM_BY_ID[textId]
-  await playAny(page, text, pick(text))
-  for (let i = 0; i < 60 && !(await page.locator(".result").count()); i += 1) {
-    const submit = page.locator(".hud__actions .btn--accent")
-    if (await submit.isVisible().catch(() => false)) await submit.click().catch(() => {})
-    else await page.evaluate(() => document.querySelector(".stage .scene")?.click())
-    await page.waitForTimeout(150)
-  }
-}
-
-/* ======================================================= màn rộng 1440 */
+/* ------------------------------------------------------------ một vòng chơi */
 const browser = await chromium.launch()
-const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, locale: "vi-VN" })
-const page = await ctx.newPage()
-const errors = []
-page.on("pageerror", (e) => errors.push(e.message))
-page.on("console", (m) => m.type() === "error" && errors.push(m.text()))
 
-console.log("— trang chủ —")
-await page.goto(`${BASE}/`, { waitUntil: "networkidle" })
-check("trang chủ không chứa ngôn ngữ xếp kiểu người", !BANNED.test(await page.locator("main").innerText()))
-await shot(page, "flow-01-landing")
+async function playRound(label, viewport, shotPrefix) {
+  console.log(`— ${label} —`)
+  const page = await browser.newPage({ viewport })
+  const errors = []
+  page.on("pageerror", (err) => errors.push(String(err)))
+  page.on("console", (msg) => msg.type() === "error" && errors.push(msg.text()))
 
-console.log("— đánh giá lần 1 (đề A, chọn mạnh nhất) —")
-await finishSeeded(page, seededCurrent("A", strongestChoice), strongestChoice)
-check("tới trang kết quả", (await page.locator(".result").count()) > 0)
-await page.waitForSelector(".syswin")
-check("cửa sổ hồ sơ hiện giữa trang", (await page.locator(".result__window .syswin").count()) === 1)
-const resultText = await page.locator(".result").innerText()
-const typeCodes = TYPES.map((t) => t.code)
-const shownCode = (await page.locator(".typecard__code").first().innerText()).trim()
-check("kiểu đúng một trong 16 mã", typeCodes.includes(shownCode), shownCode)
-check("lưới 16 kiểu hiện ở cuối trang", (await page.locator(".typegrid__card").count()) === 16, `${await page.locator(".typegrid__card").count()}`)
-const resultLower = resultText.toLowerCase()
-check("có đủ hộp Điểm mạnh và Điểm cần để ý", resultLower.includes("điểm mạnh") && resultLower.includes("điểm cần để ý"))
-check("nhìn lại đủ 12 lựa chọn", (await page.locator(".lookback__item").count()) === 12, `${await page.locator(".lookback__item").count()}`)
-check("trang kết quả không có % và không có /100", !resultText.includes("%") && !resultText.includes("/100"))
-check("trang kết quả không chứa ngôn ngữ xếp kiểu người", !BANNED.test(resultText), resultText.match(BANNED)?.[0])
-check("lần đầu: chưa có phần so với lần trước", !resultLower.includes("so với lần trước"))
-await shot(page, "flow-02-result-A", true)
+  await page.goto(`${BASE}/`, { waitUntil: "networkidle" })
+  check("trang chủ: tiêu đề mới", (await page.textContent("h1"))?.includes("Cùng một câu chuyện, mỗi người một cảm xúc."))
+  check("trang chủ: tên E-Quest", (await page.title()).includes("E-Quest"))
+  await page.screenshot({ path: `${REPORTS}/${shotPrefix}-01-landing.png` })
 
-console.log("— luyện tập —")
-await page.goto(`${BASE}/practice`, { waitUntil: "networkidle" })
-check("trang luyện có 6 thẻ kỹ năng", (await page.locator(".skills .skill").count()) === 6)
-await page.locator(".skills .skill").first().click()
-await page.waitForSelector(".stage .scene, .scene-stage-host .scn-stage")
-const practiceScope = (await page.locator(".scene-stage-host .scn-stage").count()) ? ".scene-stage-host" : ".stage .scene"
-for (let i = 0; i < 120 && !(await choicesOpen(page, practiceScope)); i += 1) {
-  await page.evaluate((sc) => document.querySelector(sc === ".scene-stage-host" ? ".scene-stage-host .scn-stage" : ".stage .scene")?.click(), practiceScope)
-  await page.waitForTimeout(120)
+  await page.goto(`${BASE}/assessment`, { waitUntil: "networkidle" })
+  const intro = await page.textContent(".quiz-intro")
+  check("bảng mở đầu: ba mục mới", ["Về E-Quest", "Cách chơi", "Một điều nhỏ cần nhớ"].every((t) => intro.includes(t)))
+  await page.screenshot({ path: `${REPORTS}/${shotPrefix}-02-intro.png`, fullPage: true })
+  await page.locator(".quiz-intro button:visible", { hasText: /Bắt đầu|Làm lại bài test/ }).click()
+
+  let maxBottom = 0
+  for (let i = 0; i < 10; i += 1) {
+    await page.locator(".choice").nth(3).waitFor({ state: "visible" })
+    await page.waitForTimeout(400)
+    const count = await page.textContent(".hud__count")
+    check(`câu ${i + 1}: đếm đúng`, count?.includes(`${i + 1}/10`), count)
+    const bottom = await page.locator(".choice").nth(3).evaluate((n) => n.getBoundingClientRect().bottom)
+    check(`câu ${i + 1}: HUD ở mép trên`, (await page.locator(".hud").evaluate((n) => n.getBoundingClientRect().top)) <= 1)
+    maxBottom = Math.max(maxBottom, bottom)
+    if (i === 0) await page.screenshot({ path: `${REPORTS}/${shotPrefix}-03-question.png` })
+    await page.locator(".choice").nth((i * 3) % 4).click()
+  }
+  check("bốn phương án luôn nằm trong khung nhìn", maxBottom <= viewport.height, `đáy thấp nhất ${Math.round(maxBottom)} / ${viewport.height}`)
+
+  await page.waitForURL(/\/result/)
+  await page.waitForTimeout(900)
+  const text = await page.textContent("main")
+  for (const t of ["Tự nhận thức", "Làm chủ cảm xúc", "Động lực tự thân", "Sự thấu cảm", "Kỹ năng xã hội", "Kỹ năng nổi bật", "Kỹ năng cần nâng cấp", "Lịch sử làm bài", "Goleman"]) {
+    check(`hồ sơ: có "${t}"`, text.includes(t))
+  }
+  check("hồ sơ: không còn chữ điểm mạnh / điểm yếu", !/điểm mạnh|điểm yếu/i.test(text))
+  await page.screenshot({ path: `${REPORTS}/${shotPrefix}-04-result.png`, fullPage: true })
+
+  await page.getByRole("button", { name: /Chìa khóa EQ/ }).click()
+  await page.waitForTimeout(3600)
+  const quote = await page.locator("[role=dialog]").textContent()
+  check("chìa khóa: mở ra câu nói của nhóm", Boolean(quote?.trim()))
+  await page.screenshot({ path: `${REPORTS}/${shotPrefix}-05-key.png` })
+  await page.keyboard.press("Escape")
+
+  check("không có lỗi trong console", errors.length === 0, errors.join(" | "))
+  check("không cuộn ngang", (await page.evaluate(() => document.documentElement.scrollWidth)) <= viewport.width)
+  await page.close()
 }
-await page.locator(`${practiceScope} .choice`).first().click()
-await page.waitForTimeout(1500)
-const reps = await page.evaluate(() => JSON.parse(localStorage.getItem("eq_practice_v2") || "{}").reps?.length ?? 0)
-check("một lượt luyện được ghi lại", reps === 1, `${reps}`)
-await shot(page, "flow-03-practice")
 
-console.log("— cảnh động (luyện) —")
-await page.goto(`${BASE}/scenes`, { waitUntil: "networkidle" })
-await page.getByText("Bắt đầu", { exact: true }).click()
-await page.waitForSelector(".scene-stage-host .scn-stage")
-const envText = await page.evaluate(() => document.querySelector(".scn-env__svg")?.outerHTML.length ?? 0)
-check("cảnh có bối cảnh vẽ", envText > 500)
-await shot(page, "flow-04-scene")
-for (let i = 0; i < 120 && !(await choicesOpen(page, ".scene-stage-host")); i += 1) {
-  await page.evaluate(() => document.querySelector(".scene-stage-host .scn-stage")?.click())
-  await page.waitForTimeout(120)
+try {
+  await playRound("điện thoại 390", { width: 390, height: 844 }, "flow-m")
+  await playRound("màn rộng 1440", { width: 1440, height: 900 }, "flow")
+} finally {
+  await browser.close()
+  server?.kill()
 }
-await page.locator(".scene-stage-host .choice").first().click()
-await clickNextButton(page, ".scene-tip") // cảnh dừng ở nút "Xem phản hồi ▶" chờ người chơi bấm
-await page.waitForSelector(".scene-tip", { timeout: 15000 })
-check("sau lựa chọn có khung phản hồi", (await page.locator(".scene-tip").count()) === 1)
-await shot(page, "flow-05-scene-feedback")
-
-console.log("— đánh giá lại (đề A, chọn yếu nhất) —")
-await page.goto(`${BASE}/assessment`, { waitUntil: "networkidle" })
-const introText = (await page.locator(".quiz-intro").innerText()).toLowerCase()
-check("màn mở đầu báo đây là đánh giá lại", introText.includes("đánh giá lại"))
-check("lần đánh giá lại dùng lại đúng 12 tình huống cũ", introText.includes("làm lại đúng 12 tình huống đó"))
-await finishSeeded(page, seededCurrent("A", weakest), weakest)
-await page.waitForSelector(".syswin")
-const retakeText = await page.locator(".result").innerText()
-check("có phần so với lần trước", retakeText.toLowerCase().includes("so với lần trước"))
-check("có hàng so sánh đổi khác", (await page.locator(".compare__row").count()) >= 1)
-check("có kỹ năng chọn khác đi khi chọn yếu nhất", /chọn khác đi/i.test(retakeText))
-await shot(page, "flow-06-result-A-compare", true)
-
-let o = await overflow(page)
-check("màn rộng: không tràn ngang", o.scrollW <= o.innerW, `${o.scrollW}/${o.innerW}`)
-check("màn rộng: không có lỗi console", errors.length === 0, errors.slice(0, 3).join(" | "))
-
-/* ======================================================= điện thoại 390 */
-console.log("\n— điện thoại 390×844 —")
-const mob = await browser.newContext({ ...devices["iPhone 12"], locale: "vi-VN", viewport: { width: 390, height: 844 } })
-const mp = await mob.newPage()
-const mErrors = []
-mp.on("pageerror", (e) => mErrors.push(e.message))
-mp.on("console", (m) => m.type() === "error" && mErrors.push(m.text()))
-for (const [path, name] of [["/", "flow-m1-landing"], ["/practice", "flow-m2-practice"]]) {
-  await mp.goto(`${BASE}${path}`, { waitUntil: "networkidle" })
-  o = await overflow(mp)
-  check(`điện thoại ${path}: không tràn ngang`, o.scrollW <= o.innerW, `${o.scrollW}/${o.innerW}`)
-  await shot(mp, name)
-}
-await finishSeeded(mp, seededCurrent("A", strongestChoice), strongestChoice)
-await mp.waitForSelector(".syswin")
-o = await overflow(mp)
-check("điện thoại /result: không tràn ngang", o.scrollW <= o.innerW, `${o.scrollW}/${o.innerW}`)
-await shot(mp, "flow-m3-result")
-await mp.goto(`${BASE}/scenes`, { waitUntil: "networkidle" })
-await mp.getByText("Bắt đầu", { exact: true }).click()
-await mp.waitForSelector(".scene-stage-host .scn-stage")
-await mp.waitForTimeout(1500)
-o = await overflow(mp)
-check("điện thoại /scenes: không tràn ngang", o.scrollW <= o.innerW, `${o.scrollW}/${o.innerW}`)
-await shot(mp, "flow-m4-scene")
-check("điện thoại: không có lỗi console", mErrors.length === 0, mErrors.slice(0, 3).join(" | "))
-
-await browser.close()
-server?.kill()
 
 if (failures.length) {
-  console.error(`\n✗ TRÌNH DUYỆT: ${failures.length} lỗi`)
-  for (const f of failures) console.error(`  · ${f}`)
+  console.log(`\n✗ ${failures.length} lỗi:\n  ${failures.join("\n  ")}`)
   process.exit(1)
 }
-console.log("\n✓ TRÌNH DUYỆT: cả vòng đánh giá → luyện → đánh giá lại chạy trên màn rộng và điện thoại.")
+console.log("\n✓ E2E E-Quest: mọi phép kiểm đạt.")

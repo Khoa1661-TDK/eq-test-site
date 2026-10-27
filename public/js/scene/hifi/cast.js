@@ -24,7 +24,7 @@ const CAST_SPECS = {
   player: SPECS.ban, // "Bạn": áo len ô-liu, tóc ngắn trung tính
   teacherF: SPECS.hanh, // cô Hạnh (giảng viên): blazer navy, búi tóc thấp
   teacher: SPECS.thay, // thầy (giảng viên): kính, tóc muối tiêu, sơ mi xanh
-  teacherTri: SPECS.tri, // Thầy Trí (giảng viên): tóc xám ngắn, thấp ngang teen, sơ mi sọc xanh-trắng, kính
+  teacherTri: SPECS.tri, // Thầy Đức (giảng viên): tóc xám ngắn, thấp ngang teen, sơ mi sọc xanh-trắng, kính
   mom: SPECS.me, // mẹ: áo ấm, tóc ngang vai
   kid: SPECS.bin, // em nhỏ ~9 tuổi
 }

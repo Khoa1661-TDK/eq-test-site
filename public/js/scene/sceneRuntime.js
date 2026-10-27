@@ -6,8 +6,12 @@
    liếc nhìn) để nhân vật không bao giờ đứng chết.
 
    ============================================================== HỢP ĐỒNG CẢNH
-   API: createSceneRuntime(mount, scene, { onAnswer(id), onDone(), onSkip(), lastLabel })
+   API: createSceneRuntime(mount, scene, { onAnswer(id), onDone(), onSkip(), lastLabel, quick })
         → { start(), skip(), destroy() }
+
+   CHẾ ĐỘ NHANH (quick: true — bài đánh giá E-Quest): không gõ hội thoại, không dừng ở bóng thoại,
+   không hậu quả. Khung thoại hiện ngay `scene.context` + câu hỏi + lựa chọn trong khi timeline
+   diễn một lần; bấm một lựa chọn là gọi onAnswer rồi onDone ngay.
 
    BẤM ĐỂ ĐỌC — hợp đồng điều nhịp (mọi bước đều do người chơi quyết định):
    Một hàng đợi bấm duy nhất; MỘT lần bấm đi tiếp ĐÚNG MỘT thứ, theo ưu tiên:
@@ -151,7 +155,7 @@ const SCENE_ACTIONS = {
 
 const DOUBLE_TAP_MS = 320
 
-export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip, lastLabel } = {}) {
+export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip, lastLabel, quick = false } = {}) {
   const timers = []
   let destroyed = false
   let rAF = 0
@@ -387,7 +391,7 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip, 
       const wait = t0 + ev.at - performance.now()
       if (wait > 0 && !fastForward) await delay(wait)
       if (destroyed) return
-      const pauses = (ev.do === "say" || ev.do === "think") && !fastForward
+      const pauses = !quick && (ev.do === "say" || ev.do === "think") && !fastForward
       runEvent(pauses ? { ...ev, hold: true } : ev)
       if (pauses && bubbleHold) {
         await new Promise((resolve) => {
@@ -640,6 +644,11 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip, 
     choices.lock(true)
     choices.confirm(id)
     sound.confirm()
+    if (quick) {
+      onAnswer && onAnswer(id)
+      after(180, () => { if (!destroyed) onDone && onDone() })
+      return
+    }
     /* Trên điện thoại, sau khi bấm lựa chọn, sân khấu dễ nằm ngoài khung nhìn —
        kéo cả container cảnh vào lại để người chơi KHÔNG lỡ đoạn hậu quả đang diễn
        (scroll-margin-top trong scene.css chừa chỗ cho thanh trên dính). */
@@ -920,6 +929,15 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip, 
   async function start() {
     resize()
     rAF = requestAnimationFrame(tick)
+    if (quick) {
+      mount.dataset.quick = "on"
+      consoleApi.textEl.textContent = scenario.context || ""
+      consoleApi.announce(`${scenario.context || ""} ${scenario.prompt || ""}`)
+      decisionStarted = true
+      showChoices()
+      playTimeline((scenario.timeline || []).filter((ev) => ev.do !== "decisionPoint"))
+      return
+    }
     for (const line of scenario.dialogue || []) queueLine(line)
     // timeline chính chạy SONG SONG với hội thoại (nhân vật vừa idle vừa hành động)
     playTimeline(scenario.timeline || [])
@@ -927,18 +945,23 @@ export function createSceneRuntime(mount, scenario, { onAnswer, onDone, onSkip, 
 
   /* ------------------------------------------------------------- responsive scale */
   function resize() {
-    const w = stageWrap.clientWidth || STAGE_W
+    // Chế độ nhanh: khung cảnh co theo cảnh đã phóng, nên đo bề rộng chỗ chứa chứ không đo chính khung.
+    const host = quick ? mount.clientWidth - parseFloat(getComputedStyle(mount).paddingLeft) - parseFloat(getComputedStyle(mount).paddingRight) : 0
+    const w = (quick ? host : stageWrap.clientWidth) || STAGE_W
     stageScale = Math.min(1.6, w / STAGE_W)
+    // Chế độ nhanh: cảnh chỉ chiếm khoảng 25% chiều cao màn hình để câu hỏi và lựa chọn cùng nằm trong khung nhìn.
+    if (quick) stageScale = Math.min(stageScale, Math.max(0.8, (window.innerHeight * (window.innerWidth < 700 ? 0.22 : 0.25)) / STAGE_H))
     stage.style.width = `${STAGE_W}px`
     stage.style.height = `${STAGE_H}px`
     stage.style.transform = `scale(${stageScale})`
     stage.style.transformOrigin = "top left"
     // căn giữa stage khi khung rộng hơn mức phóng tối đa
-    stage.style.left = `${Math.max(0, (w - STAGE_W * stageScale) / 2)}px`
+    stage.style.left = quick ? "0px" : `${Math.max(0, (w - STAGE_W * stageScale) / 2)}px`
     stageWrap.style.height = `${STAGE_H * stageScale + 8}px`
+    if (quick) stageWrap.style.maxWidth = `${Math.ceil(STAGE_W * stageScale) + 6}px`
   }
   const ro = new ResizeObserver(() => resize())
-  ro.observe(stageWrap)
+  ro.observe(quick ? mount : stageWrap)
 
   const offMotion = onMotionChange((reduced) => {
     for (const c of chars.values()) c.resetDecor()

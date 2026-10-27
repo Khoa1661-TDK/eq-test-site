@@ -1,25 +1,38 @@
-/* eqResult.js — trang HỒ SƠ CẢM XÚC: một cửa sổ hệ thống duy nhất, thẻ kiểu cảm
-   xúc (16 kiểu, quyết định theo mẫu lựa chọn — xem data/types.js), hai cột điểm
-   mạnh / điểm cần để ý, phần nhìn lại từng lựa chọn, và lưới 16 kiểu ở cuối trang.
-   Không chấm điểm, không xếp loại: trang chỉ mô tả việc bạn LÀM trong từng tình
-   huống và hậu quả thường gặp của nó. */
+/* eqResult.js — HỒ SƠ EQ: nhóm của bạn (thành phần nổi bật nhất), năm thanh đặc tính,
+   kỹ năng nổi bật / cần nâng cấp, chìa khóa EQ (hoạt ảnh mở cửa), lịch sử làm bài, nguồn tham khảo. */
 
-import { copyText, el, frame } from "../core/dom.js"
-import { sound } from "../core/sound.js"
+import { el, frame } from "../core/dom.js"
 import { MASCOTS_BY_KEY } from "../data/mascots.js"
-import { TYPES, pickType } from "../data/types.js"
-import { attempts, clearAllData, compareResults, ITEM_BY_ID, scoreAttempt } from "../core/eqScoring.js"
-import { LEVEL_WORD, qualMeter, mascotArt } from "../ui/parts.js"
+import { EQ_SOURCES, EQ_TRAITS, EQ_TRAIT_BY_KEY } from "../data/eqTraits.js"
+import { EQ_PROFILES, PRACTICE_SKILL, TRAIT_NOTES } from "../data/eqProfiles.js"
+import { clearQuestHistory, questAttempt, questAttempts, scoreQuest } from "../core/questScoring.js"
+import { mascotArt } from "../ui/parts.js"
 
-const CHANGE_WORD = { improved: "↑ Tốt hơn lần trước", steady: "= Giống lần trước", dipped: "↓ Lần này chọn khác đi" }
+const reduced = () => window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+
+const fmtDate = (ms) => {
+  if (!ms) return "không rõ ngày"
+  const d = new Date(ms)
+  const p = (n) => String(n).padStart(2, "0")
+  return `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()} lúc ${p(d.getHours())}:${p(d.getMinutes())}`
+}
+
+const KEY_SVG = `<svg viewBox="0 0 32 16" width="96" height="48" shape-rendering="crispEdges" aria-hidden="true">
+<path fill="#1d1b2e" d="M1 3h7v1h1v8H8v1H1v-1H0V4h1z"/>
+<path fill="#ffcb3a" d="M2 4h5v1h1v6H7v1H2v-1H1V5h1z"/><path fill="#1d1b2e" d="M4 7h2v2H4z"/>
+<path fill="#1d1b2e" d="M9 6h20v4H9z"/><path fill="#ffcb3a" d="M9 7h19v2H9z"/>
+<path fill="#1d1b2e" d="M23 10h3v4h-3zM28 10h3v3h-3z"/><path fill="#c79a1a" d="M24 10h1v3h-1zM29 10h1v2h-1z"/>
+</svg>`
+
+const LOCK_SVG = `<svg viewBox="0 0 16 20" width="64" height="80" shape-rendering="crispEdges" aria-hidden="true">
+<path fill="#1d1b2e" d="M4 0h8v1h1v7h-3V3H6v5H3V1h1z"/><path fill="#9aa0b4" d="M5 1h6v1h1v6h-1V3h-1V2H6v1H5v5H4V2h1z"/>
+<path fill="#1d1b2e" d="M1 8h14v12H1z"/><path fill="#ffcb3a" d="M2 9h12v10H2z"/><path fill="#c79a1a" d="M2 16h12v3H2z"/>
+<path fill="#1d1b2e" d="M7 11h2v3H7z"/><path fill="#1d1b2e" d="M6 11h4v2H6z"/>
+</svg>`
 
 export function renderEqResult(mount, { navigate }) {
-  const all = attempts()
-  const current = all.at(-1) ?? null
-  const previous = all.at(-2) ?? null
-  const result = scoreAttempt(current)
-  const before = scoreAttempt(previous)
-  const view = el("div", { class: "result" })
+  const view = el("div", { class: "result eqr" })
+  let cleanup = []
 
   const go = (href) => (event) => {
     event.preventDefault()
@@ -31,198 +44,258 @@ export function renderEqResult(mount, { navigate }) {
     return a
   }
 
-  if (!result || !result.answered) {
-    view.append(
-      frame(
-        el(
-          "div",
-          { class: "empty" },
-          el("h1", { class: "band__title", text: "Chưa có hồ sơ cảm xúc" }),
-          el("p", { class: "prose", text: "Bạn chưa hoàn thành lần đánh giá nào trên máy này nên chưa có gì để tổng hợp." }),
-          el("p", { class: "actions" }, link("/assessment", "Bắt đầu đánh giá", "btn btn--accent btn--lg")),
+  function draw() {
+    cleanup.forEach((fn) => fn())
+    cleanup = []
+    view.replaceChildren()
+
+    const all = questAttempts()
+    const latest = all.at(-1) ?? null
+    const wantedId = new URL(location.href).searchParams.get("id")
+    const current = (wantedId && questAttempt(wantedId)) || latest
+    const result = current ? scoreQuest(current) : null
+
+    if (!current || !result?.answered) {
+      view.append(
+        frame(
+          el(
+            "div",
+            { class: "empty" },
+            el("h1", { class: "band__title", text: "Chưa có hồ sơ EQ" }),
+            el("p", { class: "prose", text: "Bạn chưa làm bài nào trên máy này nên chưa có hồ sơ để xem. Làm thử một lượt, chỉ mất vài phút." }),
+            el("p", { class: "actions" }, link("/assessment", "Bắt đầu làm bài", "btn btn--accent btn--lg")),
+          ),
+          { size: "lg", cls: "result__empty" },
         ),
-        { size: "lg", cls: "result__empty" },
+      )
+      return
+    }
+
+    const profile = EQ_PROFILES[result.top]
+    const mascot = MASCOTS_BY_KEY[profile.mascot]
+
+    /* ---------------------------------------------------------- cửa sổ ---- */
+    const bar = el(
+      "div",
+      { class: "syswin__bar" },
+      el("span", { class: "syswin__title", text: "Hồ sơ EQ của bạn" }),
+      el(
+        "span",
+        { class: "syswin__dots", attrs: { "aria-hidden": "true" } },
+        el("i", { class: "syswin__dot" }),
+        el("i", { class: "syswin__dot" }),
+        el("i", { class: "syswin__dot" }),
       ),
     )
-    mount.append(view)
-    return { destroy: () => mount.replaceChildren() }
-  }
 
-  const { type, alt } = pickType(current.answers)
-  const mascot = MASCOTS_BY_KEY[type.mascot]
-
-  /* ------------------------------------------------------------- cửa sổ ----- */
-  const bar = el(
-    "div",
-    { class: "syswin__bar" },
-    el("span", { class: "syswin__title", text: "HỒ SƠ CẢM XÚC.exe" }),
-    el(
-      "span",
-      { class: "syswin__dots", attrs: { "aria-hidden": "true" } },
-      el("i", { class: "syswin__dot syswin__dot--a" }),
-      el("i", { class: "syswin__dot syswin__dot--b" }),
-      el("i", { class: "syswin__dot syswin__dot--c" }),
-    ),
-  )
-
-  /* Thẻ kiểu: mã lớn, tên tiếng Anh, một câu mô tả, ảnh pixel ngồi bên phải,
-     và dòng "chất kiểu nhì" khi có. Nền pastel + chữ mực theo bảng màu riêng
-     của kiểu (--tc-bg, --tc-ink). */
-  const hero = el(
-    "section",
-    { class: "typecard" },
-    el(
-      "div",
-      { class: "typecard__main" },
-      el("h1", { class: "typecard__code", text: type.code }),
-      el("p", { class: "typecard__title", text: type.title }),
-      el("p", { class: "typecard__desc", text: type.desc }),
-      alt ? el("p", { class: "typecard__alt" }, el("span", { text: "Bạn cũng có chút chất " }), el("strong", { text: alt.code })) : null,
-    ),
-    el("div", { class: "typecard__art", html: mascotArt(mascot, 96, `${type.code} — ${type.title}`) }),
-  )
-  hero.style.setProperty("--tc-bg", type.colors.bg)
-  hero.style.setProperty("--tc-ink", type.colors.ink)
-
-  /* Hai cột: hai kỹ năng nổi bật nhất + hai điểm mạnh của kiểu; hai kỹ năng
-     cần thêm chú ý + hai điều nên để ý; mẹo thực tế của kiểu. */
-  const colItem = (dim) =>
-    el(
-      "li",
-      { class: "col__item", attrs: { "data-skill": dim.key } },
-      el("span", { class: "col__name", text: dim.name }),
-      qualMeter(dim.level),
-      el("span", { class: "col__word", text: LEVEL_WORD[dim.level] ?? "" }),
+    const topTrait = EQ_TRAIT_BY_KEY[result.top]
+    const hero = el(
+      "section",
+      { class: "eqr-hero", attrs: { "aria-labelledby": "eqr-group" } },
+      el("div", { class: "eqr-hero__art", html: mascotArt(mascot, 120, profile.name) }),
+      el(
+        "div",
+        { class: "eqr-hero__text" },
+        el("p", { class: "eqr-kicker", text: "Nhóm EQ của bạn" }),
+        el("h1", { class: "eqr-hero__name", id: "eqr-group", text: profile.name }),
+        el("p", { class: "eqr-hero__en", text: `${profile.en} · nổi bật nhất: ${topTrait.name}` }),
+        el("p", { class: "eqr-hero__tag", text: profile.tagline }),
+        el("p", { class: "eqr-hero__desc", text: profile.description }),
+      ),
     )
-  const colLines = (lines) => el("ul", { class: "col__list" }, lines.map((t) => el("li", { text: t })))
+    hero.style.setProperty("--eqr-accent", topTrait.color)
 
-  const strengthCol = el(
-    "div",
-    { class: "col" },
-    el("h2", { class: "col__title", text: "Điểm mạnh" }),
-    el("ul", { class: "col__skills" }, result.strengths.map(colItem)),
-    colLines(type.strengths),
-  )
-  const watchCol = el(
-    "div",
-    { class: "col col--watch" },
-    el("h2", { class: "col__title", text: "Điểm cần để ý" }),
-    el("ul", { class: "col__skills" }, result.growth.map(colItem)),
-    colLines(type.watchOuts),
-    el("p", { class: "col__tip" }, el("strong", { text: "Mẹo: " }), type.tip),
-  )
+    /* Thanh đặc tính */
+    const fills = []
+    const bars = el(
+      "section",
+      { class: "eqr-sec" },
+      el("h2", { class: "syswin__heading", text: "Đặc tính EQ của bạn" }),
+      el(
+        "ul",
+        { class: "eqr-bars" },
+        result.traits.map((t) => {
+          const fill = el("span", { class: "eqr-bar__fill", style: { background: t.color } })
+          fills.push([fill, t.score])
+          return el(
+            "li",
+            { class: "eqr-bar" },
+            el("div", { class: "eqr-bar__head" }, el("span", { class: "eqr-bar__name", text: t.name }), el("span", { class: "eqr-bar__num", text: String(t.score) })),
+            el("div", { class: "eqr-bar__track", attrs: { role: "img", "aria-label": `${t.name}: ${t.score} trên 100` } }, fill),
+          )
+        }),
+      ),
+    )
+    const animate = reduced()
+    fills.forEach(([f, s]) => (f.style.width = animate ? `${s}%` : "0%"))
+    if (!animate) {
+      const raf = requestAnimationFrame(() => requestAnimationFrame(() => fills.forEach(([f, s]) => (f.style.width = `${s}%`))))
+      cleanup.push(() => cancelAnimationFrame(raf))
+    }
 
-  /* Nhìn lại: từng tình huống, lựa chọn của bạn, và điều thường xảy ra
-     tiếp theo — mô tả, không phán xét, không đúng/sai. */
-  const answeredItems = (current.order ?? []).map((id) => ITEM_BY_ID[id]).filter(Boolean)
-  const lookback = el(
-    "section",
-    { class: "lookback" },
-    el("h2", { class: "syswin__heading", text: "Nhìn lại lựa chọn của bạn" }),
-    el("p", { class: "lookback__lead", text: "Không có đáp án đúng — chỉ có điều thường xảy ra tiếp theo từ mỗi lựa chọn." }),
-    el(
-      "ul",
-      { class: "lookback__list" },
-      answeredItems.map((item) => {
-        const choice = item.choices.find((c) => c.id === current.answers[item.id])
-        if (!choice) return null
-        return el(
-          "li",
-          { class: "lookback__item" },
-          el("p", { class: "lookback__title", text: item.title }),
-          el("p", { class: "lookback__choice" }, el("strong", { text: "Bạn chọn: " }), choice.text),
-          choice.consequence ? el("p", { class: "lookback__next" }, el("strong", { text: "Điều thường xảy ra tiếp theo: " }), choice.consequence) : null,
-        )
-      }),
-    ),
-  )
-
-  /* So với lần trước: chữ thôi, không số. */
-  let compare = null
-  if (before) {
-    const rows = compareResults(before, result)
-      .filter((d) => d.change)
-      .map((d) =>
+    /* Hai hộp */
+    const box = (title, keys, kind) =>
+      el(
+        "div",
+        { class: `eqr-box eqr-box--${kind}` },
+        el("h2", { class: "eqr-box__title", text: title }),
         el(
-          "li",
-          { class: "compare__row" },
-          el("span", { class: "compare__name", text: d.name }),
-          el("span", { class: "compare__word", text: CHANGE_WORD[d.change] }),
+          "ul",
+          { class: "eqr-box__list" },
+          keys.map((k) => {
+            const t = EQ_TRAIT_BY_KEY[k]
+            const href = `/practice?skill=${PRACTICE_SKILL[k]}`
+            const li = el(
+              "li",
+              { class: "eqr-box__item" },
+              el("p", { class: "eqr-box__name", text: t.name }),
+              el("p", { class: "eqr-box__note", text: TRAIT_NOTES[k][kind === "up" ? "upgrade" : "standout"] }),
+              kind === "up" ? link(href, "Luyện kỹ năng này", "eqr-box__link") : null,
+            )
+            li.style.setProperty("--c", t.color)
+            return li
+          }),
         ),
       )
-    if (rows.length) {
-      compare = el(
-        "section",
-        { class: "compare" },
-        el("h2", { class: "syswin__heading", text: "So với lần trước" }),
-        el("p", { class: "lookback__lead", text: "Mỗi kỹ năng: lần này bạn xử lý tình huống tốt hơn, giống, hay khác đi so với lần làm trước." }),
-        el("ul", { class: "compare__list" }, rows),
-      )
-    }
+    const boxes = el("section", { class: "eqr-boxes" }, box("Kỹ năng nổi bật", result.strengths, "star"), box("Kỹ năng cần nâng cấp", result.toGrow, "up"))
+
+    /* Chìa khóa */
+    const keyBtn = el(
+      "button",
+      { class: "eqr-keybtn", type: "button" },
+      el("span", { class: "eqr-keybtn__icon", html: KEY_SVG }),
+      el("span", { class: "eqr-keybtn__text", text: "Chìa khóa EQ của bạn" }),
+    )
+    keyBtn.addEventListener("click", () => openKey(profile, topTrait.color, keyBtn))
+    const keySec = el("section", { class: "eqr-key" }, el("p", { class: "eqr-key__hint", text: "Có một câu dành riêng cho nhóm của bạn. Mở khóa để đọc." }), keyBtn)
+
+    /* Lịch sử */
+    const viewingOld = current.id !== latest.id
+    const history = el(
+      "section",
+      { class: "eqr-sec" },
+      el("h2", { class: "syswin__heading", text: "Lịch sử làm bài" }),
+      viewingOld ? el("p", { class: "eqr-note", text: `Đang xem lần làm ngày ${fmtDate(current.finishedAt)}.` }) : null,
+      el(
+        "ul",
+        { class: "eqr-hist" },
+        [...all].reverse().map((a) => {
+          const r = scoreQuest(a)
+          const p = r?.answered ? EQ_PROFILES[r.top] : null
+          const here = a.id === current.id
+          const row = el(
+            "a",
+            { class: `eqr-hist__row${here ? " is-here" : ""}`, href: `/result?id=${encodeURIComponent(a.id)}`, attrs: { "aria-current": here ? "true" : null } },
+            el("span", { class: "eqr-hist__date", text: fmtDate(a.finishedAt) }),
+            el("span", { class: "eqr-hist__group", text: p?.name ?? "—" }),
+            el("span", { class: "eqr-hist__trait", text: r?.answered ? EQ_TRAIT_BY_KEY[r.top].name : "" }),
+            here ? el("span", { class: "eqr-hist__tag", text: "Đang xem" }) : null,
+          )
+          row.addEventListener("click", (e) => {
+            e.preventDefault()
+            navigate(`/result?id=${encodeURIComponent(a.id)}`)
+          })
+          return el("li", {}, row)
+        }),
+      ),
+    )
+
+    /* Nguồn */
+    const sources = el(
+      "section",
+      { class: "eqr-sec" },
+      el("h2", { class: "syswin__heading", text: "Nguồn tham khảo" }),
+      el("p", { class: "eqr-src__p", text: "Năm đặc tính trong bài theo mô hình trí tuệ cảm xúc của Daniel Goleman. Đây là công cụ để bạn tự nhìn lại mình, không phải bài trắc nghiệm tâm lý đã được kiểm định." }),
+      el(
+        "ul",
+        { class: "eqr-src" },
+        EQ_SOURCES.map((s) => el("li", {}, el("a", { href: s.href, target: "_blank", rel: "noopener", text: s.text }))),
+      ),
+    )
+
+    /* Hành động */
+    const clearBtn = el("button", { class: "btn btn--ghost", type: "button" }, el("span", { class: "pxf-in", text: "Xóa lịch sử" }))
+    clearBtn.addEventListener("click", () => {
+      if (!confirm("Xóa toàn bộ lịch sử làm bài trên máy này? Việc này không hoàn tác được.")) return
+      clearQuestHistory()
+      if (location.search) navigate("/result")
+      else draw()
+    })
+    const actions = el("div", { class: "actions eqr-actions" }, link("/assessment", "Làm lại bài test", "btn btn--accent"), clearBtn)
+
+    const win = el(
+      "div",
+      { class: "syswin" },
+      bar,
+      el("div", { class: "syswin__body" }, hero, bars, boxes, keySec, history, sources, actions),
+    )
+    view.append(frame(win, { size: "lg", cls: "syswin-frame" }))
   }
 
-  /* Hành động. */
-  const share = el("button", { class: "btn btn--ghost", attrs: { type: "button" } }, el("span", { class: "pxf-in", text: "Chia sẻ" }))
-  share.addEventListener("click", async () => {
-    const label = share.querySelector(".pxf-in")
-    const ok = await copyText(`Mình là ${type.code} — ${type.title} trên VIBECHECK`)
-    if (!ok) return
-    label.textContent = "Đã sao chép!"
-    setTimeout(() => (label.textContent = "Chia sẻ"), 1600)
-  })
-  const wipe = el("button", { class: "btn btn--ghost", attrs: { type: "button" } }, el("span", { class: "pxf-in", text: "Xóa dữ liệu trên máy này" }))
-  wipe.addEventListener("click", () => {
-    if (!window.confirm("Xóa mọi lần đánh giá và lượt luyện đã lưu trên trình duyệt này? Không thể hoàn tác.")) return
-    clearAllData()
-    navigate("/")
-  })
-  const actions = el(
-    "section",
-    { class: "syswin__actions" },
-    link("/practice", "Luyện thêm", "btn btn--accent"),
-    link("/assessment", "Làm lại", "btn btn--ghost"),
-    share,
-    wipe,
-    el("p", {
-      class: "syswin__note",
-      text: "Kết quả chỉ được lưu trên trình duyệt này để bạn tự so sánh ở lần sau. Không có tài khoản, và câu trả lời của bạn không được gửi lên máy chủ.",
-    }),
-  )
-
-  /* Lưới 16 kiểu ở cuối trang: mỗi thẻ một màu riêng, thẻ của bạn có viền
-     mực và nhãn "Bạn". */
-  const typeGrid = el(
-    "section",
-    { class: "typegrid" },
-    el("h2", { class: "syswin__heading", text: "16 kiểu trong VIBECHECK" }),
-    el(
+  /* ---------------------------------------------------- hoạt ảnh chìa khóa */
+  function openKey(profile, color, opener) {
+    const skip = reduced()
+    const quote = el(
+      "figure",
+      { class: "kfx__quote" },
+      el("blockquote", { text: `“${profile.quote.text}”` }),
+      profile.quote.author ? el("figcaption", { text: `— ${profile.quote.author}` }) : el("figcaption", { text: profile.name }),
+    )
+    const closeBtn = el("button", { class: "kfx__close", type: "button", attrs: { "aria-label": "Đóng" }, text: "×" })
+    const door = (side) => el("div", { class: `kfx__door kfx__door--${side}` }, el("i", { class: "kfx__plank" }), el("i", { class: "kfx__plank" }), el("i", { class: "kfx__knob" }))
+    const stage = el(
       "div",
-      { class: "typegrid__list" },
-      TYPES.map((t) => {
-        const card = el(
-          "div",
-          { class: t.key === type.key ? "typegrid__card is-you" : "typegrid__card" },
-          t.key === type.key ? el("span", { class: "typegrid__badge", text: "Bạn" }) : null,
-          el("p", { class: "typegrid__code", text: t.code }),
-          el("p", { class: "typegrid__title", text: t.title }),
-          el("p", { class: "typegrid__desc", text: t.desc }),
-        )
-        card.style.setProperty("--tc-bg", t.colors.bg)
-        card.style.setProperty("--tc-ink", t.colors.ink)
-        return card
-      }),
-    ),
-  )
+      { class: "kfx__stage", attrs: { "aria-hidden": "true" } },
+      el("div", { class: "kfx__light" }),
+      el("div", { class: "kfx__doors" }, door("l"), door("r")),
+      el("div", { class: "kfx__lock", html: LOCK_SVG }),
+      el("div", { class: "kfx__key", html: KEY_SVG }),
+      el("div", { class: "kfx__flash" }),
+    )
+    const overlay = el(
+      "div",
+      { class: `kfx${skip ? " kfx--skip" : ""}`, role: "dialog", attrs: { "aria-modal": "true", "aria-label": "Chìa khóa EQ của bạn" } },
+      el("div", { class: "kfx__panel" }, closeBtn, stage, quote),
+    )
+    overlay.style.setProperty("--kc", color)
+    document.body.append(overlay)
+    document.body.classList.add("kfx-open")
+    closeBtn.focus()
+    if (!skip) requestAnimationFrame(() => requestAnimationFrame(() => overlay.classList.add("kfx--play")))
 
-  const body = el("div", { class: "syswin__body" }, hero, el("div", { class: "syswin__cols" }, strengthCol, watchCol), lookback, compare, actions, typeGrid)
-  const win = el("div", { class: "syswin" }, bar, body)
-  view.append(frame(win, { size: "lg", cls: "result__window", fill: "#fffdf7" }))
+    const close = () => {
+      overlay.remove()
+      document.body.classList.remove("kfx-open")
+      document.removeEventListener("keydown", onKey, true)
+      opener?.focus?.()
+    }
+    const onKey = (e) => {
+      if (e.key === "Escape") {
+        e.preventDefault()
+        close()
+      } else if (e.key === "Tab") {
+        e.preventDefault()
+        closeBtn.focus()
+      }
+    }
+    document.addEventListener("keydown", onKey, true)
+    closeBtn.addEventListener("click", close)
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) close()
+    })
+    cleanup.push(() => {
+      if (overlay.isConnected) close()
+    })
+  }
 
+  draw()
   mount.append(view)
-  document.title = "Hồ sơ cảm xúc"
-  sound.result()
-
   return {
-    destroy: () => mount.replaceChildren(),
+    destroy: () => {
+      cleanup.forEach((fn) => fn())
+      cleanup = []
+      document.body.classList.remove("kfx-open")
+      mount.replaceChildren()
+    },
   }
 }

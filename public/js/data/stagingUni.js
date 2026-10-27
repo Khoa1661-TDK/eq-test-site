@@ -336,7 +336,7 @@ export const STAGING_UNI = {
     cast: [
       { id: "player", x: 90, mood: "concerned", name: "Bạn" },
       { id: "classmate", x: 185, mood: "neutral", name: "Quân" },
-      { id: "teacherTri", x: 265, mood: "neutral", name: "Thầy Trí" },
+      { id: "teacherTri", x: 265, mood: "neutral", name: "Thầy Đức" },
     ],
     speakers: ["narrator", "narrator", "narrator", "narrator"],
     timeline: [
@@ -524,7 +524,7 @@ export const STAGING_UNI = {
     place: "GIẢNG ĐƯỜNG",
     cast: [
       { id: "player", x: 90, mood: "surprised", name: "Bạn" },
-      { id: "teacherTri", x: 220, mood: "neutral", name: "Thầy Trí" },
+      { id: "teacherTri", x: 220, mood: "neutral", name: "Thầy Đức" },
     ],
     speakers: ["teacherTri", "narrator", "narrator", "narrator"],
     timeline: [

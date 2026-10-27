@@ -19,7 +19,7 @@ import { STAGING_UNI } from "../public/js/data/stagingUni.js"
 const KNOWN_NAMES = [
   "An", "Bin", "Chi", "Dũng", "Đạt", "Đức", "Hà", "Hải", "Hân", "Hằng", "Hạnh", "Hùng", "Hưng", "Hương", "Huy",
   "Khang", "Khánh", "Khôi", "Lan", "Linh", "Long", "Mai", "Mi", "Minh", "My", "Nam", "Ngân", "Ngọc", "Phúc",
-  "Quân", "Quỳnh", "Thắng", "Thảo", "Thanh", "Thư", "Thu", "Trang", "Trí", "Tuấn", "Tú", "Tí", "Vy",
+  "Quân", "Quỳnh", "Thắng", "Thảo", "Thanh", "Thư", "Thu", "Trang", "Trí", "Đức", "Tuấn", "Tú", "Tí", "Vy",
 ]
 /** Người chỉ được nhắc tên trong chữ, không đứng trong cảnh → không bắt buộc có trong cast. */
 const MENTIONED_ONLY = new Set(["Long", "Hương"])

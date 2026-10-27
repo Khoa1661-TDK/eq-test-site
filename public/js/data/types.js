@@ -1,4 +1,4 @@
-/* types.js — 16 kiểu cảm xúc của VIBECHECK, quyết định theo MẪU LỰA CHỌN mà người
+/* types.js — 16 kiểu cảm xúc của E-Quest, quyết định theo MẪU LỰA CHỌN mà người
    chơi đã chọn trong bài đánh giá: mỗi kiểu đếm một vài mẫu chiến lược
    (data/eqPatterns.js) với trọng số riêng. Không phải bói toán, không xếp loại
    con người — mỗi kiểu mô tả một kiểu phản ứng phổ biến ở sinh viên, ai cũng có

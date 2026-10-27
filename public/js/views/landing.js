@@ -1,10 +1,10 @@
-/* landing.js — màn mở đầu của VIBECHECK: tiêu đề, một câu giới thiệu, nút bắt đầu và hàng chip 16 kiểu.
+/* landing.js — màn mở đầu của E-Quest: tiêu đề, một câu giới thiệu, nút bắt đầu và hàng chip năm thành phần EQ.
    Sản phẩm là một trainer theo vòng: đánh giá → hiểu → luyện → đánh giá lại → tiến bộ.
    Không phải bài kiểm tra dán nhãn con người: chỉ có kỹ năng luyện được và những tình huống thực tế. */
 
 import { el } from "../core/dom.js"
-import { TYPES } from "../data/types.js"
-import { TOTAL_SCENARIOS } from "../core/eqScoring.js"
+import { EQ_TRAITS } from "../data/eqTraits.js"
+import { QUEST_LENGTH } from "../core/questScoring.js"
 
 /** Nút chính: bàn phím và chuột đều đi qua navigate() của app shell. */
 function primaryButton(label, href, navigate) {
@@ -17,13 +17,12 @@ function primaryButton(label, href, navigate) {
 export function renderLanding(mount, { navigate }) {
   const startBtn = primaryButton("Bắt đầu", "/assessment", navigate)
 
-  /* Hàng chip 16 kiểu: mỗi chip một mã, nền pastel và chữ mực lấy từ bảng màu
-     riêng của kiểu (--mc, --mi do JS gắn). Chỉ để nhìn, không phải nút bấm. */
-  const chips = el("div", { class: "hero__chips", attrs: { "aria-label": "Mười sáu kiểu cảm xúc của trang" } })
-  TYPES.forEach((type) => {
-    const chip = el("span", { class: "hero__chip", text: type.code })
-    chip.style.setProperty("--mc", type.colors.bg)
-    chip.style.setProperty("--mi", type.colors.ink)
+  /* Hàng chip năm thành phần EQ mà hồ sơ cuối bài đo: chỉ để nhìn, không phải nút bấm. */
+  const chips = el("div", { class: "hero__chips", attrs: { "aria-label": "Năm thành phần EQ được đánh giá" } })
+  EQ_TRAITS.forEach((trait) => {
+    const chip = el("span", { class: "hero__chip", text: trait.name })
+    chip.style.setProperty("--mc", `color-mix(in srgb, ${trait.color} 28%, var(--paper))`)
+    chip.style.setProperty("--mi", "var(--ink)")
     chips.append(chip)
   })
 
@@ -32,14 +31,14 @@ export function renderLanding(mount, { navigate }) {
     el(
       "div",
       { class: "shell" },
-      el("h1", { class: "hero__title" }, "Bạn xử lý cảm xúc kiểu gì khi đời sinh viên “quay xe”?"),
+      el("h1", { class: "hero__title" }, "Cùng một câu chuyện, mỗi người một cảm xúc."),
       el("p", {
         class: "hero__tag",
-        text: `${TOTAL_SCENARIOS} khoảnh khắc ở giảng đường, KTX, căng tin — chọn điều bạn thật sự sẽ làm.`,
+        text: "Giữa những tình huống chẳng ai giống ai của cuộc sống đại học, cách bạn phản ứng có thể tiết lộ những điều mà chính bạn cũng chưa từng nhận ra.",
       }),
       el("div", { class: "hero__cta" }, startBtn),
       chips,
-      el("p", { class: "hero__chips-note", text: "Cuối bài, bạn là kiểu nào trong 16 kiểu?" }),
+      el("p", { class: "hero__chips-note", text: `${QUEST_LENGTH} tình huống, cuối bài là hồ sơ EQ với năm đặc tính của riêng bạn.` }),
     ),
   )
 

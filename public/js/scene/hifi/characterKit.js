@@ -31,7 +31,7 @@
      ban                       "Bạn": áo thun cam FPT (logo ba khối), jean tối, giày trắng, tóc ngắn trung tính, dáng trung tính
      hanh                      giảng viên ~35t: blazer navy, áo sage, quần tối, búi thấp
      thay                      giảng viên ~45t: sơ mi xanh xắn tay (sleeve "rolled"), kính (glasses), tóc muối tiêu, nếp cười (lines)
-     tri                       Thầy Trí ~40t: tóc xám ngắn gọn, trán cao hơn một chút, THẤP ngang teen (không stretch), sơ mi sọc xanh-trắng (stripes), quần tối, giày nâu, kính
+     tri                       Thầy Đức ~40t: tóc xám ngắn gọn, trán cao hơn một chút, THẤP ngang teen (không stretch), sơ mi sọc xanh-trắng (stripes), quần tối, giày nâu, kính
      me                        mẹ ~45t: áo ấm tay lỡ (sleeve "threeq"), quần vải nâu, tóc ngang vai
      bin                       em ~9t: dáng trẻ con (BODIES.kid dựng trên 47 hàng rồi đệm 13 hàng trống), quần short
    Người lớn dựng trên khung 60 hàng rồi KÉO DÀI (stretch: chèn bản sao hàng ở ngực/đùi/cẳng chân) thành 68 hàng,
@@ -133,7 +133,7 @@ const BLACKJEANS = { bot0: "#7a7f94", bot1: "#52566b", bot2: "#3a3d52", bot3: "#
 /* áo thun FPT của "Bạn": cam FPT, logo ba khối nhỏ (xanh dương, cam đậm, xanh lá) */
 const TEE_ORANGE = { top0: "#ffcf9e", top1: "#f37021", top2: "#c85a17", top3: "#98410f", topO: "#4a2010" }
 const LOGO_FPT = { badge0: "#0066b3", badge1: "#b34d12", badge2: "#6cb33f" }
-/* sọc sơ mi Thầy Trí: dải trắng + dải xanh nhạt (tone +2 là dải sọc) */
+/* sọc sơ mi Thầy Đức: dải trắng + dải xanh nhạt (tone +2 là dải sọc) */
 const STRIPE_BLUEWHITE = { top0: "#ffffff", top1: "#d7e8f7", top2: "#a9c6e4", top3: "#7fa2c6", topO: "#34476b" }
 
 /* ============================================================ đặc tả nhân vật (bối cảnh đại học: đồ thường ngày) */
@@ -178,7 +178,7 @@ export const SPECS = {
     top: "uniformShirt", bottom: "trousers", neckwear: null, shoes: "leather", sleeve: "rolled", pocket: "plain", glasses: true, lines: true,
     colors: { ...SHIRT_BLUE, ...CHARCOAL, ...SHOE_BLACK, ...SOCK },
   },
-  /* teacherTri: Thầy Trí ~40 tuổi, giảng viên: tóc xám ngắn gọn, thấp ngang teen,
+  /* teacherTri: Thầy Đức ~40 tuổi, giảng viên: tóc xám ngắn gọn, thấp ngang teen,
      sơ mi sọc xanh-trắng tay dài, quần tây tối, giày nâu, kính */
   tri: {
     id: "tri", body: "manShort", skin: "peach", hair: { style: "crew", color: "grey" },
@@ -435,7 +435,7 @@ BODIES.man = {
   pelvis: [[27.2, 6.0], [29.0, 6.2], [31.0, 6.2], [33.6, 5.9]],
   stretch: [[18, 2], [40, 3], [49, 3]],
 }
-/* Thầy Trí: người lớn nhưng THẤP — giữ khung 60 hàng như teen (không kéo dài), chân vẫn ở hàng cuối khung */
+/* Thầy Đức: người lớn nhưng THẤP — giữ khung 60 hàng như teen (không kéo dài), chân vẫn ở hàng cuối khung */
 BODIES.manShort = { ...BODIES.man, stretch: null }
 BODIES.woman = {
   ...BODIES.girl,

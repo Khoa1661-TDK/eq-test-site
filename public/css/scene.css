@@ -963,3 +963,80 @@
     padding: 16px;
   }
 }
+
+/* ------------------------------------------------------------------ chế độ nhanh (E-Quest)
+   Cảnh, bối cảnh, câu hỏi và bốn phương án cùng nằm gọn trong một màn hình: không gõ chữ,
+   không nút "Tiếp", lựa chọn mở sẵn. Cảnh bị chặn ~25% chiều cao khung nhìn (sceneRuntime.resize). */
+.assess-scene[data-quick="on"] {
+  padding-top: 10px;
+}
+[data-quick="on"] .scn-board {
+  padding-top: 10px;
+  gap: 8px;
+}
+[data-quick="on"] .scn-board .console {
+  cursor: default;
+}
+[data-quick="on"] .console__in {
+  padding: 12px 14px 12px;
+  gap: 8px;
+}
+[data-quick="on"] .console__text {
+  font-size: 17px;
+  line-height: 1.45;
+  min-height: 0;
+}
+[data-quick="on"] .console__cue {
+  justify-content: flex-start;
+  min-height: 0;
+  opacity: 1;
+}
+[data-quick="on"] .console__cue .cursor {
+  display: none;
+}
+[data-quick="on"] .console__hint {
+  font-family: var(--font-text);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0;
+  color: var(--amber);
+}
+[data-quick="on"] .scn-board .choice {
+  min-height: 0;
+  padding-block: 9px;
+  font-size: 16px;
+  line-height: 1.35;
+}
+[data-quick="on"] .scn-tap {
+  display: none;
+}
+@media (max-width: 700px) {
+  .assess-scene[data-quick="on"] {
+    padding: 8px 10px 0;
+  }
+  [data-quick="on"] .scn-board {
+    padding: 8px 0 0;
+  }
+  [data-quick="on"] .console__text,
+  [data-quick="on"] .console__hint {
+    font-size: 15px;
+  }
+  [data-quick="on"] .scn-board .choice {
+    font-size: 14.5px;
+    min-height: 0;
+    padding-block: 7px;
+  }
+  [data-quick="on"] .console__in {
+    padding: 10px 12px;
+    gap: 6px;
+  }
+}
+[data-quick="on"] .scn-portrait {
+  display: none !important;
+}
+[data-quick="on"] .console__top {
+  min-height: 0;
+}
+[data-quick="on"] .scn-stage-wrap {
+  margin-inline: auto;
+}

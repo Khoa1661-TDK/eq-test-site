@@ -451,21 +451,63 @@
   line-height: 1.15;
 }
 
-/* Ba luật chơi của màn mở đầu: mỗi dòng một biểu tượng pixel, ngắn gọn. */
+.quiz-intro__kicker {
+  font-family: var(--font-pixel);
+  font-size: 15px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--olive);
+  margin-bottom: -8px;
+}
+
+.quiz-intro__sub {
+  color: var(--ink-2, var(--ink));
+  opacity: 0.75;
+  font-size: 16px;
+  line-height: 1.5;
+  padding-bottom: var(--gap-3);
+  border-bottom: 2px solid var(--paper-3);
+}
+
+/* Ba mục "Về E-Quest", "Cách chơi", "Một điều nhỏ cần nhớ": tiêu đề có biểu tượng pixel. */
+.quiz-intro__sec {
+  display: grid;
+  gap: var(--gap-2);
+}
+
+.quiz-intro__h {
+  display: flex;
+  align-items: baseline;
+  gap: var(--gap-3);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 19px;
+}
+
+/* Cách chơi: danh sách chấm vuông, ngắn gọn. */
 .quiz-intro__rules {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  gap: var(--gap-3);
+  gap: var(--gap-2);
 }
 
 .quiz-intro__rules li {
-  display: flex;
-  align-items: baseline;
-  gap: var(--gap-3);
+  position: relative;
+  padding-left: 18px;
   font-size: 15px;
   line-height: 1.5;
+}
+
+.quiz-intro__rules li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0.62em;
+  width: 6px;
+  height: 6px;
+  background: var(--ink);
 }
 
 .quiz-intro__icon {
@@ -625,4 +667,42 @@
   .choices-slot {
     transition: none;
   }
+}
+/* ------------------------------------------------------------ HUD gọn của E-Quest
+   Một hàng: quay lại · số tình huống · nút âm thanh (chỉ chấm, nhãn đọc qua aria-label). */
+.hud--quest .hud__row {
+  padding: 6px 12px;
+  gap: var(--gap-2);
+}
+.hud--quest .hud__count {
+  font-size: 16px;
+}
+.hud--quest .hud__progress {
+  display: none;
+}
+.hud--quest .hud__bar {
+  padding: 0 12px;
+  margin-bottom: 6px;
+}
+.hud--quest .btn--sm,
+.hud--quest .sound-toggle {
+  min-height: 34px;
+  padding: 2px 10px;
+}
+.hud--quest .sound-toggle__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Đang làm bài: thanh đầu trang thôi dính để HUD lên sát mép trên, và khối bài đủ cao
+   để luôn cuộn được thanh đầu trang ra khỏi khung nhìn (xem assessment.js showItem). */
+.is-questing .topbar {
+  position: static;
+}
+.quiz-wrap--quest {
+  min-height: 100dvh;
 }
