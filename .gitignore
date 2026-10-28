@@ -1,2 +1,4 @@
 node_modules/
 graphify-out/
+data/submissions.jsonl
+.env

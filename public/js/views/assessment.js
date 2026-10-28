@@ -230,13 +230,14 @@ export function renderAssessment(mount, { navigate }) {
     const elapsed = Math.max(0, Math.round(((attempt.finishedAt || Date.now()) - (attempt.startedAt || Date.now())) / 1000))
     const traits = scoreQuest(attempt)?.traits ?? []
     const mean = traits.length ? traits.reduce((sum, t) => sum + t.score, 0) / traits.length : 0
-    // Chỉ gửi mức tổng dạng bậc và thời gian làm bài: không gửi câu trả lời, không gửi mã tình huống.
+    // Gửi ẩn danh các lựa chọn và thời gian làm bài cho thống kê (trang /admin); máy chủ tự chấm lại điểm.
+    // Không gửi tên, không có mã người dùng. band vẫn gửi kèm cho máy chủ bản cũ chỉ đếm theo mức.
     const band = mean >= 70 ? "high" : mean >= 45 ? "mid" : "low"
     window
       .fetch?.("api/stats", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ band, t: elapsed }),
+        body: JSON.stringify({ band, t: elapsed, answers: attempt.answers }),
         keepalive: true,
       })
       ?.catch(() => {})

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>E-Quest — Quản trị</title>
+    <meta name="color-scheme" content="light" />
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="css/fonts.css" />
+    <link rel="stylesheet" href="css/tokens.css" />
+    <link rel="stylesheet" href="css/admin.css" />
+  </head>
+  <body class="adm">
+    <header class="adm-top">
+      <div class="adm-shell adm-top__in">
+        <a class="adm-brand" href="/">E-Quest <span>· quản trị</span></a>
+        <div class="adm-actions" id="actions" hidden>
+          <span class="adm-chip" id="storage"></span>
+          <label class="adm-select">
+            <span class="sr">Khoảng thời gian</span>
+            <select id="range">
+              <option value="all">Tất cả</option>
+              <option value="1">Hôm nay</option>
+              <option value="7">7 ngày</option>
+              <option value="30">30 ngày</option>
+            </select>
+          </label>
+          <button class="adm-btn" id="refresh" type="button">Làm mới</button>
+          <button class="adm-btn" id="csv" type="button">Tải CSV</button>
+          <button class="adm-btn" id="json" type="button">Tải JSON</button>
+          <button class="adm-btn adm-btn--ghost" id="logout" type="button">Đăng xuất</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="adm-shell" id="main">
+      <form class="adm-login" id="login" hidden>
+        <h1>Trang quản trị</h1>
+        <p>Đăng nhập bằng tài khoản quản trị.</p>
+        <label class="sr" for="user">Tên đăng nhập</label>
+        <input id="user" type="text" autocomplete="username" placeholder="Tên đăng nhập" required />
+        <label class="sr" for="token">Mật khẩu</label>
+        <input id="token" type="password" autocomplete="current-password" placeholder="Mật khẩu" required />
+        <button class="adm-btn adm-btn--primary" type="submit">Mở</button>
+        <p class="adm-error" id="error" role="alert"></p>
+      </form>
+
+      <div id="dash" hidden>
+        <section class="adm-tiles" id="tiles" aria-label="Tổng quan"></section>
+
+        <div class="adm-grid">
+          <section class="adm-card">
+            <h2>Điểm trung bình theo đặc tính</h2>
+            <div id="traits"></div>
+          </section>
+          <section class="adm-card">
+            <h2>Lượt làm theo ngày <small>14 ngày gần nhất</small></h2>
+            <div class="adm-days" id="days"></div>
+          </section>
+        </div>
+
+        <section class="adm-card">
+          <h2>Từng câu hỏi <small>tỉ lệ chọn mỗi phương án · ★ là phương án điểm cao nhất</small></h2>
+          <div class="adm-questions" id="questions"></div>
+        </section>
+
+        <section class="adm-card">
+          <h2>Các lượt làm <small id="subs-note"></small></h2>
+          <div class="adm-table-wrap">
+            <table class="adm-table" id="subs"></table>
+          </div>
+          <button class="adm-btn" id="more" type="button" hidden>Xem thêm</button>
+        </section>
+      </div>
+    </main>
+
+    <script type="module" src="js/admin.js"></script>
+  </body>
+</html>

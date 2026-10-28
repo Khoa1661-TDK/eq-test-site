@@ -1,14 +1,22 @@
-/* server.mjs — máy chủ tĩnh nhỏ cho website đánh giá & luyện EQ + điểm cuối /api/stats.
-   Chạy: node server.mjs [--port 8787] */
+/* server.mjs — máy chủ tĩnh nhỏ cho website đánh giá & luyện EQ + /api/stats, /api/admin và trang /admin.
+   Chạy: node server.mjs [--port 8787]
+   Tài khoản /admin: ADMIN_USER + ADMIN_PASSWORD, đọc từ biến môi trường hoặc file .env (không đưa lên git).
+   Chưa đặt thì chỉ máy này (loopback) mở được /admin. */
 
 import { createServer } from "node:http"
-import { readFile, writeFile, mkdir, stat } from "node:fs/promises"
+import { readFile, stat } from "node:fs/promises"
 import { extname, join, normalize, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
+import { handleAdmin, handleStats } from "./lib/submissions.mjs"
+
+// .env cạnh server.mjs (nếu có); biến môi trường đã đặt sẵn thì giữ nguyên, không bị ghi đè.
+try {
+  process.loadEnvFile(fileURLToPath(new URL("./.env", import.meta.url)))
+} catch {
+  /* không có .env: bỏ qua */
+}
 
 const ROOT = resolve(fileURLToPath(new URL("./public", import.meta.url)))
-const DATA_DIR = resolve(fileURLToPath(new URL("./data", import.meta.url)))
-const STATS_FILE = join(DATA_DIR, "stats.json")
 
 const argPort = process.argv.indexOf("--port")
 const PORT = Number(argPort > -1 ? process.argv[argPort + 1] : process.env.PORT || 8787)
@@ -32,34 +40,30 @@ const MIME = {
 
 /** SPA: các đường dẫn không có phần mở rộng đều trả về shell index.html. */
 function shellFor(pathname) {
-  return "index.html"
+  return pathname === "/admin" ? "admin.html" : "index.html"
 }
 
-const BANDS = ["high", "mid", "low"]
+const LOOPBACK = new Set(["127.0.0.1", "::1", "::ffff:127.0.0.1"])
 
-function emptyStats() {
-  return { total: 0, bands: { high: 0, mid: 0, low: 0 }, updatedAt: null }
-}
-
-/** Thống kê ẩn danh: chỉ tổng số lượt hoàn thành và số lượt theo mức EQ.
-    Không bao giờ đọc hay ghi câu trả lời, mã tình huống, mã phương án hay bất kỳ nội dung nào khác. */
-async function readStats() {
-  try {
-    const parsed = JSON.parse(await readFile(STATS_FILE, "utf8"))
-    // Dạng cũ đếm theo mã phân loại cũ ({ types: {...} }) không còn dùng: coi như chưa có dữ liệu EQ.
-    if (!parsed || typeof parsed !== "object" || !parsed.bands || typeof parsed.bands !== "object") {
-      return emptyStats()
+/** Node IncomingMessage → Web Request, để dùng chung bộ xử lý với hàm Vercel. */
+async function toRequest(req, url) {
+  let body
+  if (req.method !== "GET" && req.method !== "HEAD") {
+    const chunks = []
+    let size = 0
+    for await (const chunk of req) {
+      size += chunk.length
+      if (size > 16 * 1024) break
+      chunks.push(chunk)
     }
-    const stats = emptyStats()
-    stats.total = Number(parsed.total) || 0
-    for (const band of BANDS) stats.bands[band] = Number(parsed.bands[band]) || 0
-    stats.updatedAt = typeof parsed.updatedAt === "string" ? parsed.updatedAt : null
-    const last = Number(parsed.lastSeconds)
-    if (Number.isFinite(last)) stats.lastSeconds = last
-    return stats
-  } catch {
-    return emptyStats()
+    body = Buffer.concat(chunks)
   }
+  return new Request(url, { method: req.method, headers: req.headers, body })
+}
+
+async function sendResponse(res, response) {
+  res.writeHead(response.status, Object.fromEntries(response.headers))
+  res.end(Buffer.from(await response.arrayBuffer()))
 }
 
 async function sendFile(res, filePath) {
@@ -80,44 +84,12 @@ const server = createServer(async (req, res) => {
 
   try {
     if (pathname === "/api/stats") {
-      if (req.method === "GET") {
-        const stats = await readStats()
-        res.writeHead(200, { "Content-Type": MIME[".json"], "Cache-Control": "no-store" })
-        res.end(JSON.stringify(stats))
-        return
-      }
-      if (req.method === "POST") {
-        const chunks = []
-        let size = 0
-        for await (const chunk of req) {
-          size += chunk.length
-          if (size > 8 * 1024) break
-          chunks.push(chunk)
-        }
-        let payload = {}
-        try {
-          payload = JSON.parse(Buffer.concat(chunks).toString("utf8") || "{}")
-        } catch {
-          payload = {}
-        }
-        const band = String(payload.band || "")
-        const t = Number(payload.t)
-        const ok = BANDS.includes(band)
-        if (ok) {
-          const stats = await readStats()
-          stats.bands[band] = (stats.bands[band] || 0) + 1
-          stats.total = (stats.total || 0) + 1
-          stats.updatedAt = new Date().toISOString()
-          if (Number.isFinite(t)) stats.lastSeconds = t
-          await mkdir(DATA_DIR, { recursive: true })
-          await writeFile(STATS_FILE, JSON.stringify(stats, null, 2) + "\n", "utf8")
-        }
-        res.writeHead(ok ? 202 : 400, { "Content-Type": MIME[".json"] })
-        res.end(JSON.stringify({ ok }))
-        return
-      }
-      res.writeHead(405, { "Content-Type": MIME[".json"], Allow: "GET, POST" })
-      res.end(JSON.stringify({ error: "method not allowed" }))
+      await sendResponse(res, await handleStats(await toRequest(req, url)))
+      return
+    }
+    if (pathname === "/api/admin") {
+      const trustLocal = LOOPBACK.has(req.socket.remoteAddress)
+      await sendResponse(res, await handleAdmin(await toRequest(req, url), { trustLocal }))
       return
     }
 

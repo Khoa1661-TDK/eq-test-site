@@ -1,0 +1,323 @@
+/* admin.css — trang /admin. Dùng lại token của tokens.css; góc vuông, viền mực, bóng lệch như phần còn lại. */
+
+.adm {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-text);
+  min-height: 100vh;
+}
+
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.adm-shell {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 var(--gap-4);
+}
+
+.adm-top {
+  border-bottom: 3px solid var(--ink);
+  background: var(--paper-2);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+@media (max-width: 640px) {
+  .adm-top {
+    position: static;
+  }
+}
+.adm-top__in {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap-3);
+  padding-block: var(--gap-3);
+}
+.adm-brand {
+  font-family: var(--font-pixel);
+  font-weight: 800;
+  font-size: 28px;
+  color: var(--ink);
+  text-decoration: none;
+}
+.adm-brand span {
+  color: var(--orange-dark);
+}
+.adm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--gap-2);
+}
+.adm-actions[hidden] {
+  display: none;
+}
+
+.adm-chip {
+  font-size: 13px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border: 2px solid var(--ink);
+  background: var(--mint-tint);
+}
+
+.adm-btn,
+.adm-select select,
+.adm-login input {
+  font: 700 14px var(--font-text);
+  color: var(--ink);
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  padding: 7px 12px;
+  box-shadow: 3px 3px 0 rgba(22, 24, 28, 0.2);
+}
+.adm-btn {
+  cursor: pointer;
+}
+.adm-btn:hover {
+  background: var(--yellow-tint);
+}
+.adm-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 rgba(22, 24, 28, 0.2);
+}
+.adm-btn:focus-visible,
+.adm-select select:focus-visible,
+.adm-login input:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}
+.adm-btn--primary {
+  background: var(--orange-dark);
+  color: #fff;
+}
+.adm-btn--primary:hover {
+  background: var(--ink);
+}
+.adm-btn--ghost {
+  box-shadow: none;
+  border-color: var(--ink-3);
+  color: var(--ink-2);
+}
+
+/* --- đăng nhập --- */
+.adm-login {
+  max-width: 420px;
+  margin: var(--gap-8) auto;
+  padding: var(--gap-5);
+  border: 3px solid var(--ink);
+  background: var(--paper-2);
+  box-shadow: 6px 6px 0 rgba(22, 24, 28, 0.2);
+  display: grid;
+  gap: var(--gap-3);
+}
+.adm-login[hidden],
+#dash[hidden] {
+  display: none;
+}
+.adm-login h1 {
+  margin: 0;
+  font-family: var(--font-pixel);
+  font-size: 36px;
+}
+.adm-login p {
+  margin: 0;
+  color: var(--ink-2);
+}
+.adm-error {
+  color: var(--pink-dark);
+  font-weight: 700;
+  min-height: 1.4em;
+}
+
+/* --- tổng quan --- */
+#dash {
+  padding-block: var(--gap-5) var(--gap-7);
+  display: grid;
+  gap: var(--gap-5);
+}
+.adm-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: var(--gap-3);
+}
+.adm-tile {
+  display: grid;
+  gap: 2px;
+  padding: var(--gap-3) var(--gap-4);
+  border: 2px solid var(--ink);
+  background: #fff;
+}
+.adm-tile__label {
+  font-size: 13px;
+  color: var(--ink-3);
+}
+.adm-tile strong {
+  font-size: 26px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.adm-tile small {
+  font-size: 12px;
+  color: var(--ink-3);
+}
+
+.adm-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+  gap: var(--gap-5);
+}
+.adm-card {
+  min-width: 0;
+  padding: var(--gap-4) var(--gap-5);
+  border: 3px solid var(--ink);
+  background: #fff;
+}
+.adm-card h2 {
+  margin: 0 0 var(--gap-4);
+  font-size: 18px;
+}
+.adm-card h2 small {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-3);
+  margin-left: var(--gap-2);
+}
+.adm-empty {
+  color: var(--ink-3);
+}
+
+/* --- thanh ngang --- */
+.adm-bar {
+  display: grid;
+  grid-template-columns: minmax(80px, 150px) 1fr 72px;
+  align-items: center;
+  gap: var(--gap-3);
+  margin-block: 6px;
+  font-size: 14px;
+}
+.adm-bar__track {
+  height: 14px;
+  background: var(--paper-2);
+  border: 1px solid var(--paper-3);
+}
+.adm-bar__fill {
+  display: block;
+  height: 100%;
+}
+.adm-bar__value {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-2);
+}
+
+/* --- cột theo ngày --- */
+.adm-days {
+  display: grid;
+  grid-template-columns: repeat(14, 1fr);
+  gap: 4px;
+  height: 180px;
+}
+.adm-day {
+  display: grid;
+  grid-template-rows: 18px 1fr 18px;
+  min-width: 0;
+  text-align: center;
+  font-size: 11px;
+}
+.adm-day__col {
+  align-self: end;
+  background: var(--orange);
+  min-height: 2px;
+}
+.adm-day__n {
+  font-weight: 700;
+}
+.adm-day__label {
+  color: var(--ink-3);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* --- câu hỏi --- */
+.adm-questions {
+  display: grid;
+  gap: var(--gap-2);
+}
+.adm-q {
+  border: 2px solid var(--paper-3);
+  padding: var(--gap-2) var(--gap-3);
+}
+.adm-q[open] {
+  border-color: var(--ink);
+}
+.adm-q summary {
+  cursor: pointer;
+  font-size: 15px;
+}
+.adm-q summary small {
+  color: var(--ink-3);
+}
+.adm-q__ctx {
+  color: var(--ink-2);
+  font-size: 14px;
+}
+.adm-q__choices {
+  font-size: 13px;
+  color: var(--ink-2);
+  padding-left: 1.4em;
+}
+
+/* --- bảng --- */
+.adm-table-wrap {
+  overflow-x: auto;
+  margin-bottom: var(--gap-3);
+}
+.adm-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.adm-table th,
+.adm-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--paper-3);
+  text-align: left;
+  white-space: nowrap;
+}
+.adm-table th {
+  background: var(--paper-2);
+  position: sticky;
+  top: 0;
+}
+.adm-answers {
+  font-family: var(--font-term);
+  font-size: 15px;
+  color: var(--ink-2);
+}
+.adm-band {
+  padding: 1px 6px;
+  font-weight: 700;
+}
+.adm-band--high {
+  background: var(--mint-tint);
+  color: var(--mint-dark);
+}
+.adm-band--mid {
+  background: var(--yellow-tint);
+  color: #7a5c00;
+}
+.adm-band--low {
+  background: var(--pink-tint);
+  color: var(--pink-dark);
+}
