@@ -1,5 +1,5 @@
 /* eqResult.js — KẾT QUẢ EQ: avatar và tên profile (EN + VI), xu hướng phản ứng, kỹ năng nổi bật / cần nâng cấp,
-   chìa khóa EQ (hoạt ảnh mở cửa, một câu cố định theo lượt làm), vài lựa chọn nghiêng về, liên kết thư viện profile.
+   năm nhóm EQ kèm thanh tiến độ 0–100, chìa khóa EQ (hoạt ảnh mở cửa, một câu cố định theo lượt làm), liên kết thư viện profile.
    /result?id=<mã lượt> xem lại một lượt cũ; không có id thì xem lượt mới nhất. Danh sách lịch sử nằm ở /history. */
 
 import { el, frame } from "../core/dom.js"
@@ -63,7 +63,7 @@ export function renderEqResult(mount, { navigate }) {
       return
     }
 
-    const profile = EQ_PROFILES[result.top]
+    const profile = EQ_PROFILES[result.profile.top]
     const accent = profileAccent(profile.key)
     const viewingOld = Boolean(latest) && current.id !== latest.id
 
@@ -71,7 +71,7 @@ export function renderEqResult(mount, { navigate }) {
     const bar = el(
       "div",
       { class: "syswin__bar" },
-      el("span", { class: "syswin__title", text: "Kết quả của bạn" }),
+      el("span", { class: "syswin__title", text: "Hồ sơ EQ của bạn" }),
       el(
         "span",
         { class: "syswin__dots", attrs: { "aria-hidden": "true" } },
@@ -89,8 +89,8 @@ export function renderEqResult(mount, { navigate }) {
       el(
         "div",
         { class: "eqr-hero__text" },
-        el("p", { class: "eqr-kicker", text: "EQ Profile của bạn" }),
-        el("h1", { class: "eqr-hero__name", id: "eqr-group", text: profile.en }),
+        el("p", { class: "eqr-kicker", text: "Nhóm EQ của bạn" }),
+        el("h1", { class: "eqr-hero__name", id: "eqr-group", text: `${profile.en} (${profile.abbr})` }),
         el("p", { class: "eqr-hero__vi", text: profile.name }),
         el("p", { class: "eqr-hero__en", text: [fmtDateTime(current.finishedAt), fmtDuration(seconds)].filter(Boolean).join(" · ") }),
       ),
@@ -114,33 +114,35 @@ export function renderEqResult(mount, { navigate }) {
       el("span", { class: "eqr-keybtn__text", text: "Chìa khóa mở khóa EQ" }),
     )
     keyBtn.addEventListener("click", () => openKey(profile, quote, accent, keyBtn))
-    const keySec = el("section", { class: "eqr-key" }, el("p", { class: "eqr-key__hint", text: "Có một câu dành riêng cho profile của bạn. Mở khóa để đọc." }), keyBtn)
+    const keySec = el("section", { class: "eqr-key" }, el("p", { class: "eqr-key__hint", text: "Sau những lựa chọn của bạn, đây là điều chúng mình muốn nói." }), keyBtn)
 
-    /* Nghiêng về: top 3 profile theo số lần chọn */
-    const lean = el(
+    /* Năm nhóm EQ: tên, điểm 0–100 và thanh tiến độ */
+    const fills = []
+    const bars = el(
       "section",
       { class: "eqr-sec" },
-      el("h2", { class: "syswin__heading", text: "Lựa chọn của bạn nghiêng về" }),
+      el("h2", { class: "syswin__heading", text: "Đặc tính EQ của bạn" }),
       el(
         "ul",
-        { class: "eqr-lean" },
-        result.ranked
-          .slice(0, 3)
-          .filter((r) => r.count > 0)
-          .map((r) => {
-            const p = EQ_PROFILES[r.key]
-            return el(
-              "li",
-              { class: "eqr-lean__row" },
-              el("span", { class: "eqr-lean__art", html: profileAvatar(r.key, 32, { decorative: true }) }),
-              el("span", { class: "eqr-lean__name", text: p.name }),
-              el("span", { class: "eqr-lean__bar", attrs: { "aria-hidden": "true" } }, el("i", { style: { width: `${(100 * r.count) / result.answered}%` } })),
-              el("span", { class: "eqr-lean__num", text: `${r.count}/${result.answered}` }),
-            )
-          }),
+        { class: "eqr-bars" },
+        result.traits.map((t) => {
+          const fill = el("span", { class: "eqr-bar__fill", style: { background: t.color } })
+          fills.push([fill, t.score])
+          return el(
+            "li",
+            { class: "eqr-bar" },
+            el("div", { class: "eqr-bar__head" }, el("span", { class: "eqr-bar__name", text: t.name }), el("span", { class: "eqr-bar__num", text: String(t.score) })),
+            el("div", { class: "eqr-bar__track", attrs: { role: "img", "aria-label": `${t.name}: ${t.score} trên 100` } }, fill),
+          )
+        }),
       ),
-      el("p", { class: "eqr-note", text: "Chỉ là số lần bạn chọn đáp án thuộc từng nhóm trong lượt làm này; profile có nhiều lựa chọn nhất được chọn làm kết quả." }),
     )
+    // Thanh chạy từ 0 lên điểm; người chọn giảm chuyển động thì hiện luôn.
+    if (reduced()) fills.forEach(([f, s]) => (f.style.width = `${s}%`))
+    else {
+      const raf = requestAnimationFrame(() => requestAnimationFrame(() => fills.forEach(([f, s]) => (f.style.width = `${s}%`))))
+      cleanup.push(() => cancelAnimationFrame(raf))
+    }
 
     const disclaimer = el("p", {
       class: "eqr-src__p",
@@ -167,7 +169,7 @@ export function renderEqResult(mount, { navigate }) {
         text("Xu hướng phản ứng", profile.description),
         boxes,
         keySec,
-        lean,
+        bars,
         disclaimer,
         actions,
       ),

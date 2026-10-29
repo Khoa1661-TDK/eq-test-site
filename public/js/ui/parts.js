@@ -51,7 +51,7 @@ export function fmtDuration(seconds) {
 /** Một dòng lịch sử: avatar + tên profile + ngày giờ + thời lượng, bấm để xem lại ở /result?id=… */
 export function historyEntry(attempt, { here = false } = {}) {
   const result = scoreQuest(attempt)
-  const profile = result?.answered ? EQ_PROFILES[result.top] : null
+  const profile = result?.answered ? EQ_PROFILES[result.profile.top] : null
   const seconds = attemptSeconds(attempt)
   return el(
     "a",
@@ -61,7 +61,7 @@ export function historyEntry(attempt, { here = false } = {}) {
       "span",
       { class: "hist__main" },
       el("span", { class: "hist__name", text: profile?.name ?? "Chưa đủ dữ liệu" }),
-      el("span", { class: "hist__en", text: profile?.en ?? "" }),
+      el("span", { class: "hist__en", text: profile ? `${profile.en} (${profile.abbr})` : "" }),
       el("span", { class: "hist__meta", text: [fmtDateTime(attempt.finishedAt), fmtDuration(seconds)].filter(Boolean).join(" · ") }),
     ),
     el("span", { class: "hist__go", text: "Xem →", attrs: { "aria-hidden": "true" } }),

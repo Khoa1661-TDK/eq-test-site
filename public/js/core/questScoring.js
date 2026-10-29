@@ -7,7 +7,11 @@
  *     cũng có cơ hội thắng. Cách làm: rút ngẫu nhiên rồi thử lại (tối đa MAX_TRIES lần); nếu hết lượt
  *     thử vẫn không đạt thì dùng bộ cố định DETERMINISTIC_FALLBACK (đã đạt cả hai điều kiện).
  *
- * Chấm điểm: mỗi đáp án chọn góp một phiếu cho profile của nó (trường `profile` trong questBank.js).
+ * Chấm điểm chạy song song hai hệ:
+ *   - NĂM NHÓM EQ (hiện ở trang kết quả dưới dạng thanh tiến độ): mỗi đáp án có điểm 0–3 cho từng nhóm được đo
+ *     (`scores` trong questBank.js); nhóm chính của câu (`trait`) trọng số 1, nhóm phụ 0,5 (`weights`).
+ *       điểm nhóm k = 100 × Σ(trọng số × điểm đạt) / Σ(trọng số × trần), trần = điểm cao nhất trong bốn đáp án.
+ *   - 10 PROFILE (phân loại đáp án): mỗi đáp án chọn góp một phiếu cho profile của nó (trường `profile` trong questBank.js).
  * Profile có nhiều phiếu nhất là kết quả chính; profile thứ hai là "runnerUp".
  *
  * QUY TẮC PHÁ THẾ HOÀ (tài liệu để ngỏ): trong các profile đồng phiếu cao nhất, thắng là profile có
@@ -26,11 +30,11 @@
  * đã lưu vẫn chấm lại được bằng cách gán profile mới: giữ nguyên khóa lưu trữ.
  */
 
-import { EQ_TRAIT_KEYS } from "../data/eqTraits.js"
+import { EQ_TRAITS, EQ_TRAIT_KEYS } from "../data/eqTraits.js"
 import { EQ_PROFILES, EQ_PROFILE_KEYS } from "../data/eqProfiles.js"
 import { QUEST_BANK } from "../data/questBank.js"
 
-export const QUEST_MODEL = "equest10p-v1"
+export const QUEST_MODEL = "equest5p10-v1"
 export const QUEST_LENGTH = 10
 export const MIN_PROFILE_OPTIONS = 2
 export const MAX_TRIES = 500
@@ -53,19 +57,21 @@ function shuffle(list, rand = Math.random) {
   return out
 }
 
-/** Bộ 10 mã có đạt điều kiện bao phủ không: đủ 5 tiêu chí chính và mỗi profile ≥ MIN_PROFILE_OPTIONS lần. */
+/** Bộ 10 mã có đạt điều kiện bao phủ không: đủ 5 tiêu chí chính, đủ 5 nhóm `trait` và mỗi profile ≥ MIN_PROFILE_OPTIONS lần. */
 export function coversQuest(ids) {
   if (ids.length !== QUEST_LENGTH || new Set(ids).size !== QUEST_LENGTH) return false
   const items = ids.map((id) => QUEST_BY_ID[id])
   if (items.some((q) => !q)) return false
   if (!EQ_TRAIT_KEYS.every((k) => items.some((q) => q.primary === k))) return false
+  // Mỗi nhóm EQ phải là nhóm chính (`trait`) của ít nhất một câu, để thanh nào cũng có điểm.
+  if (!EQ_TRAIT_KEYS.every((k) => items.some((q) => q.trait === k))) return false
   const seen = Object.fromEntries(EQ_PROFILE_KEYS.map((k) => [k, 0]))
   for (const q of items) for (const c of q.choices) seen[c.profile] += 1
   return EQ_PROFILE_KEYS.every((k) => seen[k] >= MIN_PROFILE_OPTIONS)
 }
 
 /* Bộ dự phòng cố định (chỉ dùng khi MAX_TRIES lần rút ngẫu nhiên đều trượt); test kiểm nó đạt coversQuest. */
-export const DETERMINISTIC_FALLBACK = ["EQ_01", "EQ_02", "EQ_03", "EQ_05", "EQ_06", "EQ_09", "EQ_11", "EQ_13", "EQ_17", "EQ_19"]
+export const DETERMINISTIC_FALLBACK = ["EQ_01", "EQ_02", "EQ_03", "EQ_04", "EQ_05", "EQ_06", "EQ_07", "EQ_08", "EQ_09", "EQ_12"]
 
 /** 10 mã tình huống khác nhau từ 20 câu, đạt coversQuest, đã xáo thứ tự. */
 export function drawQuest(rand = Math.random) {
@@ -79,14 +85,28 @@ export function drawQuest(rand = Math.random) {
 
 /* ------------------------------------------------------------------ chấm điểm */
 
+function ceilingOf(item, key) {
+  return Math.max(...item.choices.map((c) => c.scores[key] ?? 0))
+}
+
+/** Phương án mạnh nhất của một câu: tổng điểm có trọng số cao nhất (trang quản trị đánh dấu ★). */
+export function strongestChoice(item) {
+  const points = (c) => Object.entries(item.weights).reduce((sum, [key, w]) => sum + w * (c.scores[key] ?? 0), 0)
+  return item.choices.reduce((best, c) => (points(c) > points(best) ? c : best))
+}
+
 /**
  * Chấm một bộ câu trả lời { [mãTìnhHuống]: mãPhươngÁn }.
- * order: thứ tự các câu trong lượt (để phá thế hoà, xem đầu file).
- * Trả về { answered, counts: { [profile]: n }, ranked: [{ key, count }], top, runnerUp }.
+ * order: thứ tự các câu trong lượt (để phá thế hoà giữa các profile, xem đầu file).
+ * Trả về { answered, traits: [{ key, name, en, color, summary, score }], ranked, top, strengths, toGrow,
+ *          profile: { counts: { [profile]: n }, ranked: [{ key, count }], top, runnerUp } }.
+ * (traits/ranked/top/strengths/toGrow là hệ năm nhóm EQ; `profile` là hệ 10 profile.)
  */
 export function scoreQuestAnswers(answers = {}, order = null) {
   const counts = Object.fromEntries(EQ_PROFILE_KEYS.map((k) => [k, 0]))
   const last = Object.fromEntries(EQ_PROFILE_KEYS.map((k) => [k, -1]))
+  const got = Object.fromEntries(EQ_TRAIT_KEYS.map((k) => [k, 0]))
+  const max = Object.fromEntries(EQ_TRAIT_KEYS.map((k) => [k, 0]))
   const sequence = Array.isArray(order) && order.length ? order : QUEST_BANK.map((q) => q.id)
   const rank = (id) => {
     const at = sequence.indexOf(id)
@@ -94,16 +114,33 @@ export function scoreQuestAnswers(answers = {}, order = null) {
   }
   let answered = 0
   for (const [id, choiceId] of Object.entries(answers)) {
-    const choice = QUEST_BY_ID[id] && CHOICE_BY_ID[choiceId]
+    const item = QUEST_BY_ID[id]
+    const choice = item && CHOICE_BY_ID[choiceId]
     if (!choice || !choiceId.startsWith(`${id}_`) || !(choice.profile in counts)) continue
     answered += 1
     counts[choice.profile] += 1
     last[choice.profile] = Math.max(last[choice.profile], rank(id))
+    for (const [key, weight] of Object.entries(item.weights)) {
+      if (!(key in got)) continue
+      got[key] += weight * (choice.scores[key] ?? 0)
+      max[key] += weight * ceilingOf(item, key)
+    }
   }
-  // Phiếu giảm dần; hoà thì phiếu gần nhất đứng trước; vẫn hoà thì theo thứ tự EQ_PROFILE_KEYS (sort ổn định).
+  const traits = EQ_TRAITS.map((t) => ({ ...t, score: max[t.key] ? Math.round((100 * got[t.key]) / max[t.key]) : 0 }))
+  // Sắp xếp ổn định: hoà điểm thì giữ thứ tự của EQ_TRAITS.
+  const traitRanked = [...traits].sort((a, b) => b.score - a.score)
+  // Profile: phiếu giảm dần; hoà thì phiếu gần nhất đứng trước; vẫn hoà thì theo thứ tự EQ_PROFILE_KEYS (sort ổn định).
   const ranked = EQ_PROFILE_KEYS.map((key) => ({ key, count: counts[key] }))
     .sort((a, b) => b.count - a.count || last[b.key] - last[a.key])
-  return { answered, counts, ranked, top: ranked[0].key, runnerUp: ranked[1]?.count ? ranked[1].key : null }
+  return {
+    answered,
+    traits,
+    ranked: traitRanked,
+    top: traitRanked[0]?.key ?? EQ_TRAIT_KEYS[0],
+    strengths: traitRanked.slice(0, 2).map((t) => t.key),
+    toGrow: traitRanked.slice(-2).reverse().map((t) => t.key),
+    profile: { counts, ranked, top: ranked[0].key, runnerUp: ranked[1]?.count ? ranked[1].key : null },
+  }
 }
 
 export function scoreQuest(attempt) {

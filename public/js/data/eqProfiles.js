@@ -1,6 +1,7 @@
 /* eqProfiles.js — 10 EQ profile của E-Quest (nội dung chép nguyên văn từ tài liệu "Bảng nội dung 10 EQ Profiles").
    Mỗi đáp án trong data/questBank.js gắn với đúng một profile qua trường `profile`; profile có nhiều đáp án
    nhất sau 10 tình huống là kết quả chính (xem core/questScoring.js).
+   abbr: tên viết tắt (chữ cái đầu của tên tiếng Anh, tính cả "The"), hiện cạnh tên: The Steady Navigator (TSN).
    avatar: key trong data/mascots.js. keys: 3 câu "Chìa khóa mở khóa EQ", mỗi lần xem hiện một câu.
    Đây là công cụ tự khám phá xu hướng phản ứng, không phải nhãn tính cách cố định hay chẩn đoán. */
 
@@ -8,6 +9,7 @@ export const EQ_PROFILES = {
   steadyNavigator: {
     key: "steadyNavigator",
     en: "The Steady Navigator",
+    abbr: "TSN",
     name: "Người vững vàng",
     avatar: "steadyNavigator",
     description: "Bình tĩnh, cân nhắc trước khi phản ứng và cố gắng nhìn nhận vấn đề thực tế.",
@@ -22,6 +24,7 @@ export const EQ_PROFILES = {
   bridgeBuilder: {
     key: "bridgeBuilder",
     en: "The Bridge Builder",
+    abbr: "TBB",
     name: "Người kết nối",
     avatar: "bridgeBuilder",
     description: "Quan tâm đến cảm xúc của người khác, tìm kiếm tiếng nói chung và muốn mọi người hiểu nhau.",
@@ -36,6 +39,7 @@ export const EQ_PROFILES = {
   boldInitiator: {
     key: "boldInitiator",
     en: "The Bold Initiator",
+    abbr: "TBI",
     name: "Người tiên phong",
     avatar: "boldInitiator",
     description: "Chủ động bắt đầu, sẵn sàng thử thách và tìm cách tiến lên khi gặp vấn đề.",
@@ -50,6 +54,7 @@ export const EQ_PROFILES = {
   quietObserver: {
     key: "quietObserver",
     en: "The Quiet Observer",
+    abbr: "TQO",
     name: "Người quan sát thầm lặng",
     avatar: "quietObserver",
     description: "Thường quan sát và tìm hiểu tình hình trước khi tham gia hoặc lên tiếng.",
@@ -64,6 +69,7 @@ export const EQ_PROFILES = {
   kindAccommodator: {
     key: "kindAccommodator",
     en: "The Kind Accommodator",
+    abbr: "TKA",
     name: "Người luôn nghĩ cho người khác",
     avatar: "kindAccommodator",
     description: "Dễ ưu tiên nhu cầu và cảm xúc của người khác, đôi khi chấp nhận thiệt thòi để tránh làm mất lòng.",
@@ -78,6 +84,7 @@ export const EQ_PROFILES = {
   midnightThinker: {
     key: "midnightThinker",
     en: "The Midnight Thinker",
+    abbr: "TMT",
     name: "Người hay suy tư",
     avatar: "midnightThinker",
     description: "Có xu hướng suy nghĩ đi suy nghĩ lại, lo lắng về kết quả hoặc cách người khác đánh giá mình.",
@@ -92,6 +99,7 @@ export const EQ_PROFILES = {
   directCommunicator: {
     key: "directCommunicator",
     en: "The Direct Communicator",
+    abbr: "TDC",
     name: "Người thẳng thắn",
     avatar: "directCommunicator",
     description: "Thích nói rõ suy nghĩ, nêu vấn đề trực tiếp và không ngại bảo vệ quan điểm.",
@@ -106,6 +114,7 @@ export const EQ_PROFILES = {
   quickReactor: {
     key: "quickReactor",
     en: "The Quick Reactor",
+    abbr: "TQR",
     name: "Người phản ứng nhanh",
     avatar: "quickReactor",
     description: "Phản ứng nhanh và mạnh khi cảm thấy tức giận, bất công hoặc bị thách thức.",
@@ -120,6 +129,7 @@ export const EQ_PROFILES = {
   emotionKeeper: {
     key: "emotionKeeper",
     en: "The Emotion Keeper",
+    abbr: "TEK",
     name: "Người giữ cảm xúc trong lòng",
     avatar: "emotionKeeper",
     description: "Có thể trải qua cảm xúc mạnh nhưng thường giữ trong lòng, im lặng hoặc rút lui thay vì nói ra.",
@@ -134,6 +144,7 @@ export const EQ_PROFILES = {
   lastMinuteSprinter: {
     key: "lastMinuteSprinter",
     en: "The Last-Minute Sprinter",
+    abbr: "TLMS",
     name: "Người chạy nước rút phút cuối",
     avatar: "lastMinuteSprinter",
     description: "Thường trì hoãn việc bắt đầu, khó chia nhỏ nhiệm vụ hoặc chỉ bắt tay làm khi thời hạn đến gần.",

@@ -26,7 +26,7 @@ export function renderProfiles(mount, { navigate }) {
       "a",
       { class: `plib__card${key === open ? " is-open" : ""}`, href: `/profiles?p=${key}`, attrs: { "aria-current": key === open ? "true" : null } },
       el("span", { class: "plib__art", html: profileAvatar(key, 96, { decorative: true }) }),
-      el("span", { class: "plib__en", text: p.en }),
+      el("span", { class: "plib__en", text: `${p.en} (${p.abbr})` }),
       el("span", { class: "plib__vi", text: p.name }),
       el("span", { class: "plib__desc", text: p.description }),
     )
@@ -48,7 +48,7 @@ export function renderProfiles(mount, { navigate }) {
         el(
           "div",
           { class: "plib__titles" },
-          el("h2", { class: "plib__h", id: "plib-detail-h", text: p.en }),
+          el("h2", { class: "plib__h", id: "plib-detail-h", text: `${p.en} (${p.abbr})` }),
           el("p", { class: "plib__hvi", text: p.name }),
         ),
         link("/profiles", "Đóng", "btn btn--ghost btn--sm plib__close"),

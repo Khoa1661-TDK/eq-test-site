@@ -1,7 +1,7 @@
 /* run.mjs — kiểm tra vòng E-Quest trên trình duyệt thật, ở điện thoại 390×844 và màn rộng 1440×900:
    trang chủ → "Trước khi bắt đầu" → 10 tình huống (cảnh + câu hỏi + bốn phương án cùng nằm trong
    khung nhìn, bấm một lần là sang câu) → kết quả profile (avatar, tên EN + VI, xu hướng, kỹ năng, chìa khóa mở cửa,
-   top 3 nghiêng về) → /history, /profiles, trang chủ có dải lịch sử, /practice và /scenes không còn.
+   năm thanh nhóm EQ) → /history, /profiles, trang chủ có dải lịch sử, /practice và /scenes không còn.
    Ảnh chụp lưu vào reports/ để soi bằng mắt.
 
    Chạy: node test/playwright/run.mjs            (tự bật máy chủ trên một cổng trống)
@@ -103,15 +103,20 @@ async function playRound(label, viewport, shotPrefix) {
   await page.waitForURL(/\/result/)
   await page.waitForTimeout(900)
   const text = await page.textContent("main")
-  for (const t of ["EQ Profile của bạn", "Xu hướng phản ứng", "Kỹ năng nổi bật", "Kỹ năng cần nâng cấp", "Chìa khóa mở khóa EQ", "Lựa chọn của bạn nghiêng về", "không phải"]) {
+  for (const t of ["Hồ sơ EQ của bạn", "Nhóm EQ của bạn", "Đặc tính EQ của bạn", "Sau những lựa chọn của bạn, đây là điều chúng mình muốn nói.", "Xu hướng phản ứng", "Kỹ năng nổi bật", "Kỹ năng cần nâng cấp", "Chìa khóa mở khóa EQ", "không phải"]) {
     check(`kết quả: có "${t}"`, text.includes(t))
   }
   const h1 = await page.textContent(".eqr-hero__name")
   const vi = await page.textContent(".eqr-hero__vi")
-  check("kết quả: tên EN (The …) và tên VI", /^The /.test(h1 ?? "") && Boolean(vi?.trim()), `${h1} / ${vi}`)
+  check("kết quả: tên EN (The …) kèm (VIẾT TẮT) và tên VI", /^The .+ \([A-Z]{3,4}\)$/.test(h1 ?? "") && Boolean(vi?.trim()), `${h1} / ${vi}`)
   check("kết quả: có avatar pixel", (await page.locator(".eqr-hero__art svg rect").count()) > 40)
-  check("kết quả: top 3 dạng n/10", (await page.locator(".eqr-lean__num").allTextContents()).every((t) => /^\d+\/10$/.test(t)))
-  check("kết quả: không còn thanh điểm, mức, liên kết luyện tập", !/Luyện kỹ năng|Đặc tính EQ của bạn|Goleman/.test(text) && (await page.locator(".eqr-bar, a[href*='practice']").count()) === 0)
+  check("kết quả: bỏ khối nghiêng về, không còn câu cũ", !/nghiêng về|Có một câu dành riêng|EQ Profile của bạn/.test(text) && (await page.locator(".eqr-lean").count()) === 0)
+  const barNums = await page.locator(".eqr-bar__num").allTextContents()
+  const barNames = await page.locator(".eqr-bar__name").allTextContents()
+  check("kết quả: 5 thanh nhóm EQ có điểm 0–100", barNums.length === 5 && barNums.every((n) => /^\d+$/.test(n) && +n <= 100), `${barNames.join(" | ")} = ${barNums.join(",")}`)
+  check("kết quả: đúng 5 tên nhóm EQ", ["Tự nhận thức", "Làm chủ cảm xúc", "Động lực tự thân", "Sự thấu cảm", "Kỹ năng xã hội"].every((n) => barNames.includes(n)))
+  check("kết quả: thanh tô đúng độ rộng", (await page.locator(".eqr-bar__fill").evaluateAll((ns) => ns.map((n) => n.style.width))).every((w, i) => w === `${barNums[i]}%`))
+  check("kết quả: không có liên kết luyện tập", (await page.locator("a[href*='practice']").count()) === 0)
   await page.screenshot({ path: `${REPORTS}/${shotPrefix}-04-result.png`, fullPage: true })
 
   await page.getByRole("button", { name: /Chìa khóa mở khóa EQ/ }).click()

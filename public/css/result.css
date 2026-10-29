@@ -1222,6 +1222,14 @@
 .eqr-hero__en { font-size: 14px; color: var(--ink-2); }
 
 
+.eqr-bars { list-style: none; display: grid; gap: var(--gap-3); padding: 0; margin: 0; }
+.eqr-bar__head { display: flex; justify-content: space-between; gap: 8px; font-weight: 600; margin-bottom: 4px; }
+.eqr-bar__num { font-family: var(--font-term); font-size: 22px; line-height: 1; }
+.eqr-bar__track { height: 18px; background: var(--paper-2); border: 3px solid var(--ink); }
+.eqr-bar__fill { display: block; height: 100%; width: 0; transition: width 1s cubic-bezier(.2,.8,.2,1); border-right: 3px solid var(--ink); box-sizing: border-box; }
+.eqr-bar__fill[style*="width: 0%"] { border-right-width: 0; }
+@media (prefers-reduced-motion: reduce) { .eqr-bar__fill { transition: none; } }
+
 .eqr-boxes { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap-4); }
 @media (max-width: 640px) { .eqr-boxes { grid-template-columns: 1fr; } .eqr-hero { flex-direction: column; text-align: center; } }
 .eqr-box { border: 3px solid var(--ink); padding: var(--gap-4); display: grid; gap: var(--gap-3); align-content: start; min-width: 0; }

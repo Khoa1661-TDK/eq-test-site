@@ -2,22 +2,11 @@
    và vài mảnh dùng thêm ở trang kết quả (eqr-*). Dùng token của tokens.css, góc vuông, viền mực, bóng lệch. */
 
 /* ---- avatar pixel: giữ nét cứng ---- */
-.plib svg, .hist svg, .hero__avatars svg, .eqr-hero__art svg, .eqr-lean__art svg { display: block; image-rendering: pixelated; }
+.plib svg, .hist svg, .hero__avatars svg, .eqr-hero__art svg { display: block; image-rendering: pixelated; }
 
-/* ---- trang kết quả: phần chữ và danh sách "nghiêng về" ---- */
+/* ---- trang kết quả: phần chữ ---- */
 .eqr-hero__vi { font-family: var(--font-display); font-weight: 700; font-size: clamp(18px, 4.2vw, 24px); line-height: 1.2; color: var(--ink-2); }
 .eqr-text { color: var(--ink); line-height: 1.6; font-size: 17px; max-width: 62ch; }
-.eqr-lean { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-.eqr-lean__row { display: grid; grid-template-columns: 36px minmax(0, 1fr) minmax(60px, 120px) auto; gap: 10px; align-items: center; padding: 6px 10px; border: 3px solid var(--ink); background: var(--paper); }
-.eqr-lean__art { width: 32px; height: 32px; }
-.eqr-lean__name { font-weight: 700; min-width: 0; overflow-wrap: anywhere; }
-.eqr-lean__bar { height: 12px; background: var(--paper-2); border: 2px solid var(--ink); }
-.eqr-lean__bar i { display: block; height: 100%; background: var(--yellow); border-right: 2px solid var(--ink); box-sizing: border-box; }
-.eqr-lean__num { font-family: var(--font-term); font-size: 22px; line-height: 1; }
-@media (max-width: 480px) {
-  .eqr-lean__row { grid-template-columns: 32px minmax(0, 1fr) auto; }
-  .eqr-lean__bar { display: none; }
-}
 
 /* ---- thư viện profile ---- */
 .plib__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--gap-4); }
