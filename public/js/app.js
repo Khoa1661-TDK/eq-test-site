@@ -1,18 +1,17 @@
 /* app.js — bộ định tuyến nhỏ: điều phối các màn hình, không giữ trạng thái bài đánh giá.
-   Kết quả EQ nằm trong sessionStorage (xem core/eqScoring.js), không nằm trên URL. */
+   Các lần làm bài nằm trong localStorage (xem core/questScoring.js); xem lại một lần qua /result?id=… */
 
 import { el, frame, qs, qsa } from "./core/dom.js"
-import { EQ_TRAIT_KEYS, TRAIT_OF_DOMAIN } from "./data/eqTraits.js"
 import { renderLanding } from "./views/landing.js"
 import { renderAssessment } from "./views/assessment.js"
 import { renderEqResult } from "./views/eqResult.js"
-import { renderPractice } from "./views/practice.js"
-import { renderSceneView } from "./views/sceneView.js"
+import { renderProfiles } from "./views/profiles.js"
+import { renderHistory } from "./views/history.js"
 
 const main = qs("#main")
 
 /* Trang có thể nằm dưới một thư mục con (vd. GitHub Pages: /eq-test-site/). Mọi đường dẫn
-   trong app vẫn viết như ở gốc ("/practice"); BASE chỉ được thêm vào URL thật của trình duyệt. */
+   trong app vẫn viết như ở gốc ("/profiles"); BASE chỉ được thêm vào URL thật của trình duyệt. */
 const BASE = new URL(document.baseURI).pathname.replace(/\/+$/, "")
 const appPath = (pathname) => (BASE && pathname.startsWith(BASE) ? pathname.slice(BASE.length) : pathname).replace(/\/+$/, "") || "/"
 
@@ -28,9 +27,9 @@ function fixLinks(root = document) {
 const TITLES = {
   "/": "E-Quest — Thông minh hơn cùng cảm xúc",
   "/assessment": "Đánh giá EQ",
-  "/result": "Hồ sơ EQ",
-  "/practice": "Luyện EQ",
-  "/scenes": "Cảnh tình huống EQ",
+  "/result": "Kết quả EQ",
+  "/profiles": "Thư viện Profile",
+  "/history": "Lịch sử làm bài",
 }
 
 let view = null
@@ -63,18 +62,14 @@ function route() {
     return renderEqResult(main, { navigate })
   }
 
-  if (path === "/practice") {
-    const asked = url.searchParams.get("skill")
-    // Liên kết cũ dùng sáu kỹ năng (vd. ?skill=regulation) vẫn mở đúng thành phần mới.
-    const trait = TRAIT_OF_DOMAIN[asked] ?? asked
-    const skill = trait === "random" || EQ_TRAIT_KEYS.includes(trait) ? trait : null
-    document.title = TITLES["/practice"]
-    return renderPractice(main, { navigate, skill })
+  if (path === "/profiles") {
+    document.title = TITLES["/profiles"]
+    return renderProfiles(main, { navigate })
   }
 
-  if (path === "/scenes") {
-    document.title = TITLES["/scenes"]
-    return renderSceneView(main, { navigate })
+  if (path === "/history") {
+    document.title = TITLES["/history"]
+    return renderHistory(main, { navigate })
   }
 
   document.title = "Không có trang này — Đánh giá EQ"
@@ -120,7 +115,7 @@ function render() {
   main.focus({ preventScroll: true })
 }
 
-// Liên kết tạo sau (phản hồi luyện tập, kết quả…) cũng được thêm BASE.
+// Liên kết tạo sau (kết quả, lịch sử…) cũng được thêm BASE.
 new MutationObserver(() => fixLinks(main)).observe(main, { childList: true, subtree: true })
 
 // Bấm liên kết nội bộ: đi trong app thay vì tải lại trang (màn hình nào đã tự xử lý thì bỏ qua).

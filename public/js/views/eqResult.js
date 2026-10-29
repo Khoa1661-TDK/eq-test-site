@@ -1,21 +1,13 @@
-/* eqResult.js — HỒ SƠ EQ: nhóm của bạn (thành phần nổi bật nhất), năm thanh đặc tính,
-   kỹ năng nổi bật / cần nâng cấp, chìa khóa EQ (hoạt ảnh mở cửa), lịch sử làm bài, nguồn tham khảo. */
+/* eqResult.js — KẾT QUẢ EQ: avatar và tên profile (EN + VI), xu hướng phản ứng, kỹ năng nổi bật / cần nâng cấp,
+   chìa khóa EQ (hoạt ảnh mở cửa, một câu cố định theo lượt làm), vài lựa chọn nghiêng về, liên kết thư viện profile.
+   /result?id=<mã lượt> xem lại một lượt cũ; không có id thì xem lượt mới nhất. Danh sách lịch sử nằm ở /history. */
 
 import { el, frame } from "../core/dom.js"
-import { MASCOTS_BY_KEY } from "../data/mascots.js"
-import { EQ_SOURCES, EQ_TRAITS, EQ_TRAIT_BY_KEY } from "../data/eqTraits.js"
-import { EQ_PROFILES, PRACTICE_SKILL, TRAIT_NOTES } from "../data/eqProfiles.js"
-import { clearQuestHistory, questAttempt, questAttempts, scoreQuest } from "../core/questScoring.js"
-import { mascotArt } from "../ui/parts.js"
+import { EQ_PROFILES } from "../data/eqProfiles.js"
+import { attemptSeconds, keyQuoteFor, questAttempt, questAttempts, scoreQuest } from "../core/questScoring.js"
+import { fmtDateTime, fmtDuration, profileAccent, profileAvatar } from "../ui/parts.js"
 
 const reduced = () => window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
-
-const fmtDate = (ms) => {
-  if (!ms) return "không rõ ngày"
-  const d = new Date(ms)
-  const p = (n) => String(n).padStart(2, "0")
-  return `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()} lúc ${p(d.getHours())}:${p(d.getMinutes())}`
-}
 
 const KEY_SVG = `<svg viewBox="0 0 32 16" width="96" height="48" shape-rendering="crispEdges" aria-hidden="true">
 <path fill="#1d1b2e" d="M1 3h7v1h1v8H8v1H1v-1H0V4h1z"/>
@@ -49,10 +41,10 @@ export function renderEqResult(mount, { navigate }) {
     cleanup = []
     view.replaceChildren()
 
-    const all = questAttempts()
-    const latest = all.at(-1) ?? null
+    const latest = questAttempts().at(-1) ?? null
     const wantedId = new URL(location.href).searchParams.get("id")
-    const current = (wantedId && questAttempt(wantedId)) || latest
+    const asked = wantedId ? questAttempt(wantedId) : null
+    const current = wantedId ? asked : latest
     const result = current ? scoreQuest(current) : null
 
     if (!current || !result?.answered) {
@@ -61,9 +53,9 @@ export function renderEqResult(mount, { navigate }) {
           el(
             "div",
             { class: "empty" },
-            el("h1", { class: "band__title", text: "Chưa có hồ sơ EQ" }),
-            el("p", { class: "prose", text: "Bạn chưa làm bài nào trên máy này nên chưa có hồ sơ để xem. Làm thử một lượt, chỉ mất vài phút." }),
-            el("p", { class: "actions" }, link("/assessment", "Bắt đầu làm bài", "btn btn--accent btn--lg")),
+            el("h1", { class: "band__title", text: "Chưa có kết quả" }),
+            el("p", { class: "prose", text: wantedId ? "Không tìm thấy lần làm bài này trên máy. Có thể lịch sử đã bị xóa." : "Bạn chưa làm bài nào trên máy này nên chưa có kết quả để xem. Làm thử một lượt, chỉ mất vài phút." }),
+            el("p", { class: "actions" }, link("/assessment", "Bắt đầu bài test", "btn btn--accent btn--lg"), link("/profiles", "Xem thư viện Profile")),
           ),
           { size: "lg", cls: "result__empty" },
         ),
@@ -72,13 +64,14 @@ export function renderEqResult(mount, { navigate }) {
     }
 
     const profile = EQ_PROFILES[result.top]
-    const mascot = MASCOTS_BY_KEY[profile.mascot]
+    const accent = profileAccent(profile.key)
+    const viewingOld = Boolean(latest) && current.id !== latest.id
 
     /* ---------------------------------------------------------- cửa sổ ---- */
     const bar = el(
       "div",
       { class: "syswin__bar" },
-      el("span", { class: "syswin__title", text: "Hồ sơ EQ của bạn" }),
+      el("span", { class: "syswin__title", text: "Kết quả của bạn" }),
       el(
         "span",
         { class: "syswin__dots", attrs: { "aria-hidden": "true" } },
@@ -88,158 +81,108 @@ export function renderEqResult(mount, { navigate }) {
       ),
     )
 
-    const topTrait = EQ_TRAIT_BY_KEY[result.top]
+    const seconds = attemptSeconds(current)
     const hero = el(
       "section",
       { class: "eqr-hero", attrs: { "aria-labelledby": "eqr-group" } },
-      el("div", { class: "eqr-hero__art", html: mascotArt(mascot, 120, profile.name) }),
+      el("div", { class: "eqr-hero__art", html: profileAvatar(profile.key, 108) }),
       el(
         "div",
         { class: "eqr-hero__text" },
-        el("p", { class: "eqr-kicker", text: "Nhóm EQ của bạn" }),
-        el("h1", { class: "eqr-hero__name", id: "eqr-group", text: profile.name }),
-        el("p", { class: "eqr-hero__en", text: `${profile.en} · nổi bật nhất: ${topTrait.name}` }),
-        el("p", { class: "eqr-hero__tag", text: profile.tagline }),
-        el("p", { class: "eqr-hero__desc", text: profile.description }),
+        el("p", { class: "eqr-kicker", text: "EQ Profile của bạn" }),
+        el("h1", { class: "eqr-hero__name", id: "eqr-group", text: profile.en }),
+        el("p", { class: "eqr-hero__vi", text: profile.name }),
+        el("p", { class: "eqr-hero__en", text: [fmtDateTime(current.finishedAt), fmtDuration(seconds)].filter(Boolean).join(" · ") }),
       ),
     )
-    hero.style.setProperty("--eqr-accent", topTrait.color)
+    hero.style.setProperty("--eqr-accent", accent)
 
-    /* Thanh đặc tính */
-    const fills = []
-    const bars = el(
-      "section",
-      { class: "eqr-sec" },
-      el("h2", { class: "syswin__heading", text: "Đặc tính EQ của bạn" }),
-      el(
-        "ul",
-        { class: "eqr-bars" },
-        result.traits.map((t) => {
-          const fill = el("span", { class: "eqr-bar__fill", style: { background: t.color } })
-          fills.push([fill, t.score])
-          return el(
-            "li",
-            { class: "eqr-bar" },
-            el("div", { class: "eqr-bar__head" }, el("span", { class: "eqr-bar__name", text: t.name }), el("span", { class: "eqr-bar__num", text: String(t.score) })),
-            el("div", { class: "eqr-bar__track", attrs: { role: "img", "aria-label": `${t.name}: ${t.score} trên 100` } }, fill),
-          )
-        }),
-      ),
-    )
-    const animate = reduced()
-    fills.forEach(([f, s]) => (f.style.width = animate ? `${s}%` : "0%"))
-    if (!animate) {
-      const raf = requestAnimationFrame(() => requestAnimationFrame(() => fills.forEach(([f, s]) => (f.style.width = `${s}%`))))
-      cleanup.push(() => cancelAnimationFrame(raf))
-    }
+    const text = (title, body, cls = "") =>
+      el("section", { class: `eqr-sec ${cls}` }, el("h2", { class: "syswin__heading", text: title }), el("p", { class: "eqr-text", text: body }))
 
-    /* Hai hộp */
-    const box = (title, keys, kind) =>
-      el(
-        "div",
-        { class: `eqr-box eqr-box--${kind}` },
-        el("h2", { class: "eqr-box__title", text: title }),
-        el(
-          "ul",
-          { class: "eqr-box__list" },
-          keys.map((k) => {
-            const t = EQ_TRAIT_BY_KEY[k]
-            const href = `/practice?skill=${PRACTICE_SKILL[k]}`
-            const li = el(
-              "li",
-              { class: "eqr-box__item" },
-              el("p", { class: "eqr-box__name", text: t.name }),
-              el("p", { class: "eqr-box__note", text: TRAIT_NOTES[k][kind === "up" ? "upgrade" : "standout"] }),
-              kind === "up" ? link(href, "Luyện kỹ năng này", "eqr-box__link") : null,
-            )
-            li.style.setProperty("--c", t.color)
-            return li
-          }),
-        ),
-      )
-    const boxes = el("section", { class: "eqr-boxes" }, box("Kỹ năng nổi bật", result.strengths, "star"), box("Kỹ năng cần nâng cấp", result.toGrow, "up"))
+    /* Hai hộp: kỹ năng nổi bật / cần nâng cấp */
+    const box = (title, body, kind) =>
+      el("div", { class: `eqr-box eqr-box--${kind}` }, el("h2", { class: "eqr-box__title", text: title }), el("p", { class: "eqr-box__note", text: body }))
+    const boxes = el("section", { class: "eqr-boxes" }, box("Kỹ năng nổi bật", profile.strengths, "star"), box("Kỹ năng cần nâng cấp", profile.levelUp, "up"))
 
-    /* Chìa khóa */
+    /* Chìa khóa: một câu, cố định theo lượt làm */
+    const quote = keyQuoteFor(profile.key, current.id)
     const keyBtn = el(
       "button",
       { class: "eqr-keybtn", type: "button" },
       el("span", { class: "eqr-keybtn__icon", html: KEY_SVG }),
-      el("span", { class: "eqr-keybtn__text", text: "Chìa khóa EQ của bạn" }),
+      el("span", { class: "eqr-keybtn__text", text: "Chìa khóa mở khóa EQ" }),
     )
-    keyBtn.addEventListener("click", () => openKey(profile, topTrait.color, keyBtn))
-    const keySec = el("section", { class: "eqr-key" }, el("p", { class: "eqr-key__hint", text: "Có một câu dành riêng cho nhóm của bạn. Mở khóa để đọc." }), keyBtn)
+    keyBtn.addEventListener("click", () => openKey(profile, quote, accent, keyBtn))
+    const keySec = el("section", { class: "eqr-key" }, el("p", { class: "eqr-key__hint", text: "Có một câu dành riêng cho profile của bạn. Mở khóa để đọc." }), keyBtn)
 
-    /* Lịch sử */
-    const viewingOld = current.id !== latest.id
-    const history = el(
+    /* Nghiêng về: top 3 profile theo số lần chọn */
+    const lean = el(
       "section",
       { class: "eqr-sec" },
-      el("h2", { class: "syswin__heading", text: "Lịch sử làm bài" }),
-      viewingOld ? el("p", { class: "eqr-note", text: `Đang xem lần làm ngày ${fmtDate(current.finishedAt)}.` }) : null,
+      el("h2", { class: "syswin__heading", text: "Lựa chọn của bạn nghiêng về" }),
       el(
         "ul",
-        { class: "eqr-hist" },
-        [...all].reverse().map((a) => {
-          const r = scoreQuest(a)
-          const p = r?.answered ? EQ_PROFILES[r.top] : null
-          const here = a.id === current.id
-          const row = el(
-            "a",
-            { class: `eqr-hist__row${here ? " is-here" : ""}`, href: `/result?id=${encodeURIComponent(a.id)}`, attrs: { "aria-current": here ? "true" : null } },
-            el("span", { class: "eqr-hist__date", text: fmtDate(a.finishedAt) }),
-            el("span", { class: "eqr-hist__group", text: p?.name ?? "—" }),
-            el("span", { class: "eqr-hist__trait", text: r?.answered ? EQ_TRAIT_BY_KEY[r.top].name : "" }),
-            here ? el("span", { class: "eqr-hist__tag", text: "Đang xem" }) : null,
-          )
-          row.addEventListener("click", (e) => {
-            e.preventDefault()
-            navigate(`/result?id=${encodeURIComponent(a.id)}`)
-          })
-          return el("li", {}, row)
-        }),
+        { class: "eqr-lean" },
+        result.ranked
+          .slice(0, 3)
+          .filter((r) => r.count > 0)
+          .map((r) => {
+            const p = EQ_PROFILES[r.key]
+            return el(
+              "li",
+              { class: "eqr-lean__row" },
+              el("span", { class: "eqr-lean__art", html: profileAvatar(r.key, 32, { decorative: true }) }),
+              el("span", { class: "eqr-lean__name", text: p.name }),
+              el("span", { class: "eqr-lean__bar", attrs: { "aria-hidden": "true" } }, el("i", { style: { width: `${(100 * r.count) / result.answered}%` } })),
+              el("span", { class: "eqr-lean__num", text: `${r.count}/${result.answered}` }),
+            )
+          }),
       ),
+      el("p", { class: "eqr-note", text: "Chỉ là số lần bạn chọn đáp án thuộc từng nhóm trong lượt làm này; profile có nhiều lựa chọn nhất được chọn làm kết quả." }),
     )
 
-    /* Nguồn */
-    const sources = el(
-      "section",
-      { class: "eqr-sec" },
-      el("h2", { class: "syswin__heading", text: "Nguồn tham khảo" }),
-      el("p", { class: "eqr-src__p", text: "Năm đặc tính trong bài theo mô hình trí tuệ cảm xúc của Daniel Goleman. Đây là công cụ để bạn tự nhìn lại mình, không phải bài trắc nghiệm tâm lý đã được kiểm định." }),
-      el(
-        "ul",
-        { class: "eqr-src" },
-        EQ_SOURCES.map((s) => el("li", {}, el("a", { href: s.href, target: "_blank", rel: "noopener", text: s.text }))),
-      ),
-    )
-
-    /* Hành động */
-    const clearBtn = el("button", { class: "btn btn--ghost", type: "button" }, el("span", { class: "pxf-in", text: "Xóa lịch sử" }))
-    clearBtn.addEventListener("click", () => {
-      if (!confirm("Xóa toàn bộ lịch sử làm bài trên máy này? Việc này không hoàn tác được.")) return
-      clearQuestHistory()
-      if (location.search) navigate("/result")
-      else draw()
+    const disclaimer = el("p", {
+      class: "eqr-src__p",
+      text: "Đây là công cụ giúp bạn tự khám phá xu hướng phản ứng của mình qua một lượt tình huống, không phải nhãn tính cách cố định, không phải thang đo tâm lý đã được kiểm định và không dùng để chẩn đoán. Làm lại vào lúc khác, bạn có thể nhận kết quả khác.",
     })
-    const actions = el("div", { class: "actions eqr-actions" }, link("/assessment", "Làm lại bài test", "btn btn--accent"), clearBtn)
+
+    const actions = el(
+      "div",
+      { class: "actions eqr-actions" },
+      link("/assessment", "Làm lại bài test", "btn btn--accent"),
+      link(`/profiles?p=${profile.key}`, "Xem hồ sơ trong thư viện"),
+      link("/history", "Lịch sử làm bài"),
+    )
 
     const win = el(
       "div",
       { class: "syswin" },
       bar,
-      el("div", { class: "syswin__body" }, hero, bars, boxes, keySec, history, sources, actions),
+      el(
+        "div",
+        { class: "syswin__body" },
+        viewingOld ? el("p", { class: "eqr-note", text: `Đang xem lại lần làm bài ngày ${fmtDateTime(current.finishedAt)}.` }) : null,
+        hero,
+        text("Xu hướng phản ứng", profile.description),
+        boxes,
+        keySec,
+        lean,
+        disclaimer,
+        actions,
+      ),
     )
     view.append(frame(win, { size: "lg", cls: "syswin-frame" }))
   }
 
   /* ---------------------------------------------------- hoạt ảnh chìa khóa */
-  function openKey(profile, color, opener) {
+  function openKey(profile, text, color, opener) {
     const skip = reduced()
     const quote = el(
       "figure",
       { class: "kfx__quote" },
-      el("blockquote", { text: `“${profile.quote.text}”` }),
-      profile.quote.author ? el("figcaption", { text: `— ${profile.quote.author}` }) : el("figcaption", { text: profile.name }),
+      el("blockquote", { text: `“${text}”` }),
+      el("figcaption", { text: profile.name }),
     )
     const closeBtn = el("button", { class: "kfx__close", type: "button", attrs: { "aria-label": "Đóng" }, text: "×" })
     const door = (side) => el("div", { class: `kfx__door kfx__door--${side}` }, el("i", { class: "kfx__plank" }), el("i", { class: "kfx__plank" }), el("i", { class: "kfx__knob" }))
@@ -255,7 +198,7 @@ export function renderEqResult(mount, { navigate }) {
     )
     const overlay = el(
       "div",
-      { class: `kfx${skip ? " kfx--skip" : ""}`, role: "dialog", attrs: { "aria-modal": "true", "aria-label": "Chìa khóa EQ của bạn" } },
+      { class: `kfx${skip ? " kfx--skip" : ""}`, role: "dialog", attrs: { "aria-modal": "true", "aria-label": "Chìa khóa mở khóa EQ" } },
       el("div", { class: "kfx__panel" }, closeBtn, stage),
     )
     overlay.style.setProperty("--kc", color)

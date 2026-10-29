@@ -1,6 +1,7 @@
 /* run.mjs — kiểm tra vòng E-Quest trên trình duyệt thật, ở điện thoại 390×844 và màn rộng 1440×900:
    trang chủ → "Trước khi bắt đầu" → 10 tình huống (cảnh + câu hỏi + bốn phương án cùng nằm trong
-   khung nhìn, bấm một lần là sang câu) → hồ sơ EQ (5 thanh, lịch sử, chìa khóa mở cửa) → làm lại.
+   khung nhìn, bấm một lần là sang câu) → kết quả profile (avatar, tên EN + VI, xu hướng, kỹ năng, chìa khóa mở cửa,
+   top 3 nghiêng về) → /history, /profiles, trang chủ có dải lịch sử, /practice và /scenes không còn.
    Ảnh chụp lưu vào reports/ để soi bằng mắt.
 
    Chạy: node test/playwright/run.mjs            (tự bật máy chủ trên một cổng trống)
@@ -8,7 +9,9 @@
 
 import { chromium } from "playwright"
 import { spawn } from "node:child_process"
-import { mkdir } from "node:fs/promises"
+import { mkdir, mkdtemp } from "node:fs/promises"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { resolve } from "node:path"
 import { createServer } from "node:net"
@@ -39,7 +42,9 @@ let server = null
 let BASE = argUrl > -1 ? process.argv[argUrl + 1].replace(/\/$/, "") : null
 if (!BASE) {
   const port = await freePort()
-  server = spawn(process.execPath, ["server.mjs", "--port", String(port)], { cwd: ROOT, stdio: "ignore" })
+  // EQ_DATA_DIR: thống kê của lượt chạy thử không ghi vào data/ thật.
+  const dataDir = await mkdtemp(join(tmpdir(), "equest-e2e-"))
+  server = spawn(process.execPath, ["server.mjs", "--port", String(port)], { cwd: ROOT, stdio: "ignore", env: { ...process.env, EQ_DATA_DIR: dataDir } })
   BASE = `http://127.0.0.1:${port}`
   for (let i = 0; i < 50; i += 1) {
     try {
@@ -98,29 +103,55 @@ async function playRound(label, viewport, shotPrefix) {
   await page.waitForURL(/\/result/)
   await page.waitForTimeout(900)
   const text = await page.textContent("main")
-  for (const t of ["Tự nhận thức", "Làm chủ cảm xúc", "Động lực tự thân", "Sự thấu cảm", "Kỹ năng xã hội", "Kỹ năng nổi bật", "Kỹ năng cần nâng cấp", "Lịch sử làm bài", "Goleman"]) {
-    check(`hồ sơ: có "${t}"`, text.includes(t))
+  for (const t of ["EQ Profile của bạn", "Xu hướng phản ứng", "Kỹ năng nổi bật", "Kỹ năng cần nâng cấp", "Chìa khóa mở khóa EQ", "Lựa chọn của bạn nghiêng về", "không phải"]) {
+    check(`kết quả: có "${t}"`, text.includes(t))
   }
-  check("hồ sơ: không còn chữ điểm mạnh / điểm yếu", !/điểm mạnh|điểm yếu/i.test(text))
+  const h1 = await page.textContent(".eqr-hero__name")
+  const vi = await page.textContent(".eqr-hero__vi")
+  check("kết quả: tên EN (The …) và tên VI", /^The /.test(h1 ?? "") && Boolean(vi?.trim()), `${h1} / ${vi}`)
+  check("kết quả: có avatar pixel", (await page.locator(".eqr-hero__art svg rect").count()) > 40)
+  check("kết quả: top 3 dạng n/10", (await page.locator(".eqr-lean__num").allTextContents()).every((t) => /^\d+\/10$/.test(t)))
+  check("kết quả: không còn thanh điểm, mức, liên kết luyện tập", !/Luyện kỹ năng|Đặc tính EQ của bạn|Goleman/.test(text) && (await page.locator(".eqr-bar, a[href*='practice']").count()) === 0)
   await page.screenshot({ path: `${REPORTS}/${shotPrefix}-04-result.png`, fullPage: true })
 
-  await page.getByRole("button", { name: /Chìa khóa EQ/ }).click()
+  await page.getByRole("button", { name: /Chìa khóa mở khóa EQ/ }).click()
   await page.waitForTimeout(3600)
   const quote = await page.locator("[role=dialog]").textContent()
-  check("chìa khóa: mở ra câu nói của nhóm", Boolean(quote?.trim()))
+  check("chìa khóa: mở ra một câu của profile", Boolean(quote?.trim()))
   await page.screenshot({ path: `${REPORTS}/${shotPrefix}-05-key.png` })
   await page.keyboard.press("Escape")
 
-  // "Luyện kỹ năng này" mở đúng phiên luyện của thành phần cần nâng cấp.
-  await page.locator("a", { hasText: "Luyện kỹ năng này" }).first().click()
-  await page.waitForURL(/\/practice\?skill=/)
-  await page.waitForTimeout(600)
-  const practiceTag = await page.textContent(".hud__tag")
-  check("luyện: mở phiên của một đặc tính", /Luyện: (Tự nhận thức|Làm chủ cảm xúc|Động lực tự thân|Sự thấu cảm|Kỹ năng xã hội)/.test(practiceTag ?? ""), practiceTag)
-  await page.goto(`${BASE}/practice`, { waitUntil: "networkidle" })
-  const practiceText = await page.textContent("main")
-  check("luyện: năm đặc tính EQ, không còn sáu kỹ năng cũ", practiceText.includes("Năm đặc tính EQ") && !/Sáu kỹ năng|Nhận biết xã hội|Quản lý quan hệ/.test(practiceText))
-  await page.screenshot({ path: `${REPORTS}/${shotPrefix}-06-practice.png`, fullPage: true })
+  // Xem lại cùng một lượt qua /result?id=… cho cùng profile và cùng chìa khóa.
+  const resultUrl = page.url()
+  await page.goto(`${BASE}/history`, { waitUntil: "networkidle" })
+  check("lịch sử: có một dòng vừa làm xong", (await page.locator(".hist__row").count()) >= 1)
+  check("lịch sử: hiện thời lượng", /phút|giây/.test((await page.locator(".hist__row").first().textContent()) ?? ""))
+  await page.screenshot({ path: `${REPORTS}/${shotPrefix}-06-history.png`, fullPage: true })
+  await page.locator(".hist__row").first().click()
+  await page.waitForURL(/\/result\?id=/)
+  check("lịch sử: mở lại đúng kết quả", (await page.textContent(".eqr-hero__name")) === h1)
+  void resultUrl
+
+  await page.goto(`${BASE}/`, { waitUntil: "networkidle" })
+  check("trang chủ: dải lịch sử có lần vừa làm", (await page.locator(".hist--strip .hist__row").count()) === 1)
+  check("trang chủ: không còn chữ luyện tập", !/luyện/i.test((await page.textContent("main")) ?? ""))
+  await page.screenshot({ path: `${REPORTS}/${shotPrefix}-07-landing-history.png` })
+
+  await page.goto(`${BASE}/profiles`, { waitUntil: "networkidle" })
+  check("thư viện: đủ 10 thẻ", (await page.locator(".plib__card").count()) === 10)
+  await page.screenshot({ path: `${REPORTS}/${shotPrefix}-08-profiles.png`, fullPage: true })
+  await page.locator(".plib__card").nth(4).click()
+  await page.waitForURL(/\/profiles\?p=kindAccommodator/)
+  const detail = await page.textContent("#plib-detail")
+  check("thư viện: chi tiết có kỹ năng và 3 chìa khóa", detail.includes("Kỹ năng nổi bật") && detail.includes("Kỹ năng cần nâng cấp") && (await page.locator(".plib__keys li").count()) === 3)
+  await page.screenshot({ path: `${REPORTS}/${shotPrefix}-09-profile-detail.png` })
+
+  for (const gone of ["/practice", "/scenes"]) {
+    await page.goto(`${BASE}${gone}`, { waitUntil: "networkidle" })
+    check(`${gone} không còn (404)`, (await page.textContent("main")).includes("404"))
+  }
+  const nav = await page.locator(".topnav").textContent()
+  check("thanh điều hướng: Lịch sử ngay sau Trang chủ, không còn Luyện/Cảnh", /^\s*Trang chủ\s*Lịch sử/.test(nav) && !/Luyện|Cảnh/.test(nav), nav.replace(/\s+/g, " "))
 
   check("không có lỗi trong console", errors.length === 0, errors.join(" | "))
   check("không cuộn ngang", (await page.evaluate(() => document.documentElement.scrollWidth)) <= viewport.width)

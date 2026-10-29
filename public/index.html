@@ -8,13 +8,13 @@
     <title>E-Quest — Thông minh hơn cùng cảm xúc</title>
     <meta
       name="description"
-      content="E-Quest — trò chơi khám phá trí tuệ cảm xúc (EQ) cho sinh viên: 10 tình huống đời đại học, chọn điều bạn thật sự sẽ làm, cuối bài nhận hồ sơ EQ với năm đặc tính của riêng bạn. Miễn phí, không cần đăng ký; lựa chọn của bạn chỉ được ghi nhận ẩn danh để thống kê."
+      content="E-Quest — trò chơi khám phá xu hướng phản ứng của bản thân qua 10 tình huống đời đại học: chọn điều bạn thật sự sẽ làm, cuối bài biết mình thuộc EQ profile nào trong 10 profile. Miễn phí, không cần đăng ký; lựa chọn của bạn chỉ được ghi nhận ẩn danh để thống kê."
     />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="E-Quest — Thông minh hơn cùng cảm xúc" />
     <meta
       property="og:description"
-      content="Cùng một câu chuyện, mỗi người một cảm xúc. 10 tình huống đời đại học, khoảng 5 phút; cuối bài là hồ sơ EQ với năm đặc tính của riêng bạn."
+      content="Cùng một câu chuyện, mỗi người một cảm xúc. 10 tình huống đời đại học, khoảng 5 phút; cuối bài là EQ profile mô tả xu hướng phản ứng của riêng bạn."
     />
     <meta name="color-scheme" content="light" />
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
@@ -27,6 +27,7 @@
     <link rel="stylesheet" href="css/quiz.css" />
     <link rel="stylesheet" href="css/scene.css" />
     <link rel="stylesheet" href="css/result.css" />
+    <link rel="stylesheet" href="css/profiles.css" />
   </head>
   <body>
     <a class="skip" href="#main">Bỏ qua, đến phần nội dung</a>
@@ -55,9 +56,9 @@
         <span class="topbar__spacer"></span>
         <nav class="topnav" aria-label="Điều hướng chính">
           <a href="/" data-nav="/">Trang chủ</a>
+          <a href="/history" data-nav="/history">Lịch sử</a>
           <a href="/assessment" data-nav="/assessment">Đánh giá EQ</a>
-          <a href="/scenes" data-nav="/scenes">Cảnh EQ</a>
-          <a href="/practice" data-nav="/practice">Luyện EQ</a>
+          <a href="/profiles" data-nav="/profiles">Thư viện Profile</a>
         </nav>
       </div>
     </header>
@@ -67,13 +68,14 @@
     <footer class="foot">
       <div class="foot__in">
         <span>
-          Trang web đánh giá và luyện trí tuệ cảm xúc cho sinh viên.<br />
-          Đây là công cụ học tập và tự rèn luyện, không phải thang đo tâm lý đã được kiểm định và không dùng để
+          Trang web giúp sinh viên khám phá xu hướng phản ứng của bản thân.<br />
+          Đây là công cụ tự khám phá, không phải thang đo tâm lý đã được kiểm định và không dùng để
           chẩn đoán.
         </span>
         <span class="foot__links">
           <a href="/assessment">Đánh giá EQ</a>
-          <a href="/practice">Luyện EQ</a>
+          <a href="/profiles">Thư viện Profile</a>
+          <a href="/history">Lịch sử</a>
         </span>
       </div>
     </footer>

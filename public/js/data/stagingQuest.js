@@ -192,7 +192,7 @@ export const STAGING_QUEST = {
 
   EQ_09: {
     environment: "bedroom",
-    label: "CÒN VÀI TIẾNG NỮA NỘP BÀI · PHÒNG KÝ TÚC XÁ",
+    label: "CÒN VÀI GIỜ NỮA NỘP BÀI · PHÒNG KÝ TÚC XÁ",
     place: "PHÒNG",
     cast: [{ id: "player", x: 150, mood: "neutral", name: "Bạn" }],
     timeline: [

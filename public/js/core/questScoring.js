@@ -1,28 +1,43 @@
 /**
- * Chấm điểm E-Quest — năm thành phần EQ (data/eqTraits.js), bộ 20 tình huống (data/questBank.js).
+ * Chấm điểm E-Quest — 10 EQ profile (data/eqProfiles.js), bộ 20 tình huống (data/questBank.js).
  *
- * Mỗi lượt làm rút 10 tình huống: mỗi thành phần đúng 2 tình huống chính, xáo thứ tự.
- * Mỗi tình huống đo một thành phần CHÍNH (trọng số 1) và một thành phần PHỤ (0,5);
- * mỗi phương án có 0–3 điểm cho từng thành phần được đo. Trần điểm của một tình huống
- * cho từng thành phần là điểm cao nhất trong bốn phương án (có câu không phương án nào
- * đạt 3), nên chọn phương án tốt nhất ở mọi câu thì mọi thành phần đều đúng 100.
+ * Rút đề: mỗi lượt làm rút 10 trong 20 tình huống, xáo thứ tự, sao cho
+ *   - năm tiêu chí EQ (data/eqTraits.js) đều là tiêu chí CHÍNH của ít nhất một tình huống được rút;
+ *   - mỗi profile là đáp án của ít nhất MIN_PROFILE_OPTIONS (2) tình huống được rút, để profile nào
+ *     cũng có cơ hội thắng. Cách làm: rút ngẫu nhiên rồi thử lại (tối đa MAX_TRIES lần); nếu hết lượt
+ *     thử vẫn không đạt thì dùng bộ cố định DETERMINISTIC_FALLBACK (đã đạt cả hai điều kiện).
  *
- *   điểm thành phần k = 100 × Σ(trọng số × điểm đạt) / Σ(trọng số × trần)
+ * Chấm điểm: mỗi đáp án chọn góp một phiếu cho profile của nó (trường `profile` trong questBank.js).
+ * Profile có nhiều phiếu nhất là kết quả chính; profile thứ hai là "runnerUp".
  *
- * ĐÂY KHÔNG PHẢI là một thang đo đã được kiểm định tâm lý: điểm phản ánh lựa chọn trong
- * 10 tình huống của lượt làm này, không phải bạn là người thế nào.
+ * QUY TẮC PHÁ THẾ HOÀ (tài liệu để ngỏ): trong các profile đồng phiếu cao nhất, thắng là profile có
+ * phiếu GẦN NHẤT theo thứ tự câu hỏi của lượt làm (phản ứng ở những câu sau cùng được coi là xu hướng
+ * hiện rõ nhất). Truyền `order` (thứ tự các câu của lượt) vào scoreQuestAnswers; không truyền thì
+ * lấy thứ tự khai báo trong questBank. Nếu vẫn hoà (không xảy ra khi có order) thì theo thứ tự EQ_PROFILE_KEYS.
+ * Bảng xếp hạng đầy đủ dùng cùng quy tắc: phiếu giảm dần, hoà thì phiếu gần hơn đứng trước.
  *
- * Lịch sử lưu ở localStorage (khóa riêng, tách khỏi bài đánh giá sáu kỹ năng cũ).
+ * Câu "Chìa khóa mở khóa EQ" là một trong ba câu của profile, chọn cố định theo mã lượt làm
+ * (keyQuoteFor) nên xem lại cùng một lượt luôn thấy cùng một câu.
+ *
+ * ĐÂY KHÔNG PHẢI là thang đo tâm lý đã kiểm định: kết quả phản ánh lựa chọn trong 10 tình huống của
+ * lượt này, không phải bạn là người thế nào.
+ *
+ * Lịch sử lưu ở localStorage. Mã tình huống/phương án không đổi so với bản năm đặc tính cũ nên các lượt
+ * đã lưu vẫn chấm lại được bằng cách gán profile mới: giữ nguyên khóa lưu trữ.
  */
 
-import { EQ_TRAITS, EQ_TRAIT_BY_KEY, EQ_TRAIT_KEYS } from "../data/eqTraits.js"
+import { EQ_TRAIT_KEYS } from "../data/eqTraits.js"
+import { EQ_PROFILES, EQ_PROFILE_KEYS } from "../data/eqProfiles.js"
 import { QUEST_BANK } from "../data/questBank.js"
 
-export const QUEST_MODEL = "equest5-v1"
-export const PER_TRAIT = 2
-export const QUEST_LENGTH = PER_TRAIT * EQ_TRAITS.length
+export const QUEST_MODEL = "equest10p-v1"
+export const QUEST_LENGTH = 10
+export const MIN_PROFILE_OPTIONS = 2
+export const MAX_TRIES = 500
 
 export const QUEST_BY_ID = Object.fromEntries(QUEST_BANK.map((q) => [q.id, q]))
+const CHOICE_BY_ID = Object.fromEntries(QUEST_BANK.flatMap((q) => q.choices.map((c) => [c.id, c])))
+const BANK_INDEX = Object.fromEntries(QUEST_BANK.map((q, i) => [q.id, i]))
 
 const STORE_KEY = "equest_history_v1"
 const MAX_ATTEMPTS = 50
@@ -38,59 +53,77 @@ function shuffle(list, rand = Math.random) {
   return out
 }
 
-/** 10 mã tình huống: mỗi thành phần PER_TRAIT tình huống chính, rồi xáo cả bộ. */
+/** Bộ 10 mã có đạt điều kiện bao phủ không: đủ 5 tiêu chí chính và mỗi profile ≥ MIN_PROFILE_OPTIONS lần. */
+export function coversQuest(ids) {
+  if (ids.length !== QUEST_LENGTH || new Set(ids).size !== QUEST_LENGTH) return false
+  const items = ids.map((id) => QUEST_BY_ID[id])
+  if (items.some((q) => !q)) return false
+  if (!EQ_TRAIT_KEYS.every((k) => items.some((q) => q.primary === k))) return false
+  const seen = Object.fromEntries(EQ_PROFILE_KEYS.map((k) => [k, 0]))
+  for (const q of items) for (const c of q.choices) seen[c.profile] += 1
+  return EQ_PROFILE_KEYS.every((k) => seen[k] >= MIN_PROFILE_OPTIONS)
+}
+
+/* Bộ dự phòng cố định (chỉ dùng khi MAX_TRIES lần rút ngẫu nhiên đều trượt); test kiểm nó đạt coversQuest. */
+export const DETERMINISTIC_FALLBACK = ["EQ_01", "EQ_02", "EQ_03", "EQ_05", "EQ_06", "EQ_09", "EQ_11", "EQ_13", "EQ_17", "EQ_19"]
+
+/** 10 mã tình huống khác nhau từ 20 câu, đạt coversQuest, đã xáo thứ tự. */
 export function drawQuest(rand = Math.random) {
-  const picked = []
-  for (const key of EQ_TRAIT_KEYS) {
-    const pool = QUEST_BANK.filter((q) => q.trait === key).map((q) => q.id)
-    picked.push(...shuffle(pool, rand).slice(0, PER_TRAIT))
+  const all = QUEST_BANK.map((q) => q.id)
+  for (let i = 0; i < MAX_TRIES; i += 1) {
+    const picked = shuffle(all, rand).slice(0, QUEST_LENGTH)
+    if (coversQuest(picked)) return picked
   }
-  return shuffle(picked, rand)
+  return shuffle(DETERMINISTIC_FALLBACK, rand)
 }
 
 /* ------------------------------------------------------------------ chấm điểm */
 
-function ceilingOf(item, key) {
-  return Math.max(...item.choices.map((c) => c.scores[key] ?? 0))
-}
-
 /**
  * Chấm một bộ câu trả lời { [mãTìnhHuống]: mãPhươngÁn }.
- * Trả về { answered, traits: [{ key, name, en, color, summary, score }], ranked, top, strengths, toGrow }.
+ * order: thứ tự các câu trong lượt (để phá thế hoà, xem đầu file).
+ * Trả về { answered, counts: { [profile]: n }, ranked: [{ key, count }], top, runnerUp }.
  */
-export function scoreQuestAnswers(answers = {}) {
-  const got = Object.fromEntries(EQ_TRAIT_KEYS.map((k) => [k, 0]))
-  const max = Object.fromEntries(EQ_TRAIT_KEYS.map((k) => [k, 0]))
+export function scoreQuestAnswers(answers = {}, order = null) {
+  const counts = Object.fromEntries(EQ_PROFILE_KEYS.map((k) => [k, 0]))
+  const last = Object.fromEntries(EQ_PROFILE_KEYS.map((k) => [k, -1]))
+  const sequence = Array.isArray(order) && order.length ? order : QUEST_BANK.map((q) => q.id)
+  const rank = (id) => {
+    const at = sequence.indexOf(id)
+    return at >= 0 ? at : sequence.length + BANK_INDEX[id]
+  }
   let answered = 0
   for (const [id, choiceId] of Object.entries(answers)) {
-    const item = QUEST_BY_ID[id]
-    const choice = item?.choices.find((c) => c.id === choiceId)
-    if (!choice) continue
+    const choice = QUEST_BY_ID[id] && CHOICE_BY_ID[choiceId]
+    if (!choice || !choiceId.startsWith(`${id}_`) || !(choice.profile in counts)) continue
     answered += 1
-    for (const [key, weight] of Object.entries(item.weights)) {
-      if (!(key in got)) continue
-      got[key] += weight * (choice.scores[key] ?? 0)
-      max[key] += weight * ceilingOf(item, key)
-    }
+    counts[choice.profile] += 1
+    last[choice.profile] = Math.max(last[choice.profile], rank(id))
   }
-  const traits = EQ_TRAITS.map((t) => ({ ...t, score: max[t.key] ? Math.round((100 * got[t.key]) / max[t.key]) : 0 }))
-  // Sắp xếp ổn định: hoà điểm thì giữ thứ tự của EQ_TRAITS.
-  const ranked = [...traits].sort((a, b) => b.score - a.score)
-  return {
-    answered,
-    traits,
-    ranked,
-    top: ranked[0]?.key ?? EQ_TRAIT_KEYS[0],
-    strengths: ranked.slice(0, 2).map((t) => t.key),
-    toGrow: ranked.slice(-2).reverse().map((t) => t.key),
-  }
+  // Phiếu giảm dần; hoà thì phiếu gần nhất đứng trước; vẫn hoà thì theo thứ tự EQ_PROFILE_KEYS (sort ổn định).
+  const ranked = EQ_PROFILE_KEYS.map((key) => ({ key, count: counts[key] }))
+    .sort((a, b) => b.count - a.count || last[b.key] - last[a.key])
+  return { answered, counts, ranked, top: ranked[0].key, runnerUp: ranked[1]?.count ? ranked[1].key : null }
 }
 
 export function scoreQuest(attempt) {
-  return attempt ? scoreQuestAnswers(attempt.answers) : null
+  return attempt ? scoreQuestAnswers(attempt.answers, attempt.order) : null
 }
 
-export const traitName = (key) => EQ_TRAIT_BY_KEY[key]?.name ?? key
+/** Một trong ba câu "Chìa khóa" của profile, chọn cố định theo mã lượt làm. */
+export function keyQuoteFor(profileKey, attemptId = "") {
+  const keys = EQ_PROFILES[profileKey]?.keys ?? []
+  if (!keys.length) return ""
+  let h = 2166136261
+  for (const ch of `${attemptId}:${profileKey}`) h = Math.imul(h ^ ch.charCodeAt(0), 16777619)
+  return keys[(h >>> 0) % keys.length]
+}
+
+/** Thời gian làm bài (giây) của một lượt, hoặc null nếu không có thời điểm bắt đầu. */
+export function attemptSeconds(attempt) {
+  if (!attempt?.startedAt || !attempt?.finishedAt) return null
+  return Math.max(0, Math.round((attempt.finishedAt - attempt.startedAt) / 1000))
+}
 
 /* ------------------------------------------------------------------- lưu trữ */
 

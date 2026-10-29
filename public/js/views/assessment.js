@@ -1,5 +1,5 @@
 /* assessment.js — màn ĐÁNH GIÁ E-Quest: bảng "Trước khi bắt đầu", rồi 10 tình huống rút từ bộ 20
-   (mỗi thành phần EQ hai tình huống, xem core/questScoring.js).
+   (đủ năm tiêu chí EQ và đủ 10 profile, xem core/questScoring.js).
    Mỗi tình huống là một cảnh pixel diễn MỘT lần cùng lúc với bối cảnh, câu hỏi và bốn phương án,
    gọn trong một màn hình; bấm một phương án là sang câu tiếp, không hiện kết quả từng câu.
    Bài dở được lưu trên máy (localStorage) nên đóng tab vẫn làm tiếp được. */
@@ -8,7 +8,7 @@ import { el, frame } from "../core/dom.js"
 import { sound, soundToggle } from "../core/sound.js"
 import { createSceneRuntime } from "../scene/sceneRuntime.js"
 import { STAGING_QUEST } from "../data/stagingQuest.js"
-import { QUEST_BY_ID, QUEST_LENGTH, clearQuest, drawQuest, finishQuest, loadQuest, questAttempts, saveQuest, scoreQuest } from "../core/questScoring.js"
+import { QUEST_BY_ID, QUEST_LENGTH, clearQuest, drawQuest, finishQuest, loadQuest, questAttempts, saveQuest } from "../core/questScoring.js"
 
 const CODES = "ABCD"
 
@@ -228,16 +228,13 @@ export function renderAssessment(mount, { navigate }) {
 
   function reportStats(attempt) {
     const elapsed = Math.max(0, Math.round(((attempt.finishedAt || Date.now()) - (attempt.startedAt || Date.now())) / 1000))
-    const traits = scoreQuest(attempt)?.traits ?? []
-    const mean = traits.length ? traits.reduce((sum, t) => sum + t.score, 0) / traits.length : 0
-    // Gửi ẩn danh các lựa chọn và thời gian làm bài cho thống kê (trang /admin); máy chủ tự chấm lại điểm.
-    // Không gửi tên, không có mã người dùng. band vẫn gửi kèm cho máy chủ bản cũ chỉ đếm theo mức.
-    const band = mean >= 70 ? "high" : mean >= 45 ? "mid" : "low"
+    // Gửi ẩn danh các lựa chọn và thời gian làm bài cho thống kê (trang /admin); máy chủ tự chấm lại.
+    // Không gửi tên, không có mã người dùng. order gửi kèm để máy chủ phá thế hoà đúng như trình duyệt.
     window
       .fetch?.("api/stats", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ band, t: elapsed, answers: attempt.answers }),
+        body: JSON.stringify({ t: elapsed, order: attempt.order, answers: attempt.answers }),
         keepalive: true,
       })
       ?.catch(() => {})

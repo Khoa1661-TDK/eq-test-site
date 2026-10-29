@@ -1,13 +1,12 @@
-/* parts.js — vài mảnh giao diện dùng ở nhiều màn của phần đánh giá EQ:
-   thang đo pixel, hàng chiều hướng (mở ra xem nghĩa + bài tập), thẻ kỹ năng, khung xem trước. */
+/* parts.js — vài mảnh giao diện dùng chung: avatar pixel của profile, định dạng ngày/giờ,
+   và một dòng lịch sử làm bài (trang chủ, /history). */
 
 import { el } from "../core/dom.js"
-import { meterCells } from "./meter.js"
+import { EQ_PROFILES } from "../data/eqProfiles.js"
+import { MASCOTS_BY_KEY } from "../data/mascots.js"
+import { attemptSeconds, scoreQuest } from "../core/questScoring.js"
 
-export { meterCells }
-
-/** Linh vật pixel vẽ từ lưới 16×16, nét cứng, không mờ. Cỡ ảnh và nhãn
-    aria-label đều là tham số — chữ của mỗi kiểu nằm bên data/types.js. */
+/** Avatar pixel vẽ từ lưới 16×16, nét cứng, không mờ. Cỡ ảnh và nhãn aria-label là tham số. */
 export function mascotArt(mascot, size = 160, label = "") {
   const rects = []
   mascot.pixels.forEach((row, y) => {
@@ -16,125 +15,55 @@ export function mascotArt(mascot, size = 160, label = "") {
       rects.push(`<rect x="${x}" y="${y}" width="1" height="1" fill="${mascot.palette[ch]}"/>`)
     })
   })
-  return `<svg viewBox="0 0 16 16" width="${size}" height="${size}" shape-rendering="crispEdges" role="img" aria-label="${label}" fill="none">${rects.join("")}</svg>`
+  const alt = label ? `role="img" aria-label="${label}"` : `aria-hidden="true"`
+  return `<svg viewBox="0 0 16 16" width="${size}" height="${size}" shape-rendering="crispEdges" ${alt} fill="none">${rects.join("")}</svg>`
 }
 
-/** Nhãn mức độ của một chiều: dùng chung cho thẻ và bảng kết quả. */
-export function levelChip(dim) {
-  const cls = dim.level === "high" ? "chip--olive" : dim.level === "mid" ? "chip--amber" : "chip--ink"
-  return el("span", { class: `chip ${cls}`, text: dim.band?.label ?? "" })
+/** HTML avatar của một profile (theo key trong eqProfiles). decorative: true khi tên đã có chữ ngay cạnh. */
+export function profileAvatar(profileKey, size = 96, { decorative = false } = {}) {
+  const profile = EQ_PROFILES[profileKey]
+  const mascot = profile && MASCOTS_BY_KEY[profile.avatar]
+  return mascot ? mascotArt(mascot, size, decorative ? "" : `${profile.en} — ${profile.name}`) : ""
 }
 
-/** Một hàng chiều hướng ở trang kết quả: bấm vào để mở phần giải thích và bài tập. */
-export function dimRow(dim, { open = false, practiceHref = null } = {}) {
-  const head = el(
-    "summary",
-    { class: "dim__head" },
-    el("span", { class: "dim__code", text: dim.code, attrs: { "aria-hidden": "true" } }),
-    el("span", { class: "dim__name", text: dim.name }),
-    el("span", { class: "dim__val", text: dim.score === null ? "—" : `${dim.score}` }),
-    el("span", { class: "dim__meter" }, meterCells(dim.score ?? 0, 100, { cells: 16, cls: "meter__cells" })),
-    el("span", { class: "dim__sign", text: "＋", attrs: { "aria-hidden": "true" } }),
-  )
+/** Màu nhấn của profile: màu chính thứ hai trong bảng màu avatar (sau màu viền mực). */
+export function profileAccent(profileKey) {
+  const palette = MASCOTS_BY_KEY[EQ_PROFILES[profileKey]?.avatar]?.palette ?? {}
+  return Object.entries(palette).find(([k]) => k !== "o")?.[1] ?? "#ffd23f"
+}
 
-  const body = el(
-    "div",
-    { class: "dim__body" },
-    el("p", { class: "dim__band", text: dim.score === null ? "Chưa đủ dữ liệu" : dim.band?.label ?? "" }),
-    el("p", { class: "dim__meaning", text: dim.band?.meaning ?? "" }),
+const pad = (n) => String(n).padStart(2, "0")
+
+/** "29/10/2026, 14:05" theo định dạng vi-VN. */
+export function fmtDateTime(ms) {
+  if (!ms) return "không rõ ngày"
+  return new Date(ms).toLocaleString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: false })
+}
+
+/** "4 phút 12 giây" / "45 giây". */
+export function fmtDuration(seconds) {
+  if (seconds == null) return ""
+  const m = Math.floor(seconds / 60)
+  const s = seconds % 60
+  return m ? `${m} phút ${pad(s)} giây` : `${s} giây`
+}
+
+/** Một dòng lịch sử: avatar + tên profile + ngày giờ + thời lượng, bấm để xem lại ở /result?id=… */
+export function historyEntry(attempt, { here = false } = {}) {
+  const result = scoreQuest(attempt)
+  const profile = result?.answered ? EQ_PROFILES[result.top] : null
+  const seconds = attemptSeconds(attempt)
+  return el(
+    "a",
+    { class: `hist__row${here ? " is-here" : ""}`, href: `/result?id=${encodeURIComponent(attempt.id)}` },
+    el("span", { class: "hist__avatar", html: profile ? profileAvatar(profile.key, 48, { decorative: true }) : "" }),
     el(
-      "ul",
-      { class: "dim__examples" },
-      (dim.band?.examples ?? []).map((text) => el("li", { text })),
+      "span",
+      { class: "hist__main" },
+      el("span", { class: "hist__name", text: profile?.name ?? "Chưa đủ dữ liệu" }),
+      el("span", { class: "hist__en", text: profile?.en ?? "" }),
+      el("span", { class: "hist__meta", text: [fmtDateTime(attempt.finishedAt), fmtDuration(seconds)].filter(Boolean).join(" · ") }),
     ),
-    el("p", {
-      class: "dim__exact",
-      text:
-        dim.score === null
-          ? `Mới có ${dim.primaryAnswered} tình huống chính về kỹ năng này — cần ít nhất 3 để cho điểm.`
-          : `Đo qua ${dim.measured} tình huống (${dim.primaryAnswered} tình huống chính) — đạt ${dim.earned}/${dim.possible} điểm có trọng số.`,
-    }),
-    practiceHref ? el("a", { class: "dim__link", href: practiceHref, text: `Luyện ${dim.name.toLowerCase()} →` }) : null,
+    el("span", { class: "hist__go", text: "Xem →", attrs: { "aria-hidden": "true" } }),
   )
-
-  return el("details", { class: "dim", open: open || null, attrs: { "data-skill": dim.key } }, head, body)
-}
-
-/** Chữ mức độ định tính cho trang hồ sơ — không điểm số, không xếp loại con người. */
-export const LEVEL_WORD = { high: "mạnh nhất của bạn", mid: "ổn", low: "nên luyện thêm" }
-
-/** Thang pixel năm ô, không kèm số: chỉ định tính, dùng cho trang hồ sơ. */
-export function qualMeter(level) {
-  const filled = { high: 5, mid: 3, low: 2 }[level] ?? 0
-  return meterCells(filled, 5, { cells: 5, cls: "meter__cells qualmeter" })
-}
-
-/** Danh sách bài tập của một chiều hướng (3–5 bài). */
-export function exerciseList(dim, { limit = 5 } = {}) {
-  const box = el("div", { class: "exlist" })
-  const exercises = (dim.exercises ?? []).slice(0, limit)
-  exercises.forEach((ex, index) => {
-    box.append(
-      el(
-        "div",
-        { class: "ex" },
-        el("span", { class: "ex__n", text: String(index + 1) }),
-        el("div", { class: "ex__main" },
-          el("div", { class: "ex__name", text: ex.name }),
-          el("p", { class: "ex__how", text: ex.how }),
-          el("p", { class: "ex__why", text: ex.why }),
-        ),
-      ),
-    )
-  })
-  return box
-}
-
-/** Thẻ một kỹ năng ở trang luyện tập: số tình huống đã luyện / tổng số. */
-export function skillCard(dim, { practised = 0, total = 0, href = null } = {}) {
-  const node = el("a", { class: "skill", href, attrs: { "aria-label": `Luyện ${dim.name}`, "data-skill": dim.key } })
-  node.append(
-    el(
-      "div",
-      { class: "skill__in" },
-      el("div", { class: "skill__top" },
-        el("span", { class: "skill__code", text: dim.code }),
-        el("span", { class: "skill__name", text: dim.name }),
-      ),
-      el("p", { class: "skill__tagline", text: dim.tagline }),
-      el("div", { class: "skill__meter" }, meterCells(practised, total || 1, { cells: 14, cls: "meter__cells" })),
-      el("p", { class: "skill__count", text: `${practised}/${total} tình huống đã luyện` }),
-    ),
-  )
-  return node
-}
-
-/** Khung xem trước tĩnh của một tình huống: cho thấy trải nghiệm thật trước khi bắt đầu. */
-export function scenarioPeek(scenario) {
-  const board = el(
-    "div",
-    { class: "console peek__board", dataset: { cue: "off", hint: "off" } },
-    el(
-      "div",
-      { class: "console__in" },
-      el("div", { class: "console__top" }, el("span", { class: "console__page", text: "TÌNH HUỐNG" })),
-      el("div", { class: "console__text" }, el("span", { text: scenario.dialogue[0] })),
-      el("div", { class: "console__top" }, el("span", { class: "console__page", text: "CÂU HỎI" })),
-      el("div", { class: "console__text" }, el("span", { text: scenario.prompt })),
-      el(
-        "div",
-        { class: "choices is-open" },
-        scenario.choices.map((choice) =>
-          el(
-            "div",
-            { class: "choice is-in" },
-            el("span", { class: "choice__cursor", text: ">", attrs: { "aria-hidden": "true" } }),
-            el("span", { class: "choice__code", text: choice.code, attrs: { "aria-hidden": "true" } }),
-            el("span", { class: "choice__text", text: choice.text }),
-          ),
-        ),
-      ),
-    ),
-  )
-  return board
 }

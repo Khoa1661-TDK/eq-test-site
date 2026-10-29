@@ -1,5 +1,5 @@
 /**
- * Kiểm tra lời văn: trang này luyện KỸ NĂNG, không xếp người vào "kiểu".
+ * Kiểm tra lời văn: trang này giúp bạn khám phá XU HƯỚNG PHẢN ỨNG, không xếp người vào "kiểu" cố định.
  *
  *   node test/wording.test.mjs
  *

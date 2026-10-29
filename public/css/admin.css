@@ -305,19 +305,13 @@
   font-size: 15px;
   color: var(--ink-2);
 }
-.adm-band {
-  padding: 1px 6px;
+.adm-profile {
+  display: inline-block;
+  padding: 1px 8px;
+  border-left: 6px solid var(--ink);
   font-weight: 700;
 }
-.adm-band--high {
-  background: var(--mint-tint);
-  color: var(--mint-dark);
-}
-.adm-band--mid {
-  background: var(--yellow-tint);
-  color: #7a5c00;
-}
-.adm-band--low {
-  background: var(--pink-tint);
-  color: var(--pink-dark);
+.adm-q__profile {
+  color: var(--ink-3);
+  font-size: 13px;
 }

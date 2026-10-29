@@ -10,13 +10,14 @@ import { spawn } from "node:child_process"
 import { createServer } from "node:net"
 import { fileURLToPath } from "node:url"
 import { resolve } from "node:path"
+import { tmpdir } from "node:os"
 
 const ROOT = resolve(fileURLToPath(new URL("../..", import.meta.url)))
 const port = await new Promise((res) => {
   const srv = createServer()
   srv.listen(0, "127.0.0.1", () => { const { port } = srv.address(); srv.close(() => res(port)) })
 })
-const server = spawn(process.execPath, ["server.mjs", "--port", String(port)], { cwd: ROOT, stdio: "ignore" })
+const server = spawn(process.execPath, ["server.mjs", "--port", String(port)], { cwd: ROOT, stdio: "ignore", env: { ...process.env, EQ_DATA_DIR: tmpdir() + "/equest-skip-cutscene" } })
 const BASE = `http://127.0.0.1:${port}`
 for (let i = 0; i < 50; i += 1) {
   try { if ((await fetch(BASE)).ok) break } catch { /* chưa lên */ }
@@ -30,18 +31,30 @@ async function open(id) {
   const page = await browser.newPage({ viewport: { width: 1280, height: 860 } })
   const errors = []
   page.on("pageerror", (e) => errors.push(e.message))
-  await page.goto(`${BASE}/practice`, { waitUntil: "networkidle" })
+  await page.goto(`${BASE}/`, { waitUntil: "networkidle" })
   await page.evaluate(async (itemId) => {
-    const { SCENARIO_BY_ID } = await import("/js/data/scenarios.js")
-    const { toScene } = await import("/js/scene/staged.js")
+    const { QUEST_BANK } = await import("/js/data/questBank.js")
+    const { STAGING_QUEST } = await import("/js/data/stagingQuest.js")
     const { createSceneRuntime } = await import("/js/scene/sceneRuntime.js")
+    const item = QUEST_BANK.find((q) => q.id === itemId)
+    const st = STAGING_QUEST[itemId]
+    // dựng cảnh từ câu hỏi E-Quest, nhưng chạy ở chế độ thường (không "quick") để thử tua
+    const scene = {
+      id: item.id, label: st.label, environment: st.environment, dialogueSpeaker: st.place ?? "", chatTitle: st.chatTitle,
+      characters: st.cast, ...(st.extras !== undefined ? { extras: st.extras } : {}),
+      context: item.context, prompt: item.prompt, choices: item.choices.map((c) => ({ id: c.id, code: c.code, text: c.text })),
+      // chế độ thường: lời kể + dàn dựng, rồi dừng ở điểm quyết định; hậu quả để trống (câu hỏi E-Quest không diễn hậu quả)
+      dialogue: [{ who: "narrator", text: item.context }],
+      timeline: [...(st.timeline ?? []), { at: Math.max(0, ...(st.timeline ?? []).map((e) => e.at)) + 300, do: "decisionPoint" }],
+      consequences: Object.fromEntries(item.choices.map((c) => [c.id, []])),
+    }
     const main = document.querySelector("#main")
     main.replaceChildren()
     const host = document.createElement("div")
     host.className = "scene-stage-host"
     main.append(host)
     window.__pv = { done: false }
-    createSceneRuntime(host, toScene({ ...SCENARIO_BY_ID[itemId], kind: "text" }), {
+    createSceneRuntime(host, scene, {
       onAnswer() {},
       onDone() { window.__pv.done = true },
     }).start()
@@ -62,7 +75,7 @@ async function waitFor(page, fn, ms) {
   return -1
 }
 
-for (const [id, how] of [["AW_01", "click"], ["EP_02", "space"], ["NX_02", "click"], ["RS_05", "space"]]) {
+for (const [id, how] of [["EQ_01", "click"], ["EQ_10", "space"], ["EQ_12", "click"], ["EQ_16", "space"]]) {
   const { page, errors } = await open(id)
   await page.waitForTimeout(600)
   // một lần bấm: không được nhảy tới lựa chọn
