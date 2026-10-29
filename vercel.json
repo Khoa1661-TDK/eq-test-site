@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
   "installCommand": "echo no dependencies needed",
-  "buildCommand": "node test/eq-data.test.mjs && node test/scoring.test.mjs && node test/wording.test.mjs",
+  "buildCommand": "npm test",
   "outputDirectory": "public",
   "rewrites": [
     {

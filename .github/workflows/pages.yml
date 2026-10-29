@@ -1,6 +1,6 @@
 # Đăng MoodQuest lên GitHub Pages mỗi lần push lên main.
 # Trang nằm dưới /<tên repo>/, nên bước build đổi <base href="/"> thành đường dẫn đó và chép
-# index.html thành 404.html để mọi đường dẫn của app (/practice, /result…) mở được trực tiếp.
+# index.html thành 404.html để mọi đường dẫn của app (/profiles, /result…) mở được trực tiếp.
 name: Deploy to GitHub Pages
 
 on:
@@ -28,8 +28,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Data, scoring and wording tests
-        run: node test/eq-data.test.mjs && node test/scoring.test.mjs && node test/wording.test.mjs
+      - name: Tests
+        run: npm test
       - name: Build the static site
         run: |
           mkdir -p _site
